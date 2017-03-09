@@ -1,4 +1,4 @@
-# ecourse
+# DoctorBot
 
 ## Installation
 ### Python module
