@@ -2,7 +2,7 @@
 
 ## Installation
 ### Python module
-* pip install -r requirement.txt
+* sudo pip3 install -r requirement.txt
 
 ### Node.js (LTS Version: v6.x)
 windows:
@@ -11,6 +11,7 @@ windows:
 linux: 
 * curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 * sudo apt-get install -y nodejs
+* sudo npm install webpack -g
 
 ### MySQL
 MySQL Installer [link](http://dev.mysql.com/downloads/installer/)
@@ -26,9 +27,13 @@ mysql> FLUSH PRIVILEGES;
 
 ###Usage
 ```
-cd ecourse_web
+cd doctorbot
 npm install
 webpack
+python3 manage.py check
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py runserver 0.0.0.0:8000
 ```
 
 ### Testing
