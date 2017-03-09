@@ -1,0 +1,15 @@
+django
+djangorestframework
+django-filter
+requests
+beautifulsoup4
+ddt
+pytest
+pytest-django
+pytest-cov
+pytest-xdist
+mysql-python
+PyMySQL
+drfdocs
+django-cors-headers
+django-allauth

@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.idea/
 
 # C extensions
 *.so
@@ -87,3 +88,15 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# sqlite files
+db.sqlite3
+
+# migrations
+# ecourse_web/website/migrations
+
+# node_modules
+node_modules/
+
+# react bundle
+# bundle/
