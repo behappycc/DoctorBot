@@ -25,7 +25,7 @@ SECRET_KEY = '1gptfosgk3f5%ub$*sa24ht)0p5%ib@i_g((3t%5@q3cv*xg%#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '104.199.131.158']
 
 
 # Application definition
@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'doctorbot.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'db_doctorbot',                       # Or path to database file if using sqlite3.
         'USER': 'doctorbot',                       # Not used with sqlite3.
         'PASSWORD': 'dbdev',               # Not used with sqlite3.
