@@ -4,7 +4,7 @@ from hospital_crawler import views
 
 urlpatterns = [
     url(r'^movies/sync_division_database_init$', views.movie_view.sync_division_database_init),
-    url(r'^movies/sync_movie_database_init$', views.division_view.sync_movie_database_init),
+    url(r'^movies/sync_movie_database_init$', views.movie_view.sync_movie_database_init),
     url(r'^movies/clear_movie$', views.movie_view.clear_movie),
     url(r'^movies/$', views.movie_view.MovieDetail.as_view()),
 ]   
