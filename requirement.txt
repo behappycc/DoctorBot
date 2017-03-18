@@ -7,3 +7,4 @@ PyMySQL
 mysqlclient
 drfdocs
 django-cors-headers
+lxml
