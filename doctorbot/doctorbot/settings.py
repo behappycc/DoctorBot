@@ -25,7 +25,7 @@ SECRET_KEY = '1gptfosgk3f5%ub$*sa24ht)0p5%ib@i_g((3t%5@q3cv*xg%#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '104.199.131.158']
+ALLOWED_HOSTS = ['localhost', '104.199.131.158', 'www.seek-doctor.com']
 
 
 # Application definition
