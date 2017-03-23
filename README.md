@@ -3,6 +3,9 @@
 ## Installation
 ### Python module
 * sudo pip3 install -r requirement.txt
+### apt-get module
+* sudo chmod +x setup_environment.sh
+* sudo ./setup_environment.sh
 
 ### Node.js (LTS Version: v6.x)
 windows:
@@ -14,7 +17,14 @@ linux:
 * sudo npm install webpack -g
 
 ### MySQL
+windows:
 MySQL Installer [link](http://dev.mysql.com/downloads/installer/)
+
+linux:
+* sudo apt-get update
+* sudo apt-get install mysql-server
+* sudo mysql_secure_installation
+* sudo mysql_install_db
 ```
 mysql> CREATE DATABASE db_doctorbot;
 mysql> CREATE USER 'doctorbot'@'%' IDENTIFIED BY 'dbdev';
