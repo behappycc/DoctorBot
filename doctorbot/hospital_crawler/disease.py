@@ -64,6 +64,5 @@ for i in range(bodytext.count("/disease/sole/")):
     #print href
     start = indexEnd + 2
     subPage(href)
-    
-outfile.close()
 
+outfile.close()
