@@ -3,6 +3,8 @@
 ## Installation
 ### Python module
 * sudo pip3 install -r requirement.txt
+### apt-get module
+* ./setup_environment.sh
 
 ### Node.js (LTS Version: v6.x)
 windows:
