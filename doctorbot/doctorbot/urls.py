@@ -16,10 +16,15 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls import include
+from fb_doctor_chatbot import Doctor
+from fb_doctor_chatbot.views import hello_world
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('website.urls')),
     url(r'^', include('hospital_crawler.urls')),
     url(r'^docs/', include('rest_framework_docs.urls')),
+    url(r'^fb_doctor_chatbot/',include('fb_doctor_chatbot.urls')),
+
 ]

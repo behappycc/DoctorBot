@@ -25,7 +25,7 @@ SECRET_KEY = '1gptfosgk3f5%ub$*sa24ht)0p5%ib@i_g((3t%5@q3cv*xg%#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '104.199.131.158', 'www.seek-doctor.com', 'seek-doctor.com']
+ALLOWED_HOSTS = ['127.0.0.1','localhost', '104.199.131.158', 'www.seek-doctor.com', 'seek-doctor.com']
 
 
 # Application definition
@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'website',
     'hospital_crawler',
+    'fb_doctor_chatbot',
 ]
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
