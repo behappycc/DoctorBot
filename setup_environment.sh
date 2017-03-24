@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # upgrade pip3
-pip3 install --upgrade pip
+sudo pip3 install --upgrade pip
 
 # install python3-lxml
 sudo apt-get install python3-lxml
