@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url,include
 from django.contrib import admin
-from fb_doctor_chatbot.views.Doctor import get
+from fb_doctor_chatbot import Doctor
 from fb_doctor_chatbot.views import hello_world
 
 urlpatterns = [
