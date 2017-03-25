@@ -8,3 +8,4 @@ mysqlclient
 drfdocs
 django-cors-headers
 jieba
+keras
