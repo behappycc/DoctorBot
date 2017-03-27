@@ -20,54 +20,54 @@ class DivisionCrawler(object):
         # Preprocessing doctor cloumn
         ts = []
         def textclean(ts):
-			ts = "".join(ts)
-			ts = re.sub('\n+',' ',ts)
-    	    ts = re.sub(' +', ' ', ts)
-	        ts = re.sub('、', ' ',ts)
-	        ts = re.sub('\u3000', ' ',ts)
-    	    ts = re.sub('\xa0', ' ', ts)
-    	    ts = re.sub('\u200b', ' ',ts )
-        	#ts = bytes(ts,"UTF-8")
-	        #ts = ts.decode("ascii","ignore") 
-	        ts = ts.split(' ')
-	        cleants =[]
-    	    for item in ts: 
-	    	    if(len(item)>1):
-	    		cleants.append(item)
-    	    ts =[]
-    	    ts = cleants
-	        return ts
+            ts = "".join(ts)
+            ts = re.sub('\n+',' ',ts)
+            ts = re.sub(' +', ' ', ts)
+            ts = re.sub('、', ' ',ts)
+            ts = re.sub('\u3000', ' ',ts)
+            ts = re.sub('\xa0', ' ', ts)
+            ts = re.sub('\u200b', ' ',ts )
+            #ts = bytes(ts,"UTF-8")
+            #ts = ts.decode("ascii","ignore") 
+            ts = ts.split(' ')
+            cleants =[]
+            for item in ts: 
+                if(len(item)>1):
+            	cleants.append(item)
+            ts =[]
+            ts = cleants
+            return ts
         c = 0
         fs= []
         ss= [] 
         inin = []
         res = []
         for row in result:
-	        i = False
-    	    temp = "".join(row)
-	        if(temp.find('部')!=-1 or temp.find('中心')!=-1 or temp.find('醫院')!=-1):
-		        ts = textclean(ts)
-		        inin = [fs,ss,ts]
-		        if(ts!=[]):
-			        res.append(inin)
-    		    fs= []
-    		    ss= [] 
-	    	    ts = []
-    		    inin = []
-    		    if(temp.find('部')!=-1):
-    			    a = temp.index('部')
-    		    elif(temp.find('中心')!=-1):
-    			    a = temp.index('心')
-    		    else:
-    			    a = temp.index('院')
-    		    fs = temp[0:a+1]
-    		    if(temp.find('專')!=-1):	
-    			    b = temp.index('專')
-    			    ss = temp[a+1:b]
-    			    ts = temp[b:]
+            i = False
+            temp = "".join(row)
+            if(temp.find('部')!=-1 or temp.find('中心')!=-1 or temp.find('醫院')!=-1):
+                ts = textclean(ts)
+                inin = [fs,ss,ts]
+                if(ts!=[]):
+                    res.append(inin)
+                fs= []
+                ss= [] 
+                ts = []
+                inin = []
+                if(temp.find('部')!=-1):
+                    a = temp.index('部')
+                elif(temp.find('中心')!=-1):
+                    a = temp.index('心')
+                else:
+                    a = temp.index('院')
+                fs = temp[0:a+1]
+                if(temp.find('專')!=-1):	
+                    b = temp.index('專')
+                    ss = temp[a+1:b]
+                    ts = temp[b:]
     	    else:
-    		    tempts = [ts,temp]
-    		    ts = "".join(ts)
+                tempts = [ts,temp]
+                ts = "".join(ts)
         ts = textclean(ts)
         inin = [fs,ss,ts]
         res.append(inin)	
