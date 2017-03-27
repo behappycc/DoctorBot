@@ -28,12 +28,12 @@ class DivisionCrawler(object):
             ts = re.sub('\xa0', ' ', ts)
             ts = re.sub('\u200b', ' ',ts )
             #ts = bytes(ts,"UTF-8")
-            #ts = ts.decode("ascii","ignore") 
+            #ts = ts.decode("ascii","ignore")
             ts = ts.split(' ')
             cleants =[]
-            for item in ts: 
+            for item in ts:
                 if(len(item)>1):
-            	cleants.append(item)
+                cleants.append(item)
             ts =[]
             ts = cleants
             return ts
