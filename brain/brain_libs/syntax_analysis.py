@@ -57,12 +57,10 @@ class SyntaxAnalysis(object):
                         one_hot_word[index] = 1
                         print('word: {} one-hot: {}'.format(s_word, one_hot_word))
             one_hot_words = np.append(one_hot_words, one_hot_word)
-        print (one_hot_words)
-        print (one_hot_words.shape)
+        
         return one_hot_words
 
     def zero_padding(self, one_hot_words, time_steps, input_size):
-        print('xxx')
         padding_num = int(time_steps - (len(one_hot_words) / input_size))
         print(padding_num)
         one_hot_word = np.zeros(input_size)
@@ -72,20 +70,26 @@ class SyntaxAnalysis(object):
         # print (one_hot_words.reshape(30, 4))
         return one_hot_words
 
+    def generat_answer_one_hot_encode(self, sentence_category, output_size):
+        one_hot_word_answer = np.zeros(output_size)
+        one_hot_word_answer[sentence_category] = 1
+        print (one_hot_word_answer)
+        return one_hot_word_answer
+
 
 def main():
     sentence_words = ['妳好', '妳', '好', '哈']
+    sentence_category = 0
     sa = SyntaxAnalysis()
     sentences, categories = sa.segment_words()
     words = sa.flat_sentences(sentences)
     corpus_list = sa.generate_corpus(words)
     one_hot_words = sa.one_hot_encode(corpus_list, sentence_words)
-    print('yyy')
-    print (corpus_list)
-    print (len(corpus_list))
-    print('yyy')
-    sa.zero_padding(one_hot_words, 40, len(sentence_words))
-
+    sentence_x = sa.zero_padding(one_hot_words, 40, len(sentence_words))
+    sentence_y = sa.generat_answer_one_hot_encode(sentence_category, 3)
+    sentence_data = (sentence_x, sentence_y)
+    print (sentence_data)
+    
     # sa = SyntaxAnalysis()
     # sa.segment_words()
     # words = ['妳好', '妳好', '妳好', '妳', '好']
