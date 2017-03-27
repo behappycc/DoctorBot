@@ -20,8 +20,8 @@ class DivisionCrawler(object):
         # Preprocessing doctor cloumn
         ts = []
         def textclean(ts):
-    	    ts = "".join(ts)
-	        ts = re.sub('\n+',' ',ts)
+			ts = "".join(ts)
+			ts = re.sub('\n+',' ',ts)
     	    ts = re.sub(' +', ' ', ts)
 	        ts = re.sub('、', ' ',ts)
 	        ts = re.sub('\u3000', ' ',ts)
