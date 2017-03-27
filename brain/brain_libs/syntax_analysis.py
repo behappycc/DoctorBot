@@ -74,24 +74,25 @@ class SyntaxAnalysis(object):
 
 
 def main():
-    # sentence_words = ['妳好', '妳', '好', '哈']
-    # sa = SyntaxAnalysis()
-    # sentences, categories = sa.segment_words()
-    # words = sa.flat_sentences(sentences)
-    # corpus_list = sa.generate_corpus(words)
-    # one_hot_words = sa.one_hot_encode(corpus_list, sentence_words)
-    # print('yyy')
-    # print (len(words))
-    # print('yyy')
-    # sa.zero_padding(one_hot_words, 30, len(words))
-
-    sa = SyntaxAnalysis()
-    sa.segment_words()
-    words = ['妳好', '妳好', '妳好', '妳', '好']
     sentence_words = ['妳好', '妳', '好', '哈']
+    sa = SyntaxAnalysis()
+    sentences, categories = sa.segment_words()
+    words = sa.flat_sentences(sentences)
     corpus_list = sa.generate_corpus(words)
     one_hot_words = sa.one_hot_encode(corpus_list, sentence_words)
-    sa.zero_padding(one_hot_words, 30, 4)
+    print('yyy')
+    print (corpus_list)
+    print (len(corpus_list))
+    print('yyy')
+    sa.zero_padding(one_hot_words, 40, len(sentence_words))
+
+    # sa = SyntaxAnalysis()
+    # sa.segment_words()
+    # words = ['妳好', '妳好', '妳好', '妳', '好']
+    # sentence_words = ['妳好', '妳', '好', '哈']
+    # corpus_list = sa.generate_corpus(words)
+    # one_hot_words = sa.one_hot_encode(corpus_list, sentence_words)
+    # sa.zero_padding(one_hot_words, 30, 4)
 
 
 if __name__ == '__main__':
