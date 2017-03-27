@@ -33,7 +33,7 @@ class DivisionCrawler(object):
             cleants =[]
             for item in ts:
                 if(len(item)>1):
-                cleants.append(item)
+                    cleants.append(item)
             ts =[]
             ts = cleants
             return ts
