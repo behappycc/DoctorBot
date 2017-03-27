@@ -65,7 +65,7 @@ class DivisionCrawler(object):
                     b = temp.index('專')
                     ss = temp[a+1:b]
                     ts = temp[b:]
-    	    else:
+            else:
                 tempts = [ts,temp]
                 ts = "".join(ts)
         ts = textclean(ts)
