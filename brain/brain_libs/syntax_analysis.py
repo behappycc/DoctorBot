@@ -10,16 +10,24 @@ class SyntaxAnalysis(object):
     def segment_words(self):
         stop_words = [' ', '\n']
         sentences = []
+        categories = []
         with open('dialogue.txt', 'r', encoding="utf-8") as file:
             for line in file:
                 print (line)
+                line = line.split(",&")
                 sentence = []
-                for word in jieba.cut(line):
+                for word in jieba.cut(line[0]):
                     if word not in stop_words:
                         sentence.append(word)
+                categories.append(int(line[1]))
                 sentences.append(sentence)
         print (sentences)
-        return sentences
+        print (categories)
+        return sentences, categories
+
+    def flat_sentences(self, sentences):
+        words = [word for sentence in sentences for word in sentence]
+        return words
 
     def generate_corpus(self, words):
         corpus_dict = {}
@@ -61,12 +69,22 @@ class SyntaxAnalysis(object):
         for i in range(padding_num):
             one_hot_words = np.append(one_hot_words, one_hot_word)
         print (one_hot_words.shape)
-        print (one_hot_words)
-        print (one_hot_words.reshape(30, 4))
+        # print (one_hot_words.reshape(30, 4))
         return one_hot_words
 
 
 def main():
+    # sentence_words = ['妳好', '妳', '好', '哈']
+    # sa = SyntaxAnalysis()
+    # sentences, categories = sa.segment_words()
+    # words = sa.flat_sentences(sentences)
+    # corpus_list = sa.generate_corpus(words)
+    # one_hot_words = sa.one_hot_encode(corpus_list, sentence_words)
+    # print('yyy')
+    # print (len(words))
+    # print('yyy')
+    # sa.zero_padding(one_hot_words, 30, len(words))
+
     sa = SyntaxAnalysis()
     sa.segment_words()
     words = ['妳好', '妳好', '妳好', '妳', '好']
