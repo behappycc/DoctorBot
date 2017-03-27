@@ -7,12 +7,13 @@ TOKEN = 'AG1BsKUxZB8BAIwX45aWjehyGbfqWgu7DVVorr4qhe77V9mrtETGurNiUH45z7nPAhM2A68
 
 # Create your views here.
 class Doctor(generic.View):
-	@method_decorator(csrf_exempt)
+	#@method_decorator(csrf_exempt)
 	def dispatch(self,request,*args,**kwargs):
 		return generic.View.dispatch(self,request,*args,**kwargs)
 
 	def post(self,request,*args,**kwargs):
-		incoming_message = json.loads(self.request.body.decode('utf-8'))		for entry in incoming_message['entry']:
+		incoming_message = json.loads(self.request.body.decode('utf-8'))
+		for entry in incoming_message['entry']:
 			for message in entry['messaging']:
 				if 'message' in message:
 					pprint(message)
