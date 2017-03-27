@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 #from hospital_crawler.models import Movie, MovieQuery
 #from hospital_crawler.serializers import MovieSerializer
-from hospital_crawler.division_crawler import DivisionCrawler
+from doctorbot.hospital_crawler.division_crawler import DivisionCrawler
 import csv
 
 @api_view(['GET'])

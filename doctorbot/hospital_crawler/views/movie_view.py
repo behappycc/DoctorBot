@@ -11,6 +11,7 @@ from hospital_crawler.serializers import MovieSerializer
 from hospital_crawler.yahoo_movie_crawler import YahooMovieCrawler
 
 from hospital_crawler.division_crawler import DivisionCrawler
+from hospital_crawler.disease_crawler import DiseaseCrawler
 import csv
 
 class MovieDetail(generics.ListAPIView):
@@ -55,17 +56,30 @@ def sync_movie_database_init(requests):
         )
     return HttpResponse('sync_movie_database_init')
 
+
 @api_view(['GET'])
 def clear_movie(requests):
     Movie.objects.all().delete()
     return HttpResponse('Clear movie data')
 
+
 @api_view(['GET'])
 def sync_division_database_init(requests):
-	dc = DivisionCrawler()
-	result_list = dc.crawl_search_result()
-	f = open("division.csv","w")  
-	w = csv.writer(f)  
-	w.writerows(result_list)  
-	f.close()
-	return HttpResponse('creat_division_database_csv')
+    dc = DivisionCrawler()
+    result_list = dc.crawl_search_result()
+    f = open("division.csv", "w")
+    w = csv.writer(f)
+    w.writerows(result_list)
+    f.close()
+    return HttpResponse('created_division_database_csv')
+
+
+@api_view(['GET'])
+def sync_disease_database_init(requests):
+    dc = DiseaseCrawler()
+    result_list = dc.crawl_search_result()
+    f = open("disease.csv", "w")
+    w = csv.writer(f)
+    w.writerows(result_list)
+    f.close()
+    return HttpResponse('created_disease_database_csv')

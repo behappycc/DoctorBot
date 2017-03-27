@@ -56,8 +56,8 @@ class DivisionCrawler(object):
         # Preprocessing disease cloumn
 
         parse_list = []
-        first_row = ["division", "disease", "doctor"]
-        parse_list.append(first_row)
+        #first_row = ["division", "disease", "doctor"]
+        #parse_list.append(first_row)
 
         for index, row in enumerate(res):
             if index != 0:
