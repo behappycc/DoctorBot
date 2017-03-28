@@ -1,28 +1,15 @@
-Usage:
-
-python3 intent_training_data.py
-
+"""
+Usage:python3 intent_training_data.py
 **Please put disease.csv and division.csv in the same folder
 
-Output:
+Output: intent_training.txt
 
-intent_training.txt
+pattern_list format:[[pattern], [pattern], ... , [',&N']]
+***where pattern is a list of string,N is the number of the category for the intent
 
-pattern_list format:
+"""
 
-[[pattern], [pattern], ... , [',&N']]
-
-where pattern is a list of string,
-
-N is the number of the category for the intent
-
-disease 239個
-
-division 51個
-
-doctor 702個
-
-time 16個（星期一-日/天，禮拜一-日/天）
+disease 239個,division 51個,doctor 702個,time 16個（星期一-日/天，禮拜一-日/天）
 
 1.查詢症狀 search_symptom
 
