@@ -1,11 +1,17 @@
 """
+
 Usage:python3 intent_training_data.py
+
 **Please put disease.csv and division.csv in the same folder
 
 Output: intent_training.txt
 
-pattern_list format:[[pattern], [pattern], ... , [',&N']]
+pattern_list format:
+
+        [[pattern], [pattern], ... , [',&N']]
+
 ***where pattern is a list of string,N is the number of the category for the intent
+
 
 """
 
