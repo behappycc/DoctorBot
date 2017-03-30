@@ -45,6 +45,7 @@ def main():
     doctor_list_generator(division_file, doctor_list)
 
     wf = open("doctorbot_dict.txt", "w")
+    print('請問', file=wf)
     for word in disease_list:
         print(word, file=wf)
     for word in division_list:
