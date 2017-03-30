@@ -66,3 +66,30 @@ disease 239個,division 51個,doctor 702個,time 16個（星期一-日/天，禮
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, disease_list, ['', '的門診'], [',&5']]
 
 
+"""
+
+
+Usage:
+
+python3 slot_training_data.py
+
+**Please put disease.csv and division.csv in the same folder
+**Please run create_dictionary.py to get newest dictionary for Jieba
+
+Output:
+
+slot_training.txt
+
+
+training data format:
+
+( [], [] )
+
+
+
+"""
+
+Data Example:
+
+
+        ([請問,得,過敏性鼻炎,會,怎麼樣,],[o,o,b-disease,o,o])
