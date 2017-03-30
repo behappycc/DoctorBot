@@ -10,6 +10,7 @@ intent_training.txt
 pattern_list format:
 [[pattern], [pattern], ... , [',&N']]
 where pattern is a list of string,
+(if there is an empty string'' in the pattern list, please put it in the end of the list)
 N is the number of the category for the intent
 
 """
@@ -63,8 +64,8 @@ def main():
     disease_list = []
     division_list = []
     doctor_list = []
-    time_list = ['', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日', '星期天',
-                 '禮拜一', '禮拜二', '禮拜三', '禮拜四', '禮拜五', '禮拜六', '禮拜日', '禮拜天']
+    time_list = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日', '星期天',
+                 '禮拜一', '禮拜二', '禮拜三', '禮拜四', '禮拜五', '禮拜六', '禮拜日', '禮拜天', '']
     disease_list_generator(disease_file, disease_list, division_list)
     doctor_list_generator(division_file, doctor_list)
 
@@ -82,9 +83,9 @@ def main():
         [['請給我', '給我', '請告訴我', '告訴我', '請問'], time_list, division_list, ['的門診時刻表', '的門診時間'], [',&4']],
         [['請給我', '給我', '請告訴我', '告訴我', '請問'], time_list, doctor_list, ['的門診時刻表', '的門診時間'], [',&4']],
 
-        [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, doctor_list, ['', '的門診'], [',&5']],
-        [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, division_list, ['', '的門診'], [',&5']],
-        [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, disease_list, ['', '的門診'], [',&5']]
+        [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, doctor_list, ['的門診', ''], [',&5']],
+        [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, division_list, ['的門診', ''], [',&5']],
+        [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, disease_list, ['的門診', ''], [',&5']]
     ]
 
     it_wf = open("intent_training.txt", "w")
