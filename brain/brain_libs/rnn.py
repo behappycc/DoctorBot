@@ -3,6 +3,7 @@ from keras.utils import np_utils
 from keras.models import Sequential
 from keras.layers import SimpleRNN, LSTM, Activation, Dense
 from keras.optimizers import Adam
+import gc
 
 TIME_STEPS = 15
 INPUT_SIZE = 10
@@ -68,3 +69,5 @@ for step in range(4001):
         cost, accuracy = model.evaluate(
             X_test, y_test, batch_size=y_test.shape[0], verbose=False)
         print('test cost: ', cost, 'test accuracy: ', accuracy)
+
+gc.collect()
