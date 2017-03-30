@@ -29,7 +29,7 @@ class DivisionCrawler(object):
         # Preprocessing doctor cloumn
         # Making list with url
         doctor_name = []
-                x = soup.find_all(href=re.compile("DoctorServiceQueryByDrName"))
+        x = soup.find_all(href=re.compile("DoctorServiceQueryByDrName"))
         for doctor in x:
             tempdoc = doctor.text
             tempdoc = re.sub('、', '', tempdoc)
