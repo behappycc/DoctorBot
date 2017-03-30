@@ -7,11 +7,11 @@ class SyntaxAnalysis(object):
     def __init__(self):
         pass
 
-    def segment_words(self):
+    def segment_words(self, file_name):
         stop_words = [' ', '\n']
         sentences = []
         categories = []
-        with open('dialogue.txt', 'r', encoding="utf-8") as file:
+        with open(file_name, 'r', encoding="utf-8") as file:
             for line in file:
                 print (line)
                 line = line.split(",&")
@@ -57,13 +57,12 @@ class SyntaxAnalysis(object):
                         one_hot_word[index] = 1
                         print('word: {} one-hot: {}'.format(s_word, one_hot_word))
             one_hot_words = np.append(one_hot_words, one_hot_word)
-        
+
         return one_hot_words
 
-    def zero_padding(self, one_hot_words, time_steps, input_size):
-        padding_num = int(time_steps - (len(one_hot_words) / input_size))
-        print(padding_num)
-        one_hot_word = np.zeros(input_size)
+    def zero_padding(self, one_hot_words, time_steps, sentence_length):
+        padding_num = int(time_steps - sentence_length)
+        one_hot_word = np.zeros(int(len(one_hot_words) / sentence_length))
         for i in range(padding_num):
             one_hot_words = np.append(one_hot_words, one_hot_word)
         print (one_hot_words.shape)
@@ -81,7 +80,7 @@ def main():
     sentence_words = ['妳好', '妳', '好', '哈']
     sentence_category = 0
     sa = SyntaxAnalysis()
-    sentences, categories = sa.segment_words()
+    sentences, categories = sa.segment_words('dialogue.txt')
     words = sa.flat_sentences(sentences)
     corpus_list = sa.generate_corpus(words)
     one_hot_words = sa.one_hot_encode(corpus_list, sentence_words)
@@ -89,7 +88,7 @@ def main():
     sentence_y = sa.generat_answer_one_hot_encode(sentence_category, 3)
     sentence_data = (sentence_x, sentence_y)
     print (sentence_data)
-    
+
     # sa = SyntaxAnalysis()
     # sa.segment_words()
     # words = ['妳好', '妳好', '妳好', '妳', '好']
