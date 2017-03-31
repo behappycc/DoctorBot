@@ -11,7 +11,7 @@ class IntentClassfication(object):
 
     def train(self):
         sa = SyntaxAnalysis()
-        sentences, categories = sa.segment_words('dialogue.txt')
+        sentences, categories = sa.segment_words('toy.txt')
         words = sa.flat_sentences(sentences)
         corpus_list = sa.generate_corpus(words)
 

@@ -102,3 +102,8 @@ node_modules/
 # bundle/
 
 nohup.out
+
+#training data
+intent_training.txt
+slot_training.txt
+toy.txt
