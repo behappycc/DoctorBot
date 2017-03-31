@@ -14,7 +14,7 @@ training data format:
 import csv
 import ast
 import jieba
-jieba.load_userdict("doctorbot_dict.txt")
+jieba.load_userdict("../jieba_dict/doctorbot_dict.txt")
 
 
 def dfs(sen, depth, input_list, ans):
