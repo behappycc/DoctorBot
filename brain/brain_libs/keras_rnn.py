@@ -44,7 +44,7 @@ class KerasRnn(object):
         model = Sequential()
 
         # RNN cell
-        model.add(SimpleRNN(
+        model.add(LSTM(
             # for batch_input_shape, if using tensorflow as the backend, we have to put None for the batch_size.
             # Otherwise, model.evaluate() will get error.
             # Or: input_dim=INPUT_SIZE, input_length=TIME_STEPS,
