@@ -2,7 +2,7 @@
 
 Usage:
 python3 slot_training_data.py
-**Please put disease.csv and division.csv in the same folder
+**disease.csv and division.csv are in the folder ../data_resource/
 
 Output:
 slot_training.txt
@@ -14,7 +14,10 @@ training data format:
 import csv
 import ast
 import jieba
-jieba.load_userdict("../jieba_dict/doctorbot_dict.txt")
+jieba.load_userdict("../data_resource/doctor_dict.txt")
+jieba.load_userdict("../data_resource/disease_dict.txt")
+jieba.load_userdict("../data_resource/division_dict.txt")
+jieba.load_userdict("../data_resource/other_dict.txt")
 
 
 def dfs(sen, depth, input_list, ans):
@@ -55,9 +58,9 @@ def doctor_list_generator(division_file, doctor_list):
 
 def main():
 
-    div_rf = open("division.csv", "r")
+    div_rf = open("../data_resource/division.csv", "r")
     division_file = csv.reader(div_rf)
-    dis_rf = open("disease.csv", "r")
+    dis_rf = open("../data_resource/disease.csv", "r")
     disease_file = csv.reader(dis_rf)
 
     disease_list = []
@@ -119,7 +122,8 @@ def main():
                     li.append(item + ',')
                     slot_parse.append(li)
             for slot_sen in data_generator(slot_parse):
-                output = "([" + slot_sen + "],[" + slot_tag + "])"
+                modify_sen = slot_sen[:len(slot_sen)-1]
+                output = "([" + modify_sen + "],[" + slot_tag + "])"
                 print(output, file=st_wf)
 
     div_rf.close()

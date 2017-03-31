@@ -44,18 +44,24 @@ def main():
     disease_list_generator(disease_file, disease_list, division_list)
     doctor_list_generator(division_file, doctor_list)
 
-    wf = open("doctorbot_dict.txt", "w")
-    print('請問', file=wf)
+    doc_f = open("doctor_dict.txt", "w")
+    dis_f = open("disease_dict.txt", "w")
+    div_f = open("division_dict.txt", "w")
+    o_f = open("other_dict.txt", "w")
+    print('請問', file=o_f)
     for word in disease_list:
-        print(word, file=wf)
+        print(word, file=dis_f)
     for word in division_list:
-        print(word, file=wf)
+        print(word, file=div_f)
     for word in doctor_list:
-        print(word, file=wf)
+        print(word, file=doc_f)
 
     div_rf.close()
     dis_rf.close()
-    wf.close()
+    doc_f.close()
+    dis_f.close()
+    div_f.close()
+    o_f.close()
 
 if __name__ == '__main__':
     main()

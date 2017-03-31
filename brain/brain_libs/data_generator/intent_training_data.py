@@ -2,7 +2,7 @@
 
 Usage:
 python3 intent_training_data.py
-**Please put disease.csv and division.csv in the same folder
+**disease.csv and division.csv are in the folder ../data_resource/
 
 Output:
 intent_training.txt
@@ -56,9 +56,9 @@ def doctor_list_generator(division_file, doctor_list):
 
 def main():
 
-    div_rf = open("division.csv", "r")
+    div_rf = open("../data_resource/division.csv", "r")
     division_file = csv.reader(div_rf)
-    dis_rf = open("disease.csv", "r")
+    dis_rf = open("../data_resource/disease.csv", "r")
     disease_file = csv.reader(dis_rf)
 
     disease_list = []
