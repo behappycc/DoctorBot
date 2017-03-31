@@ -1,6 +1,6 @@
 import jieba
 import numpy as np
-jieba.load_userdict("doctorbot_dict.txt")
+jieba.load_userdict("data_resource/doctorbot_dict.txt")
 
 
 class SyntaxAnalysis(object):
@@ -13,7 +13,7 @@ class SyntaxAnalysis(object):
         categories = []
         with open(file_name, 'r', encoding="utf-8") as file:
             for line in file:
-                print (line)
+                # print (line)
                 line = line.split(",&")
                 sentence = []
                 for word in jieba.cut(line[0]):
@@ -21,8 +21,8 @@ class SyntaxAnalysis(object):
                         sentence.append(word)
                 categories.append(int(line[1]))
                 sentences.append(sentence)
-        print (sentences)
-        print (categories)
+        # print (sentences)
+        # print (categories)
         return sentences, categories
 
     def flat_sentences(self, sentences):
@@ -37,11 +37,11 @@ class SyntaxAnalysis(object):
                 corpus_dict[word] += 1
             else:
                 corpus_dict[word] = 1
-        print(corpus_dict)
+        # print(corpus_dict)
 
         for key, value in corpus_dict.items():
             corpus_list.append(key)
-        print (corpus_list)
+        # print (corpus_list)
         return corpus_list
 
     def one_hot_encode(self, corpus_list, sentence_words):
@@ -50,12 +50,12 @@ class SyntaxAnalysis(object):
             one_hot_word = np.zeros(len(corpus_list) + 1)
             if s_word not in corpus_list:
                 one_hot_word[-1] = 1
-                print('word: {} one-hot: {}'.format(s_word, one_hot_word))
+                # print('word: {} one-hot: {}'.format(s_word, one_hot_word))
             else:
                 for index, word in enumerate(corpus_list):
                     if word == s_word:
                         one_hot_word[index] = 1
-                        print('word: {} one-hot: {}'.format(s_word, one_hot_word))
+                        # print('word: {} one-hot: {}'.format(s_word, one_hot_word))
             one_hot_words = np.append(one_hot_words, one_hot_word)
 
         return one_hot_words
@@ -65,14 +65,14 @@ class SyntaxAnalysis(object):
         one_hot_word = np.zeros(int(len(one_hot_words) / sentence_length))
         for i in range(padding_num):
             one_hot_words = np.append(one_hot_words, one_hot_word)
-        print (one_hot_words.shape)
+        # print (one_hot_words.shape)
         # print (one_hot_words.reshape(30, 4))
         return one_hot_words
 
     def generat_answer_one_hot_encode(self, sentence_category, output_size):
         one_hot_word_answer = np.zeros(output_size)
         one_hot_word_answer[sentence_category] = 1
-        print (one_hot_word_answer)
+        # print (one_hot_word_answer)
         return one_hot_word_answer
 
 
@@ -87,7 +87,7 @@ def main():
     sentence_x = sa.zero_padding(one_hot_words, 40, len(sentence_words))
     sentence_y = sa.generat_answer_one_hot_encode(sentence_category, 3)
     sentence_data = (sentence_x, sentence_y)
-    print (sentence_data)
+    # print (sentence_data)
 
     # sa = SyntaxAnalysis()
     # sa.segment_words()
