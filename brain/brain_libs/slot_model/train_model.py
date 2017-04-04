@@ -23,7 +23,7 @@ sentence_developing_file = "data/sentence_developing.txt"
 slot_training_file = "data/slot_training.txt"
 slot_developing_file = "data/slot_developing.txt"
 
-model_file = 'model/GRU_model30.h5'
+model_file = 'model/GRU_model_1.h5'
 
 class SlotFilling(object):
     def __init__(self):
@@ -111,6 +111,8 @@ class SlotFilling(object):
         #n_toy = 1000
         #sentence_training, slot_training = sentence_training[:n_toy],\
         #    slot_training[:n_toy]
+        #sentence_developing, slot_devloping = sentence_developing[:round(n_toy/2)],\
+        #    slot_devloping[:round(n_toy/2)]
 
         # Dictionaries
         w2id_sentence, id2w_sentence = data_helper.initialize_vocabulary(self.vocab_sentence)

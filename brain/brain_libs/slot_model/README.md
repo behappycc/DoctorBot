@@ -21,4 +21,4 @@ Tensorflow, Keras
 Manually generate data and model directories for storing data and model, respectively.
 
 ### Toy data:
-Uncomment line 11[1-3] in train_model.py to apply toy data
+Uncomment line 11[1-5] in train_model.py to apply toy data
