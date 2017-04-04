@@ -13,10 +13,10 @@ sf = train_model.SlotFilling()
 slot = sf.decode(“sentence”)
 ```
 
-###Prerequisites:
+### Prerequisites:
 Tensorflow, Keras
 
 Manually generate data and model directories for storing data and model, respectively.
 
-###Toy data:
+### Toy data:
 Uncomment line 11[1-3] in train_model.py to apply toy data
