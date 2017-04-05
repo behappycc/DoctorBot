@@ -52,6 +52,7 @@ class SlotFilling(object):
         jieba.load_userdict("../data_resource/doctor_dict.txt")
         jieba.load_userdict("../data_resource/disease_dict.txt")
         jieba.load_userdict("../data_resource/division_dict.txt")
+        jieba.load_userdict("../data_resource/week_dict.txt")
         jieba.load_userdict("../data_resource/other_dict.txt")
 
         model = load_model(model_file)
