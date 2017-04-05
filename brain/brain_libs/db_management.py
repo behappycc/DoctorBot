@@ -72,10 +72,16 @@ def main():
     # create_collection_division(collection_division)
     # create_collection_disease(collection_disease)
 
-    for division in collection_division.find({"doctor": "王秀枝"}):
-        print (division)
+    # for division in collection_division.find({"doctor": "王秀枝"}):
+    #     print (division)
 
-    for disease in collection_disease.find({"symptom": "流鼻水", "disease_c": "百日咳"}):
+    # for disease in collection_disease.find({"symptom": "流鼻水", "disease_c": "百日咳"}):
+    #     print (disease)
+
+    # for disease in collection_disease.find({"symptom": {"$regex": "流鼻"}}):
+    #     print (disease)
+
+    for disease in collection_disease.find({"$and": [{"symptom": {"$regex": "流鼻"}}, {"disease_c": {"$regex": "百日"}}]}):
         print (disease)
 
 
