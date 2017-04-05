@@ -9,3 +9,6 @@ drfdocs
 django-cors-headers
 jieba
 keras
+pymongo
+progressbar2
+h5py

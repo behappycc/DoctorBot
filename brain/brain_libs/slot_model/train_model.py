@@ -5,6 +5,7 @@ import numpy as np
 import progressbar
 import gc
 import jieba
+import os
 
 from keras.models import Sequential
 from keras.layers.embeddings import Embedding
@@ -15,6 +16,9 @@ from keras.layers import Convolution1D
 from keras.models import load_model
 
 from metrics.accuracy import conlleval
+
+if os.path.exists("data") is False:
+    os.system("mkdir data")
 
 sentence_file = "data/training_sentence.txt"
 slot_file = "data/training_slot.txt"
@@ -224,7 +228,7 @@ class SlotFilling(object):
 def main():
     sf = SlotFilling()
     sf.train()
-    #sf.decode()
+    # sf.decode()
 
 if __name__ == '__main__':
     main()

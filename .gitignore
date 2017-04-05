@@ -106,4 +106,5 @@ nohup.out
 #training data
 intent_training.txt
 slot_training.txt
-toy.txt
+# toy.txt
+brain/brain_libs/slot_model/data
