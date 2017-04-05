@@ -227,8 +227,9 @@ class SlotFilling(object):
 
 def main():
     sf = SlotFilling()
-    sf.train()
-    # sf.decode()
+    #sf.train()
+    sf.decode()
+
 
 if __name__ == '__main__':
     main()
