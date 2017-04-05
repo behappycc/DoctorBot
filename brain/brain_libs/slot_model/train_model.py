@@ -17,8 +17,8 @@ from keras.models import load_model
 
 from metrics.accuracy import conlleval
 
-if os.path.exists("data") is False:
-    os.system("mkdir data")
+if not os.path.exists("data"):
+    os.makedirs("data")
 
 sentence_file = "data/training_sentence.txt"
 slot_file = "data/training_slot.txt"
