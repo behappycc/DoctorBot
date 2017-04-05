@@ -6,6 +6,7 @@ import progressbar
 import gc
 import jieba
 import os
+import re
 
 from keras.models import Sequential
 from keras.layers.embeddings import Embedding
@@ -86,7 +87,11 @@ class SlotFilling(object):
                 sys.stdout.flush()
                 sentence = sys.stdin.readline()
 
-        elif sentence.isalpha():
+        else:
+            _WORD_FILTER = re.compile("([.,!?\"':;)(])")
+            sentence = _WORD_FILTER.sub('', sentence)
+            if not sentence.isalpha():
+                return ("sentence should be words!")
             seg_gen = jieba.cut(sentence, cut_all=False)
             _sentence = " ".join(seg_gen)
             # Get token-ids for the input sentence.
@@ -101,9 +106,6 @@ class SlotFilling(object):
             if data_helper.EOS_ID in _pred:
                 _pred = _pred[:_pred.index(data_helper.EOS_ID)]
             return " ".join([tf.compat.as_str(id2w_slot[slot_pred]) for slot_pred in _pred])
-
-        else:
-            raise ValueError('sentence should be string!')
 
 
     def train(self):
