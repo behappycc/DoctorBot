@@ -13,7 +13,7 @@ def drop_db(client, db_name):
 
 def remove_all_documents(collection):
     result = collection.delete_many({})
-    print (result.deleted_count)
+    print(result.deleted_count)
 
 
 def create_division(collection_division, division):
@@ -66,14 +66,15 @@ def main():
 
     collection_division = client[DB_NAME]["division"]
     collection_disease = client[DB_NAME]["disease"]
-    print (collection_division.count())
-    print (collection_disease.count())
+
+    # print(collection_division.count())
+    # print(collection_disease.count())
 
     # create_collection_division(collection_division)
     # create_collection_disease(collection_disease)
 
-    # for division in collection_division.find({"doctor": "王秀枝"}):
-    #     print (division)
+    for division in collection_division.find({"disease": "白內障"}):
+         print(division)
 
     # for disease in collection_disease.find({"symptom": "流鼻水", "disease_c": "百日咳"}):
     #     print (disease)
@@ -82,7 +83,7 @@ def main():
     #     print (disease)
 
     for disease in collection_disease.find({"$and": [{"symptom": {"$regex": "流鼻"}}, {"disease_c": {"$regex": "百日"}}]}):
-        print (disease)
+        print(disease)
 
 
 if __name__ == '__main__':
