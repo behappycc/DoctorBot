@@ -1,7 +1,7 @@
 from generate_vector import generate_vector
 import json
 from keras.models import load_model
-loaded_model = load_model('intent_model.h5')
+loaded_model = load_model('intent_predict/intent_model.h5')
 
 
 class IntentPredict(object):
