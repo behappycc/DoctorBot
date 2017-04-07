@@ -1,10 +1,10 @@
 import sys
 import db_management
-sys.path.append('../slot_model')
+sys.path.append('./slot_model')
 import slot_model
 
-# sys.path.append('../intent_predict')
-# import intent_model
+sys.path.append('./intent_predict')
+import intent_model
 
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
