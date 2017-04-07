@@ -5,11 +5,17 @@
 `python3 train_model.py`
 
 **Or**
-```
-import train_model
-sf = train_model.SlotFilling()
-slot = sf.decode(“sentence”)
-```
+### Run slot model example:
+`python3 example.py`
+
+#### Sample input:
+請問青光眼看哪科
+
+#### Sample output:
+division :
+doctor :
+time :
+disease :  青光眼
 
 ### Training mode:
 Reverse the comment mark in line 22[3-4].
