@@ -1,9 +1,9 @@
 import sys
-sys.path.append("../LU_model")
+sys.path.append('../LU_model')
 #print (sys.path)
 import os
 import json
-from LU_model import LU
+import LU
 import db
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
