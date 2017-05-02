@@ -46,15 +46,6 @@ elif FLAGS.task == 'joint':
     task['joint'] = 1
 
 _buckets = [(FLAGS.max_sequence_length, FLAGS.max_sequence_length)]
-#vocab_path = ''
-#tag_vocab_path = ''
-#label_vocab_path = ''
-#
-#(in_seq_train, out_seq_train, label_train, in_seq_dev,
-#out_seq_dev, label_dev, in_seq_test, out_seq_test,
-#label_test, vocab_path, tag_vocab_path, label_vocab_path) =\
-#    data_utils.prepare_multi_task_data(
-#            FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.out_vocab_size, pred=True)
 # Create vocabularies of the appropriate sizes.
 vocab_path = os.path.join(FLAGS.data_dir, "in_vocab_%d.txt" % FLAGS.in_vocab_size)
 tag_vocab_path = os.path.join(FLAGS.data_dir, "out_vocab_%d.txt" % FLAGS.out_vocab_size)
