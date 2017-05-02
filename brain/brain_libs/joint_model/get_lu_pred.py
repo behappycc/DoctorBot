@@ -150,8 +150,8 @@ class LuModel(object):
 
 
 def main():
-    sf = LuModel()
-    sf.get_lu_pred()
+    lu = LuModel()
+    lu.get_lu_pred()
 
 
 if __name__ == '__main__':
