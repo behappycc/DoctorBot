@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+Get predicted intent and slot form user utterance.
+"""
 
-#from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
 import sys
@@ -9,7 +11,6 @@ import numpy as np
 import jieba
 import data_utils
 import multi_task_model
-
 
 tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
                           "Clip gradients to this norm.")
@@ -22,14 +23,6 @@ tf.app.flags.DEFINE_integer("in_vocab_size", 10000, "max vocab Size.")
 tf.app.flags.DEFINE_integer("out_vocab_size", 10000, "max tag vocab Size.")
 tf.app.flags.DEFINE_string("data_dir", "data/hospital", "Data directory")
 tf.app.flags.DEFINE_string("train_dir", "model_tmp", "Training directory.")
-#tf.app.flags.DEFINE_integer("max_train_data_size", 0,
-#                            "Limit on the size of training data (0: no limit).")
-#tf.app.flags.DEFINE_integer("steps_per_checkpoint", 300,
-#                            "How many training steps to do per checkpoint.")
-#tf.app.flags.DEFINE_integer("max_training_steps", 1000,  # 10000
-#                            "Max training steps.")
-#tf.app.flags.DEFINE_integer("max_test_data_size", 0,
-#                            "Max size of test set.")
 tf.app.flags.DEFINE_boolean("use_attention", True,
                             "Use attention based RNN")
 tf.app.flags.DEFINE_integer("max_sequence_length", 30,
@@ -53,15 +46,19 @@ elif FLAGS.task == 'joint':
     task['joint'] = 1
 
 _buckets = [(FLAGS.max_sequence_length, FLAGS.max_sequence_length)]
-vocab_path = ''
-tag_vocab_path = ''
-label_vocab_path = ''
-
-(in_seq_train, out_seq_train, label_train, in_seq_dev,
-out_seq_dev, label_dev, in_seq_test, out_seq_test,
-label_test, vocab_path, tag_vocab_path, label_vocab_path) =\
-    data_utils.prepare_multi_task_data(
-            FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.out_vocab_size)
+#vocab_path = ''
+#tag_vocab_path = ''
+#label_vocab_path = ''
+#
+#(in_seq_train, out_seq_train, label_train, in_seq_dev,
+#out_seq_dev, label_dev, in_seq_test, out_seq_test,
+#label_test, vocab_path, tag_vocab_path, label_vocab_path) =\
+#    data_utils.prepare_multi_task_data(
+#            FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.out_vocab_size, pred=True)
+# Create vocabularies of the appropriate sizes.
+vocab_path = os.path.join(FLAGS.data_dir, "in_vocab_%d.txt" % FLAGS.in_vocab_size)
+tag_vocab_path = os.path.join(FLAGS.data_dir, "out_vocab_%d.txt" % FLAGS.out_vocab_size)
+label_vocab_path = os.path.join(FLAGS.data_dir, "label.txt")
 
 vocab, rev_vocab = data_utils.initialize_vocabulary(vocab_path)
 tag_vocab, rev_tag_vocab = data_utils.initialize_vocabulary(tag_vocab_path)
@@ -77,54 +74,51 @@ _buckets = [(FLAGS.max_sequence_length, FLAGS.max_sequence_length)]
 bucket_id = 0
 
 
-class lu_model(object):
+class LuModel(object):
     def __init__(self):
-        pass
+        def create_model(session, source_vocab_size, target_vocab_size, label_vocab_size):
+            """Create model and initialize or load parameters in session."""
+            with tf.variable_scope("model", reuse=None):
+                model_test = multi_task_model.MultiTaskModel(
+                        source_vocab_size, target_vocab_size, label_vocab_size, _buckets,
+                        FLAGS.word_embedding_size, FLAGS.size, FLAGS.num_layers,
+                        FLAGS.max_gradient_norm, FLAGS.batch_size,
+                        dropout_keep_prob=FLAGS.dropout_keep_prob, use_lstm=True,
+                        forward_only=True,
+                        use_attention=FLAGS.use_attention,
+                        bidirectional_rnn=FLAGS.bidirectional_rnn,
+                        task=task)
+            ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
+            if ckpt and tf.gfile.Exists(ckpt.model_checkpoint_path + ".meta"):
+                print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+                model_test.saver.restore(session, ckpt.model_checkpoint_path)
+            else:
+                print("Pre-trained model did not exist!")
+            return model_test
 
-    def create_model(self, session, source_vocab_size, target_vocab_size, label_vocab_size):
-        """Create model and initialize or load parameters in session."""
-        with tf.variable_scope("model", reuse=None):
-            model_test = multi_task_model.MultiTaskModel(
-                    source_vocab_size, target_vocab_size, label_vocab_size, _buckets,
-                    FLAGS.word_embedding_size, FLAGS.size, FLAGS.num_layers,
-                    FLAGS.max_gradient_norm, FLAGS.batch_size,
-                    dropout_keep_prob=FLAGS.dropout_keep_prob, use_lstm=True,
-                    forward_only=True,
-                    use_attention=FLAGS.use_attention,
-                    bidirectional_rnn=FLAGS.bidirectional_rnn,
-                    task=task)
-        ckpt = tf.train.get_checkpoint_state(FLAGS.train_dir)
-        if ckpt and tf.gfile.Exists(ckpt.model_checkpoint_path + ".meta"):
-            print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
-            model_test.saver.restore(session, ckpt.model_checkpoint_path)
-        else:
-            print("Pre-trained model did not exist!")
-        return model_test
+        self.sess = tf.Session()
+        self.model_test = create_model(self.sess, len(vocab),
+                                       len(tag_vocab), len(label_vocab))
+        print('Applying Parameters:')
+        for k,v in FLAGS.__dict__['__flags'].items():
+            print('%s: %s' % (k, str(v)))
+        print("Preparing model in %s" % FLAGS.data_dir)
+        if not os.path.exists(FLAGS.data_dir):
+            print("%s not exist! Abort!" % FLAGS.data_dir)
+            exit
+        print("Max sequence length: %d." % _buckets[0][0])
+        print("Creating %d layers of %d units." % (FLAGS.num_layers, FLAGS.size))
+        print ("Creating model with source_vocab_size=%d, target_vocab_size=%d,\
+               and label_vocab_size=%d." % (len(vocab), len(tag_vocab), len(label_vocab)))
 
 
     def get_lu_pred(self, sentence=None):
-        with tf.Session() as sess:
-            print('Applying Parameters:')
-            for k,v in FLAGS.__dict__['__flags'].items():
-                print('%s: %s' % (k, str(v)))
-            print("Preparing model in %s" % FLAGS.data_dir)
-            if not os.path.exists(FLAGS.data_dir):
-                print("%s not exist! Abort!" % FLAGS.data_dir)
-                exit
-
-            # Create model.
-            print("Max sequence length: %d." % _buckets[0][0])
-            print("Creating %d layers of %d units." % (FLAGS.num_layers, FLAGS.size))
-
-            model_test = self.create_model(sess, len(vocab), len(tag_vocab), len(label_vocab))
-            print ("Creating model with source_vocab_size=%d, target_vocab_size=%d,\
-                   and label_vocab_size=%d." % (len(vocab), len(tag_vocab), len(label_vocab)))
-
-            if sentence == None:
-                # Decode from standard input.
-                sys.stdout.write("> ")
-                sys.stdout.flush()
-                sentence = sys.stdin.readline()
+        if sentence == None:
+            # Decode from standard input.
+            sys.stdout.write("> ")
+            sys.stdout.flush()
+            sentence = sys.stdin.readline()
+            try:
                 while sentence:
                     seg_gen = jieba.cut(sentence, cut_all=False)
                     _sentence = " ".join(seg_gen)
@@ -132,11 +126,11 @@ class lu_model(object):
                     token_ids = data_utils.sentence_to_token_ids(
                         _sentence, vocab, data_utils.UNK_ID_dict['with_padding'])
                     # Prepare one batch
-                    encoder_inputs, tags, tag_weights, sequence_length, labels = model_test.get_one(
+                    encoder_inputs, tags, tag_weights, sequence_length, labels = self.model_test.get_one(
                         [[[token_ids, [], [0]]]], bucket_id, 0)
                     # Get prediction logits
-                    _, step_loss, tagging_logits, classification_logits = model_test.joint_step(
-                        sess, encoder_inputs, tags, tag_weights, labels, sequence_length,
+                    _, step_loss, tagging_logits, classification_logits = self.model_test.joint_step(
+                        self.sess, encoder_inputs, tags, tag_weights, labels, sequence_length,
                         bucket_id, True)
                     hyp_label = rev_label_vocab[np.argmax(classification_logits[0],0)]
                     print(hyp_label)
@@ -145,25 +139,27 @@ class lu_model(object):
                     print("> ", end="")
                     sys.stdout.flush()
                     sentence = sys.stdin.readline()
-
-            else:
-                seg_gen = jieba.cut(sentence, cut_all=False)
-                _sentence = " ".join(seg_gen)
-                # Get token-ids for the input sentence.
-                token_ids = data_utils.sentence_to_token_ids(
-                    _sentence, vocab, data_utils.UNK_ID_dict['with_padding'])
-                encoder_inputs, tags, tag_weights, sequence_length, labels = model_test.get_one(
-                    [[[token_ids, [], [0]]]], bucket_id, 0)
-                _, step_loss, tagging_logits, classification_logits = model_test.joint_step(
-                    sess, encoder_inputs, tags, tag_weights, labels, sequence_length,
-                    bucket_id, True)
-                hyp_label = rev_label_vocab[np.argmax(classification_logits[0],0)]
-                hyp_tags = [rev_tag_vocab[np.argmax(x)] for x in tagging_logits[:sequence_length[0]]]
-                return hyp_label, hyp_tags
+            except KeyboardInterrupt:
+                print("KeyboardInterrupt")
+                self.sess.close()
+        else:
+            seg_gen = jieba.cut(sentence, cut_all=False)
+            _sentence = " ".join(seg_gen)
+            # Get token-ids for the input sentence.
+            token_ids = data_utils.sentence_to_token_ids(
+                _sentence, vocab, data_utils.UNK_ID_dict['with_padding'])
+            encoder_inputs, tags, tag_weights, sequence_length, labels = self.model_test.get_one(
+                [[[token_ids, [], [0]]]], bucket_id, 0)
+            _, step_loss, tagging_logits, classification_logits = self.model_test.joint_step(
+                self.sess, encoder_inputs, tags, tag_weights, labels, sequence_length,
+                bucket_id, True)
+            hyp_label = rev_label_vocab[np.argmax(classification_logits[0],0)]
+            hyp_tags = [rev_tag_vocab[np.argmax(x)] for x in tagging_logits[:sequence_length[0]]]
+            return hyp_label, hyp_tags
 
 
 def main():
-    sf = lu_model()
+    sf = LuModel()
     sf.get_lu_pred()
 
 
