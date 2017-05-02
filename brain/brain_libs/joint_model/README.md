@@ -15,6 +15,9 @@
 Training data will be generated accordingly.
 
 `python3 run_multi-task_rnn_test.py`  
-With extremely few `max_training_steps` for testing purpose.
+With extremely few `max_training_steps` and applied training data for testing purpose.
 
 Tokenized dataset will be generated if training-model scripts executed the first time.
+
+### Prerequisites:
+Tensorflow, jieba
