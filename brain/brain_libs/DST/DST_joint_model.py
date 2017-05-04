@@ -166,7 +166,6 @@ def main():
         if DM["Intent"] == None:
             DM["Intent"] = int(semantic_frame['intent'])
             print("Intent : ", DM["Intent"])
-            #print(type(DM["Intent"]))
 
         DM = DM_request(DM)
         print ("[ DM ]")
