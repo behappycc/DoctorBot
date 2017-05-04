@@ -4,7 +4,7 @@
 ### Get LU prediction in a cmd environment:
 `python3 get_lu_pred.py` will get a cmd prompt for input sentence iteration.
 
-### Get LU prediction as a module output:
+### Get LU prediction as a object output:
 	import get_lu_pred as lu
 	model = lu.LuModel()
 	intent, slot = model.get_lu_pred(sentence="星期四王德宏的門診時間")
