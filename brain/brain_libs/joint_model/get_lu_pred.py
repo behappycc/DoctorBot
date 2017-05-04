@@ -21,8 +21,8 @@ tf.app.flags.DEFINE_integer("word_embedding_size", 128, "Size of the word embedd
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers in the model.")
 tf.app.flags.DEFINE_integer("in_vocab_size", 10000, "max vocab Size.")
 tf.app.flags.DEFINE_integer("out_vocab_size", 10000, "max tag vocab Size.")
-tf.app.flags.DEFINE_string("data_dir", "data/hospital", "Data directory")
-tf.app.flags.DEFINE_string("train_dir", "model_tmp", "Training directory.")
+tf.app.flags.DEFINE_string("data_dir", "../joint_model/data/hospital", "Data directory")
+tf.app.flags.DEFINE_string("train_dir", "../joint_model/model_tmp", "Training directory.")
 tf.app.flags.DEFINE_boolean("use_attention", True,
                             "Use attention based RNN")
 tf.app.flags.DEFINE_integer("max_sequence_length", 30,
