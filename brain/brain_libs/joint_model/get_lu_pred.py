@@ -102,6 +102,31 @@ class LuModel(object):
         print ("Creating model with source_vocab_size=%d, target_vocab_size=%d,\
                and label_vocab_size=%d." % (len(vocab), len(tag_vocab), len(label_vocab)))
 
+    def semantic_frame(self, sentence):
+        seg_gen = list(jieba.cut(sentence, cut_all=False))
+        _sentence = " ".join(seg_gen)
+        # Get token-ids for the input sentence.
+        token_ids = data_utils.sentence_to_token_ids(
+            _sentence, vocab, data_utils.UNK_ID_dict['with_padding'])
+        encoder_inputs, tags, tag_weights, sequence_length, labels = self.model_test.get_one(
+            [[[token_ids, [], [0]]]], bucket_id, 0)
+        _, step_loss, tagging_logits, classification_logits = self.model_test.joint_step(
+            self.sess, encoder_inputs, tags, tag_weights, labels, sequence_length,
+            bucket_id, True)
+        intent_label = rev_label_vocab[np.argmax(classification_logits[0], 0)]
+        slot_list = [rev_tag_vocab[np.argmax(x)] for x in tagging_logits[:sequence_length[0]]]
+        slot_dictionary = {'intent': intent_label[1],
+                           'slot': {'disease': '', 'division': '', 'doctor': '', 'time': ''}}
+        for index, item in enumerate(slot_list):
+            if item == 'b-disease':
+                slot_dictionary['slot']['disease'] = seg_gen[index]
+            elif item == 'b-division':
+                slot_dictionary['slot']['division'] = seg_gen[index]
+            elif item == 'b-doctor':
+                slot_dictionary['slot']['doctor'] = seg_gen[index]
+            elif item == 'b-time':
+                slot_dictionary['slot']['time'] = seg_gen[index]
+        return slot_dictionary
 
     def get_lu_pred(self, sentence=None):
         if sentence == None:
