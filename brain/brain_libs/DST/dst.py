@@ -69,9 +69,13 @@ def DM_request(DM):
             DM["State"]["doctor"] = get_dbinfo(DM["State"]["disease"], "doctor",0)
             DM["Request"] = "choose"
             DM["Slot"] = ["doctor"]
+        elif DM["State"]["division"] != None:
+            DM["State"]["doctor"] = get_dbinfo(DM["State"]["division"], "doctor", 1)
+            DM["Request"] = "choose"
+            DM["Slot"] = ["doctor"]
         else:
             DM["Request"] = "info"
-            DM["Slot"] = ["doctor","disease"]
+            DM["Slot"] = ["disease", "division", "doctor"]
     elif DM["Intent"] == 5:
         if DM["State"]["doctor"] != None and DM["State"]["time"] != None:
             DM["Request"] = "end"
