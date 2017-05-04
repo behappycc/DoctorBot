@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import re
 sys.path.append('../LU_model')
 import db
 sys.path.pop()
@@ -163,8 +164,9 @@ def main():
             DM["State"]["time"] = None
 
         if DM["Intent"] == None:
-            DM["Intent"] = semantic_frame['intent']
+            DM["Intent"] = int(semantic_frame['intent'])
             print("Intent : ", DM["Intent"])
+            #print(type(DM["Intent"]))
 
         DM = DM_request(DM)
         print ("[ DM ]")
