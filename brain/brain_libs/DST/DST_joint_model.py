@@ -136,7 +136,11 @@ def main():
         slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
 
         sentence = input('U: ')
-        if sentence in week:
+        pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+        match = pattern.match(sentence)
+        if match:
+            DM["State"]["time"] = sentence
+        elif sentence in week:
             DM["State"]["time"] = sentence
         # elif sentence in doctor:
         #     DM["State"]["doctor"] = sentence
@@ -155,7 +159,7 @@ def main():
             if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
                 DM["State"][slot] = slot_dictionary[slot]
 
-        if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week:
+        if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
             DM["State"]["time"] = None
 
         if DM["Intent"] == None:
