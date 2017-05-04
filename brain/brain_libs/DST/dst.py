@@ -1,10 +1,13 @@
 import sys
-sys.path.append('../LU_model')
-#print (sys.path)
 import os
 import json
+sys.path.append('../LU_model')
 import LU
 import db
+sys.path.pop()
+sys.path.append('../data_resource')
+import CrawlerTimeTable
+
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
 DB_NAME = "doctorbot"  # use the collection
@@ -83,14 +86,16 @@ def DM_request(DM):
                 DM["Slot"] = ["doctor"]
             else:
                 DM["Request"] = "info"
-                DM["Slot"] = ["disease","division","doctor"]
+                DM["Slot"] = ["disease", "division", "doctor"]
         elif DM["State"]["time"] == None:
-            DM["Request"] = "info"
-            DM["Slot"] = ["time"]
+            if DM["State"]["doctor"] != None:
+                DM["State"]["time"] = CrawlerTimeTable.Timetable(DM["State"]["doctor"]).get_time()
+                DM["Request"] = "choose"
+                DM["Slot"] = ["time"]
 
         else:
             DM["Request"] = "info"
-            DM["Slot"] = ["disease","division","doctor"]
+            DM["Slot"] = ["disease", "division", "doctor"]
     else:
         pass
 

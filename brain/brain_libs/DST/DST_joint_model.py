@@ -6,6 +6,9 @@ import db
 sys.path.pop()
 sys.path.append('../joint_model')
 import get_lu_pred
+sys.path.pop()
+sys.path.append('../data_resource')
+import CrawlerTimeTable
 
 
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
@@ -88,8 +91,10 @@ def DM_request(DM):
                 DM["Request"] = "info"
                 DM["Slot"] = ["disease","division","doctor"]
         elif DM["State"]["time"] == None:
-            DM["Request"] = "info"
-            DM["Slot"] = ["time"]
+            if DM["State"]["doctor"] != None:
+                DM["State"]["time"] = CrawlerTimeTable.Timetable(DM["State"]["doctor"]).get_time()
+                DM["Request"] = "choose"
+                DM["Slot"] = ["time"]
 
         else:
             DM["Request"] = "info"

@@ -1,1 +1,1 @@
-{"Intent": 1, "State": {"disease": "\u9752\u5149\u773c", "doctor": null, "division": null, "time": null, "intent": null}, "Slot": null, "Request": "end"}
+{"State": {"division": ".", "intent": null, "disease": "\u9752\u5149\u773c", "time": ["106.5.9(\u4e8c) \u4e0a\u5348", "106.5.16(\u4e8c) \u4e0a\u5348"], "doctor": "\u738b\u6e05\u6cd3"}, "Request": "end", "Slot": null, "Intent": 5}
