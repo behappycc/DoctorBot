@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Get predicted intent and slot form user utterance.
+Get predicted intent and slot from user utterance.
 """
 
 import tensorflow as tf
