@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 
 import json, requests, random, re
 from pprint import pprint
-
+from .models import fb_db
 
 
 #@ensure_csrf_cookie
@@ -34,6 +34,14 @@ class Doctor(generic.View):
 			return HttpResponse(self.request.GET['hub.challenge'])
 		else:
 			return HttpResponse('Error,invalid token')
+
+#def fb_database_init(requests):
+	#fb_db.objects.all().delete()
+	
+def savetodb(self,request,*args,**kwargs):
+	message = json.loads(self.request.body.decode('utf-8'))
+	message = json.dumps(message)
+#	fb_db.objects.create(content = message)
 
 
 
