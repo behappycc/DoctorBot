@@ -26,13 +26,15 @@ class Doctor(generic.View):
         return generic.View.dispatch(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        print("======")
         incoming_message = json.loads(self.request.body.decode('utf-8'))
         for entry in incoming_message['entry']:
             for message in entry['messaging']:
                 if 'message' in message:
                     pprint(message)
-                    post_facebook_message(
-                        message['sender']['id'], message['message']['text'])
+                    post_facebook_message(message['sender']['id'], message['message']['text'])
+        
+        savetodb(incoming_message)
         return HttpResponse()
 
     def get(self, request, *args, **kwargs):
@@ -43,12 +45,15 @@ class Doctor(generic.View):
 
 # def fb_database_init(requests):
     # fb_db.objects.all().delete()
-
-
-def savetodb(self, request, *args, **kwargs):
-    message = json.loads(self.request.body.decode('utf-8'))
+    #savetodb(request, *args, **kwargs)
+    print("==")
+def savetodb(message):
+    print("====================")
+   #message = json.loads(self.request.body.decode('utf-8'))
     message = json.dumps(message)
-#	fb_db.objects.create(content = message)
+    fb_db.objects.create(content = message,title="fb user input")
+    print("====================")
+
 
 
 # This function should be outside the BotsView class
