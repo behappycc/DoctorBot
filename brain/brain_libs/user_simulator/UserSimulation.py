@@ -19,26 +19,40 @@ class User(object):
         disease_list = [line.rstrip('\n') for line in open("../data_resource/disease_dict.txt", "r")]
         #print(disease_list)
 
-        disease = disease_list[random.randint(0, len(disease_list)-1)]
-        #print(disease)
-        while collection_division.find({"disease": disease}).count() < 1:
-            disease = disease_list[random.randint(0, len(disease_list) - 1)]
+        notfind = True
+        while notfind :
+            notfind = False
+
+            disease = disease_list[random.randint(0, len(disease_list)-1)]
             #print(disease)
+            while collection_division.find({"disease": disease}).count() < 1:
+                disease = disease_list[random.randint(0, len(disease_list) - 1)]
 
-        for collection in collection_division.find({"disease": disease}):
-            doctor_list = collection['doctor']
+            print(disease)
+            for collection in collection_disease.find({"disease_c": disease}):
+                division = collection['department'][0]
+
+            doctor_list = []
+            for collection in collection_division.find({"disease": disease}):
+                doctor_list.extend(collection['doctor'])
+
             print(doctor_list)
-            name = doctor_list[random.randint(0, len(doctor_list)-1)]
-            #print(name)
+            if len(doctor_list) is 0:
+                notfind = True
+            elif len(doctor_list) > 1:
+                name = doctor_list[random.randint(0, len(doctor_list)-1)]
+            else:
+                name = doctor_list[0]
 
-        for collection in collection_disease.find({"disease_c": disease}):
-            division = collection['department'][0]
-            #print(division)
-
-        time_list = CrawlerTimeTable.Timetable(name).get_time()
-        #print(time_list)
-        time = time_list[random.randint(0, len(time_list)-1)]
-        #print(time)
+            if not notfind:
+                time_list = CrawlerTimeTable.Timetable(name).get_time()
+                print(time_list)
+                if len(time_list) is 0:
+                    notfind = True
+                elif len(time_list) > 1:
+                    time = time_list[random.randint(0, len(time_list)-1)]
+                else:
+                    time = time_list[0]
 
         self.goal = {'intent': random.randint(1, 5),
                      'slot': {'disease': disease, 'division': division, 'doctor': name, 'time': time}}
