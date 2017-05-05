@@ -36,16 +36,19 @@ class Timetable(object):
                     temp.append(content)
                 if(temp!=[]):
                     self.result.append(temp)
-        f = open("../data_resource/doctor.csv", "w")
-        w = csv.writer(f)
-        w.writerows(self.result[1:])
-        f.close()
+            self.result.pop(0)
 
     def get_time(self):
         time_list = []
         for col in self.result:
             time_list.append(col[2])
         return time_list
+
+    def save_csv(self):
+        f = open("../data_resource/doctor.csv", "w")
+        w = csv.writer(f)
+        w.writerows(self.result[1:])
+        f.close()
 
 
 def main():
