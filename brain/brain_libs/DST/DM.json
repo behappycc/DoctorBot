@@ -1,1 +1,1 @@
-{"Request": "end", "Slot": null, "Intent": 5, "State": {"disease": "\u4e2d\u8033\u708e", "intent": null, "time": "105.5.4", "division": null, "doctor": "\u9ec3\u7acb\u6c11"}}
+{"Slot": null, "State": {"time": "106.5.9", "doctor": "\u738b\u6e05\u6cd3", "intent": null, "disease": "\u9752\u5149\u773c", "division": null}, "Request": "end", "Intent": 5}

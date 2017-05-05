@@ -97,7 +97,7 @@ def DM_request(DM):
                 DM["Slot"] = ["disease","division","doctor"]
         elif DM["State"]["time"] == None:
             if DM["State"]["doctor"] != None:
-                DM["State"]["time"] = CrawlerTimeTable.Timetable(DM["State"]["doctor"]).get_time()
+                DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
                 DM["Request"] = "choose"
                 DM["Slot"] = ["time"]
 
@@ -129,7 +129,7 @@ def main():
     # with open('../data_resource/doctor_dict.txt','r') as r_doctor:
     #     for line in r_doctor:
     #         doctor.append(line)
-
+    lu_model = get_lu_pred.LuModel()
     while True:
         if os.path.exists("DM.json"):
             with open("DM.json", 'r') as f:
@@ -150,7 +150,7 @@ def main():
         elif sentence in disease:
             DM["State"]["disease"] = sentence
         else:
-            semantic_frame = get_lu_pred.LuModel().semantic_frame(sentence)
+            semantic_frame = lu_model.semantic_frame(sentence)
             slot_dictionary = semantic_frame['slot']
 
         print("[ LU ]")
