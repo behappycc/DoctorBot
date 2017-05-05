@@ -27,7 +27,7 @@ class User(object):
 
         for collection in collection_division.find({"disease": disease}):
             doctor_list = collection['doctor']
-            #print(doctor_list)
+            print(doctor_list)
             name = doctor_list[random.randint(0, len(doctor_list)-1)]
             #print(name)
 

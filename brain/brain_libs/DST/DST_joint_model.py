@@ -30,6 +30,7 @@ def get_dbinfo(slot1,slot2, choose):
 
     collection_division = client[DB_NAME]["division"]
     collection_disease = client[DB_NAME]["disease"]
+    doctor_list = []
     #use disease to find division
     if slot2 == "department":
         for data in collection_disease.find({"disease_c": {"$regex": slot1}}):
@@ -38,12 +39,18 @@ def get_dbinfo(slot1,slot2, choose):
     elif slot2 == "doctor" and choose == 0:
         for data in collection_division.find({"$and": [{"disease": {"$regex": slot1}},
                                                        {"department": {"$regex": ""}}]}):
-            return data['doctor']
+            for name in data['doctor']:
+                if name not in doctor_list:
+                    doctor_list.append(name)
+        return doctor_list
     #use division to find doctors
     elif slot2 == "doctor" and choose == 1:
         for data in collection_division.find({"$and": [{"disease": {"$regex": ''}},
                                                        {"department": {"$regex": slot1}}]}):
-            return data['doctor']
+            for name in data['doctor']:
+                if name not in doctor_list:
+                    doctor_list.append(name)
+        return doctor_list
 #################################################################################################
 #                   decide a request                                                            #
 #################################################################################################
