@@ -10,8 +10,24 @@ import get_lu_pred
 sys.path.pop()
 sys.path.append('../data_resource')
 import CrawlerTimeTable
+sys.path.pop()
 
+import django
+sys.path.append('../../../doctorbot')
+from doctorbot import settings
+from fb_doctor_chatbot import models
+setup_environ(settings)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'doctorbot.settings'
 
+DIR_NAME = '/home/a1995080130/DoctorBot/doctorbot/doctorbot'
+import sqlite3
+conn = sqlite3.connect(DIR_NAME + 'db.sqlite3')
+fb = conn.cursor()
+t=('TTTT')
+fb.execute('SELECT * FROM *')
+
+print("===============")
+print(fb.fetchone())
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
 DB_NAME = "doctorbot"  # use the collection
@@ -137,6 +153,8 @@ def main():
     #     for line in r_doctor:
     #         doctor.append(line)
     lu_model = get_lu_pred.LuModel()
+    print("print")
+    print(fb_db.objects.all())
     while True:
         if os.path.exists("DM.json"):
             with open("DM.json", 'r') as f:
