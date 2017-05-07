@@ -17,7 +17,7 @@ verify_token = '00000000'
 TOKEN = 'EAAG1BsKUxZB8BALNakB02SE5R3tAf7NyEXF8plOF1SUKkvWWiHwvmi2OoQBqcOqCjJxfRkC9wR7t3kIYv3AfQaZBOTJwfpQQtL7eIMA4z9fhLmApLEDF25iZA99U3RZBZA9WQRnHK7mWjGvmcER2sTZBFo0Ln9AqT8hluFZA5hPGQZDZD'
 
 # Create your views here.
-#json_dir = '../brain/brain_libs/DST/'
+json_dir = '../brain/brain_libs/DST/'
 class Doctor(generic.View):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
