@@ -17,7 +17,7 @@ verify_token = '00000000'
 TOKEN = 'EAAG1BsKUxZB8BALNakB02SE5R3tAf7NyEXF8plOF1SUKkvWWiHwvmi2OoQBqcOqCjJxfRkC9wR7t3kIYv3AfQaZBOTJwfpQQtL7eIMA4z9fhLmApLEDF25iZA99U3RZBZA9WQRnHK7mWjGvmcER2sTZBFo0Ln9AqT8hluFZA5hPGQZDZD'
 
 # Create your views here.
-json_dir = '../brain/brain_libs/DST/'
+#json_dir = '../brain/brain_libs/DST/'
 class Doctor(generic.View):
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -54,9 +54,9 @@ def savetodb(message,text):
 # This function should be outside the BotsView class
 def post_facebook_message(fbid):
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
-    with open(json_dir + "DM.json") as json_file:
-        line = json.load(json_file)
-        line = json.dumps(line)
-        response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": line}})
-        requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
+    #with open(json_dir + "DM.json") as json_file:
+        #line = json.load(json_file)
+        #line = json.dumps(line)
+    response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": line}})
+    requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
 
