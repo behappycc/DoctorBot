@@ -54,9 +54,9 @@ def savetodb(message,text):
 # This function should be outside the BotsView class
 def post_facebook_message(fbid):
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
-    #with open(json_dir + "DM.json") as json_file:
-        #line = json.load(json_file)
-        #line = json.dumps(line)
+    with open(json_dir + "DM.json") as json_file:
+        line = json.load(json_file)
+        line = json.dumps(line)
     response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": line}})
     requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
 
