@@ -153,56 +153,57 @@ def main():
     lu_model = get_lu_pred.LuModel()
     
     
-    #while True:
+    while True:
+        fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
+        vid = fb.fetchone()
+        #if(fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db') != vid):
+        fb.execute('select * from fb_doctor_chatbot_fb_db where ID=(select MAX(ID) from fb_doctor_chatbot_fb_db) ')
+        message = fb.fetchone()
+        sentence = message[3]
+        if os.path.exists("DM.json"):
+            with open("DM.json", 'r') as f:
+                DM = json.load(f)
+        slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
 
-    fb.execute('select * from fb_doctor_chatbot_fb_db where ID=(select MAX(ID) from fb_doctor_chatbot_fb_db) ')
-    message = fb.fetchone()
-    sentence = message[3]
-
-    if os.path.exists("DM.json"):
-        with open("DM.json", 'r') as f:
-            DM = json.load(f)
-    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
-
-        #sentence = input('U: ')
-    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
-    match = pattern.match(sentence)
-    if match:
-        DM["State"]["time"] = sentence
-    elif sentence in week:
-        DM["State"]["time"] = sentence
+        sentence = input('U: ')
+        pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+        match = pattern.match(sentence)
+        if match:
+            DM["State"]["time"] = sentence
+        elif sentence in week:
+            DM["State"]["time"] = sentence
         # elif sentence in doctor:
         #     DM["State"]["doctor"] = sentence
-    elif sentence in division:
-        DM["State"]["division"] = sentence
-    elif sentence in disease:
-        DM["State"]["disease"] = sentence
-    else:
-        semantic_frame = lu_model.semantic_frame(sentence)
-        slot_dictionary = semantic_frame['slot']
+        elif sentence in division:
+            DM["State"]["division"] = sentence
+        elif sentence in disease:
+            DM["State"]["disease"] = sentence
+        else:
+            semantic_frame = lu_model.semantic_frame(sentence)
+            slot_dictionary = semantic_frame['slot']
 
-    print("[ LU ]")
-    for slot, value in semantic_frame['slot'].items():
-        print(slot, ": ", value)
-    for slot in slot_dictionary:
-        if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
-            DM["State"][slot] = slot_dictionary[slot]
+        print("[ LU ]")
+        for slot, value in semantic_frame['slot'].items():
+            print(slot, ": ", value)
+        for slot in slot_dictionary:
+            if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
+                DM["State"][slot] = slot_dictionary[slot]
 
-    if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
-        DM["State"]["time"] = None
+        if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
+            DM["State"]["time"] = None
 
-    if DM["Intent"] == None:
-        DM["Intent"] = int(semantic_frame['intent'])
-        print("Intent : ", DM["Intent"])
+        if DM["Intent"] == None:
+            DM["Intent"] = int(semantic_frame['intent'])
+            print("Intent : ", DM["Intent"])
 
-    DM = DM_request(DM)
-    print ("[ DM ]")
-    for i in DM:
-        print (i, DM[i])
-    with open("DM.json", 'w') as fp:
-        json.dump(DM, fp)
-    if DM["Request"] == "end":
-        sys.exit()
+        DM = DM_request(DM)
+        print ("[ DM ]")
+        for i in DM:
+            print (i, DM[i])
+        with open("DM.json", 'w') as fp:
+            json.dump(DM, fp)
+        if DM["Request"] == "end":
+            sys.exit()
 
 
 if __name__ == '__main__':
