@@ -10,7 +10,7 @@ DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
 DB_NAME = "doctorbot"  # use the collection
 
-class User(object):
+class intent_slot_generator(object):
     def __init__(self):
         client = db.MongoClient(DB_IP, DB_PORT)
         collection_division = client[DB_NAME]["division"]
@@ -28,7 +28,7 @@ class User(object):
             while collection_division.find({"disease": disease}).count() < 1:
                 disease = disease_list[random.randint(0, len(disease_list) - 1)]
 
-            print(disease)
+            #print(disease)
             for collection in collection_disease.find({"disease_c": disease}):
                 division = collection['department'][0]
 
@@ -36,7 +36,7 @@ class User(object):
             for collection in collection_division.find({"disease": disease}):
                 doctor_list.extend(collection['doctor'])
 
-            print(doctor_list)
+            #print(doctor_list)
             if len(doctor_list) is 0:
                 notfind = True
             elif len(doctor_list) > 1:
@@ -46,7 +46,7 @@ class User(object):
 
             if not notfind:
                 time_list = CrawlerTimeTable.Timetable(name).get_time()
-                print(time_list)
+                #print(time_list)
                 if len(time_list) is 0:
                     notfind = True
                 elif len(time_list) > 1:
@@ -58,8 +58,8 @@ class User(object):
                      'slot': {'disease': disease, 'division': division, 'doctor': name, 'time': time}}
 
 
-def main():
-    print(User().goal)
+#def main():
+    #print(intent_slot_generator().goal)
 
-if __name__ == '__main__':
-        main()
+#if __name__ == '__main__':
+#   main()
