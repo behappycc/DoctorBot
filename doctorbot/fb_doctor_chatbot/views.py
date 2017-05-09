@@ -8,6 +8,7 @@ import json
 import requests
 import random
 import re
+import time
 import sys
 from pprint import pprint
 from .models import fb_db
@@ -33,8 +34,9 @@ class Doctor(generic.View):
             for message in entry['messaging']:
                 if 'message' in message:
                     pprint(message)
-                    post_facebook_message(message['sender']['id'])
                     savetodb(message,message['message']['text'])
+                    time.sleep(0.5)
+                    post_facebook_message(message['sender']['id'])
         return HttpResponse()
 
     def get(self, request, *args, **kwargs):
