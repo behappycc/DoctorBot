@@ -12,6 +12,9 @@ import jieba
 import data_utils
 import multi_task_model
 
+DIR1 = "../brain/brain_libs/data_resource/"
+DIR2 = "../"
+DIR3 = "../joint_model/"
 tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
                           "Clip gradients to this norm.")
 tf.app.flags.DEFINE_integer("batch_size", 16,
@@ -21,8 +24,8 @@ tf.app.flags.DEFINE_integer("word_embedding_size", 128, "Size of the word embedd
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers in the model.")
 tf.app.flags.DEFINE_integer("in_vocab_size", 10000, "max vocab Size.")
 tf.app.flags.DEFINE_integer("out_vocab_size", 10000, "max tag vocab Size.")
-tf.app.flags.DEFINE_string("data_dir", "../joint_model/data/hospital", "Data directory")
-tf.app.flags.DEFINE_string("train_dir", "../joint_model/model_tmp", "Training directory.")
+tf.app.flags.DEFINE_string("data_dir", DIR3+"data/hospital", "Data directory")
+tf.app.flags.DEFINE_string("train_dir", DIR3+"model_tmp", "Training directory.")
 tf.app.flags.DEFINE_boolean("use_attention", True,
                             "Use attention based RNN")
 tf.app.flags.DEFINE_integer("max_sequence_length", 30,
@@ -55,11 +58,13 @@ vocab, rev_vocab = data_utils.initialize_vocabulary(vocab_path)
 tag_vocab, rev_tag_vocab = data_utils.initialize_vocabulary(tag_vocab_path)
 label_vocab, rev_label_vocab = data_utils.initialize_vocabulary(label_vocab_path)
 
-jieba.load_userdict("../data_resource/doctor_dict.txt")
-jieba.load_userdict("../data_resource/disease_dict.txt")
-jieba.load_userdict("../data_resource/division_dict.txt")
-jieba.load_userdict("../data_resource/week_dict.txt")
-jieba.load_userdict("../data_resource/other_dict.txt")
+DIR1 = "../brain/brain_libs/data_resource/"
+DIR2 = "../"
+jieba.load_userdict(DIR2+"data_resource/doctor_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/disease_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/division_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/week_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/other_dict.txt")
 
 _buckets = [(FLAGS.max_sequence_length, FLAGS.max_sequence_length)]
 bucket_id = 0
