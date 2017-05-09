@@ -8,8 +8,13 @@ import json
 import requests
 import random
 import re
+import sys
 from pprint import pprint
 from .models import fb_db
+print (sys.path)
+sys.path.append('../brain/brain_libs/DST')
+print (sys.path)
+import DST_joint_model
 
 
 #@ensure_csrf_cookie
@@ -53,6 +58,8 @@ def savetodb(message,text):
 
 # This function should be outside the BotsView class
 def post_facebook_message(fbid):
+    dst = DST_joint_model.DST_model()
+    dst.dst()
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
     with open(json_dir + "DM.json") as json_file:
         line = json.load(json_file)
