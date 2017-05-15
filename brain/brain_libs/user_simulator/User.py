@@ -43,7 +43,7 @@ class User(object):
         self.reward_accumalation = 0
 
     
-    # for NLG
+    # for NLG_model
     def nlg_intent_1(self,response_slot):
         pattern_dic = {
         "disease":[self.slot["disease"]+"會怎樣",self.slot["disease"],"我想問"+self.slot["disease"],
