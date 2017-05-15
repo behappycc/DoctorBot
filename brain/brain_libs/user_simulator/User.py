@@ -270,7 +270,7 @@ class User(object):
         reward = -1                
         self.observation = observation
         wrong, response, reward = self.check_if_something_wrong()
-        if wrong and self.observation["request"] != 'end':
+        if wrong and self.observation["request"] != 'end' and self.observation["request"] != 'confirm':
             return response, reward
         if self.observation == None:
             if self.intent == 1:
