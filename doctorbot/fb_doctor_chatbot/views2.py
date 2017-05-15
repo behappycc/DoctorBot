@@ -33,8 +33,8 @@ class Doctor(generic.View):
             for message in entry['messaging']:
                 if 'message' in message:
                     pprint(message)
-                    post_facebook_message(message['sender']['id'])
                     savetodb(message,message['message']['text'])
+                    post_facebook_message(message['sender']['id'])
         return HttpResponse()
 
     def get(self, request, *args, **kwargs):
@@ -58,8 +58,8 @@ def savetodb(message,text):
 
 # This function should be outside the BotsView class
 def post_facebook_message(fbid):
-    dst = DST_joint_model.DST_model()
-    dst.dst()
+    #dst = DST_joint_model.DST_model()
+    #dst.dst()
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
     with open(json_dir + "DM.json") as json_file:
         line = json.load(json_file)

@@ -19,7 +19,7 @@ print (sys.path)
 
 
 #@ensure_csrf_cookie
-verify_token = '00000000'
+verify_token = '11111111'
 TOKEN = 'EAAG1BsKUxZB8BALNakB02SE5R3tAf7NyEXF8plOF1SUKkvWWiHwvmi2OoQBqcOqCjJxfRkC9wR7t3kIYv3AfQaZBOTJwfpQQtL7eIMA4z9fhLmApLEDF25iZA99U3RZBZA9WQRnHK7mWjGvmcER2sTZBFo0Ln9AqT8hluFZA5hPGQZDZD'
 
 # Create your views here.
@@ -39,7 +39,7 @@ class Doctor(generic.View):
                     post_facebook_message(message['sender']['id'])
         return HttpResponse()
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):#, *args, **kwargs):
         if self.request.GET['hub.verify_token'] == verify_token:
             return HttpResponse(self.request.GET['hub.challenge'])
         else:
