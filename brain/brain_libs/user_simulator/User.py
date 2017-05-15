@@ -33,7 +33,7 @@ class User(object):
                      lambda x: x["disease"] != None or x["division"] != None,
                      lambda x: x["doctor"]  != None,
                      lambda x: x["doctor"]  != None and x["time"] != None]
-    ERROR_RATE = {"intent":0, "disease":0, "division":0, "doctor": 0.8, "time":0 }
+    ERROR_RATE = {"intent":0, "disease":0, "division":0, "doctor": 0, "time":0 }
     WRONG_DOCTOR_LIST = ["李琳山", "李宏毅", "陳縕儂", "廖世文", "楊佳玲"]
     day = ["一","二","三","四","五","六","日"]
     inv_day = {}
@@ -130,9 +130,13 @@ class User(object):
             if (self.state[key] == True 
             and self.observation['state'][key] != None):
                 if self.slot[key] != self.observation['state'][key]:
-                    wrong = True
-                    response = "我是說" + self.slot[key]
-                    break
+                    if not key == "time":
+                        wrong = True
+                        response = "我是說" + self.slot[key]
+                        break
+                    if key =="time" and ".".join(self.time[:3]) != self.observation['state']['time']:
+                        wrong = True
+                        response = "我是說" + ".".join(self.time[:3])
         return wrong, response, reward;
 
     def say_intent_again(self):
@@ -212,11 +216,13 @@ class User(object):
         # def response_dm_confirm(self):
         # def response_dm_inform(self):
     def response_dm_choose(self):
-        choose_slot = self.observation["slot"]
-        if self.slot[choose_slot] in self.observation["state"]:
+        choose_slot = self.observation["slot"][0]
+        if self.slot[choose_slot] in self.observation["state"][choose_slot]:
             if choose_slot == "time":
+                self.state["time"] = True
                 return ".".join(self.time[0:3]), User.reward_per_response
             else:
+                self.state[choose_slot] = True
                 return self.slot[choose_slot], User.reward_per_response
         else:
             return self.say_intent_again() # I don't know if it is appropriate to say user's intent again when the slot is not in choose list     
@@ -243,18 +249,13 @@ class User(object):
         if(self.intent == self.observation["intent"]):
             if User.SUCCESS_CHECK[self.intent-1](self.observation["state"]):
                 for key in self.slot:
-                    if ((self.state[key] == True and self.observation['state'][key] != None)
-                        or (self.state[key] == False and self.observation['state'][key] == None)):
+                    if self.observation['state'][key] != None:
                         if self.slot[key] != self.observation['state'][key]:
                             if not(key == "time" and ".".join(self.time[:3]) == self.observation['state']['time']):
                                 self.success = False
                                 break
-                    else:
-                        self.success = False
-                        break
         else:
             self.success = False
-        #######
         if(self.success):
             return "謝謝", User.reward_success
         else:
