@@ -97,7 +97,7 @@ class User(object):
             time = ".".join(self.time[:3])
         pattern_dic = {
         "disease":[self.slot["disease"]+"的",self.slot["disease"],self.slot["disease"]],
-        "doctor":[doctor + "的" + "門診時間表" ],
+        "doctor":["我要掛" + doctor + "的" + "門診時間表" ],
         "time":[ time +"的", time, time +"的時刻表"],
         "division":[self.slot["division"]+"的",self.slot["division"]]
         }
@@ -117,7 +117,7 @@ class User(object):
         ],
         "time":[time+"的",time,"我"+time+"可以","我"+time+"有空"
         ],
-        "doctor":["我要掛"+doctor,doctor]
+        "doctor":["我要掛"+doctor]
         }        
         return choice(pattern_dic[response_slot])
 
@@ -130,13 +130,16 @@ class User(object):
             if (self.state[key] == True 
             and self.observation['state'][key] != None):
                 if self.slot[key] != self.observation['state'][key]:
-                    if not key == "time":
+                    if key == "disease" or key == "division":
                         wrong = True
                         response = "我是說" + self.slot[key]
                         break
-                    if key =="time" and ".".join(self.time[:3]) != self.observation['state']['time']:
+                    if key == "time" and ".".join(self.time[:3]) != self.observation['state']['time']:
                         wrong = True
                         response = "我是說" + ".".join(self.time[:3])
+                    if key == "doctor":
+                        wrong = True
+                        response = "我是說我要掛" + self.slot[key]
         return wrong, response, reward;
 
     def say_intent_again(self):
@@ -235,6 +238,8 @@ class User(object):
         print(check_slots)
         for s in check_slots:
             if self.observation['state'][s] != self.slot[s]:
+                if s == "doctor":
+                    return choice(["我是說我要掛","不，我是說我要掛"]) + self.slot[s] + " 不是" + self.observation['state'][s], User.reward_per_response
                 return choice(["我是說","不，我是說"]) + self.slot[s] + " 不是" + self.observation['state'][s], User.reward_per_response
         if correct:
             return choice(["對","是的","沒錯","就是這樣"]), User.reward_per_response
@@ -265,7 +270,7 @@ class User(object):
         reward = -1                
         self.observation = observation
         wrong, response, reward = self.check_if_something_wrong()
-        if wrong and self.observation["intent"] != 'end':
+        if wrong and self.observation["request"] != 'end':
             return response, reward
         if self.observation == None:
             if self.intent == 1:
@@ -278,7 +283,7 @@ class User(object):
                 self.state["time"] = True
                 response, reward = "我想看"+self.slot["disease"]+"有哪些醫生可以", -1
             elif self.intent == 4:
-                response, reward = "我要問時間", -1
+                response, reward = "請問門診時間", -1
             elif self.intent == 5:
                 response, reward = "我想要掛號", -1
         elif self.observation["intent"] != self.intent:
