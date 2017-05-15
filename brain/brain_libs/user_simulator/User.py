@@ -33,7 +33,7 @@ class User(object):
                      lambda x: x["disease"] != None or x["division"] != None,
                      lambda x: x["doctor"]  != None,
                      lambda x: x["doctor"]  != None and x["time"] != None]
-    ERROR_RATE = {"intent":0, "disease":0, "division":0, "doctor": 0.8, "time":0 }
+    ERROR_RATE = {"intent":0, "disease":0, "division":0, "doctor": 0, "time":0 }
     WRONG_DOCTOR_LIST = ["李琳山", "李宏毅", "陳縕儂", "廖世文", "楊佳玲"]
     day = ["一","二","三","四","五","六","日"]
     inv_day = {}
