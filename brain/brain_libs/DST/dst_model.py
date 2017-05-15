@@ -14,6 +14,9 @@ import CrawlerTimeTable
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
 DB_NAME = "doctorbot"  # use the collection
+client = db.MongoClient(DB_IP, DB_PORT)
+collection_division = client[DB_NAME]["division"]
+collection_disease = client[DB_NAME]["disease"]
 
 def initialize():
     state = {"intent": None, "disease": None, "division": None, "doctor": None, "time": None}
@@ -25,10 +28,6 @@ def initialize():
 #                   search for division or doctor from database                                 #
 #################################################################################################
 def get_dbinfo(slot1,slot2, choose):
-    client = db.MongoClient(DB_IP, DB_PORT)
-
-    collection_division = client[DB_NAME]["division"]
-    collection_disease = client[DB_NAME]["disease"]
     doctor_list = []
     #use disease to find division
     if slot2 == "department":
@@ -120,7 +119,46 @@ def DM_request(DM):
 def get_sentence(DM):
     sentence =""
     if(DM["Request"] == "end"):
-        sentence += "謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
+        if DM["Intent"] == 1:
+            sentence += DM['State']['disease']
+            sentence += "的相關症狀有：\n"
+            for data in collection_disease.find({"disease_c": {"$regex": DM['State']['disease']}}):
+               sentence += ", ".join(data['symptom'])
+        elif DM["Intent"] == 2:
+            sentence += DM['State']['disease']
+            sentence += "的相關科別為：\n"
+            for data in collection_disease.find({"disease_c": {"$regex": DM['State']['disease']}}):
+                sentence += ", ".join(data['department'])
+        elif DM["Intent"] == 3:
+            if DM['State']['division'] != None:
+                sentence += DM['State']['division']
+            if DM['State']['disease'] != None:
+                sentence += DM['State']['disease']
+            sentence += "的醫生有：\n"
+            for data in collection_division.find({"$and": [{"disease": {"$regex": DM['State']['disease']}},
+                                                          {"department": {"$regex": DM['State']['division'][0]}}]}):
+                sentence += (data['department'] + " 醫師: " + ", ".join(data['doctor']))
+        elif DM["Intent"] == 4:
+            if DM['State']['division'] != None:
+                sentence += DM['State']['division']
+            if DM['State']['disease'] != None:
+                sentence += DM['State']['disease']
+            if DM['State']['doctor'] != None:
+                sentence += DM['State']['doctor']
+            sentence += "的門診時間為：\n"
+            sentence += ", ".join(CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time())
+        elif DM["Intent"] == 5:
+            sentence += "已幫您預約掛號 "
+            if DM['State']['division'] != None:
+                sentence += DM['State']['division']
+            if DM['State']['disease'] != None:
+                sentence += DM['State']['disease']
+            if DM['State']['doctor'] != None:
+                sentence += DM['State']['doctor']
+            if DM['State']['time'] != None:
+                sentence += DM['State']['time']
+            sentence += " 的門診\n"
+        sentence += "\n\n謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
     elif(DM["Request"] == "info"):
         sentence += "請告訴我"
         for index,slot in enumerate(DM['Slot']):
