@@ -87,7 +87,7 @@ def DM_request(DM):
             DM["Request"] = "info"
             DM["Slot"] = ["disease", "division", "doctor"]
     elif DM["Intent"] == 5:
-        if DM["State"]["doctor"] != None and DM["State"]["time"] != None:
+        if DM["State"]["doctor"] != None and DM["State"]["time"] != None and DM["State"]["time"] != []:
             DM["Request"] = "end"
         elif DM["State"]["doctor"] == None:
             if DM["State"]["disease"] != None:
@@ -114,6 +114,33 @@ def DM_request(DM):
         pass
 
     return DM
+#################################################################################################
+#                     Rule Based NLG                                                            #
+#################################################################################################
+def get_sentence(DM):
+    sentence =""
+    if(DM["Request"] == "end"):
+        sentence += "謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
+    elif(DM["Request"] == "info"):
+        sentence += "請告訴我"
+        for index,slot in enumerate(DM['Slot']):
+            if slot == "disease":
+                sentence += " 疾病名稱 "
+            elif slot == "division":
+                sentence += " 科別名稱 "
+            elif slot == "doctor":
+                sentence += " 醫生名稱 "
+            if index != len(DM['Slot'])-1:
+                sentence += "或"
+        sentence += ",謝謝!"
+    elif (DM["Request"] == "choose"):
+        sentence += "請選擇一個"
+        if DM['Slot'][0] == "doctor":
+            sentence += "醫生名稱："
+        elif DM['Slot'][0] == "time":
+            sentence += "看診時間："
+        sentence += " , ".join(DM['State'][DM['Slot'][0]])
+    return sentence
 
 def main():
 
@@ -179,6 +206,7 @@ def main():
             print("Intent : ", DM["Intent"])
 
         DM = DM_request(DM)
+        DM['Sentence'] = get_sentence(DM)
         print ("[ DM ]")
         for i in DM:
             print (i, DM[i])
