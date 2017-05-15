@@ -3,7 +3,7 @@
 
 import requests
 import re
-from lxml import etree
+#from lxml import etree
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 

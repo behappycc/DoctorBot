@@ -7,7 +7,8 @@ user_intent = None
 user_slot = None
 
 generate = UserSimulation.intent_slot_generator()
-user_intent = generate.goal["intent"]
+#  user_intent = generate.goal["intent"]
+user_intent = 5
 user_slot = generate.goal["slot"]
 sim_user = User(intent = user_intent, slot = user_slot)
 reward = 0
@@ -57,7 +58,7 @@ while(True):
             DM["intent"] = int(input('查症狀(1), 查科別(2), 查醫師(3), 查時間(4), 幫我掛號(5) : '))
         else:
             slot = input(slot_name_dic[slot_name]+" = ")
-            state[slot_name] = slot
+            state[slot_name_dic[slot_name]] = slot
     while(error):
         request = input('要求（i）、選擇（s）、確認(c)、結束（e）：')
         if not (request in handle_request):
@@ -73,10 +74,12 @@ while(True):
             else:
                 error = False
         error = True
-
-    if request == 'i' or request == 'c':
+    if request == 'i' or request == 'c' or request == 's':
         request_slot = slot_name_dic[slot_name]
         DM["slot"] = [request_slot]
+    if request == 's':
+        slots = input(slot_name_dic[slot_name]+" = ")
+        state[slot_name_dic[slot_name]] = slots.split("|")
     DM["state"] = state
     DM["request"] = request_dic[request]
     #DM["slot"] = slotname

@@ -8,9 +8,11 @@ https://docs.djangoproject.com/en/1.10/howto/deployment/wsgi/
 """
 
 import os
+#import django
 
+#django.setup()
 from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_react_boilerplate.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "doctorbot.settings")
+#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_react_boilerplate.settings")
 
 application = get_wsgi_application()

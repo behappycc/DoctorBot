@@ -3,7 +3,7 @@ import urllib
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import requests
-from lxml import etree
+import lxml.etree
 import csv
 
 
