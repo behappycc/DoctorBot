@@ -116,47 +116,46 @@ def DM_request(DM):
 #################################################################################################
 #                     Rule Based NLG                                                            #
 #################################################################################################
+def get_str(input):
+    if input == None:
+        return ""
+    elif type(input) == list:
+        return ", ".join(input)
+    elif type(input) == str:
+        return input
+
 def get_sentence(DM):
     sentence =""
     if(DM["Request"] == "end"):
         if DM["Intent"] == 1:
-            sentence += DM['State']['disease']
+            sentence += get_str(DM['State']['disease'])
             sentence += "的相關症狀有：\n"
-            for data in collection_disease.find({"disease_c": {"$regex": DM['State']['disease']}}):
+            for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                sentence += ", ".join(data['symptom'])
         elif DM["Intent"] == 2:
-            sentence += DM['State']['disease']
+            sentence += get_str(DM['State']['disease'])
             sentence += "的相關科別為：\n"
-            for data in collection_disease.find({"disease_c": {"$regex": DM['State']['disease']}}):
+            for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                 sentence += ", ".join(data['department'])
         elif DM["Intent"] == 3:
-            if DM['State']['division'] != None:
-                sentence += DM['State']['division']
-            if DM['State']['disease'] != None:
-                sentence += DM['State']['disease']
+            sentence += get_str(DM['State']['division'])
+            sentence += get_str(DM['State']['disease'])
             sentence += "的醫生有：\n"
-            for data in collection_division.find({"$and": [{"disease": {"$regex": DM['State']['disease']}},
-                                                          {"department": {"$regex": DM['State']['division'][0]}}]}):
+            for data in collection_division.find({"$and": [{"disease": {"$regex": get_str(DM['State']['disease'])}},
+                                                          {"department": {"$regex": get_str(DM['State']['division'])}}]}):
                 sentence += (data['department'] + " 醫師: " + ", ".join(data['doctor']))
         elif DM["Intent"] == 4:
-            if DM['State']['division'] != None:
-                sentence += DM['State']['division']
-            if DM['State']['disease'] != None:
-                sentence += DM['State']['disease']
-            if DM['State']['doctor'] != None:
-                sentence += DM['State']['doctor']
+            sentence += get_str(DM['State']['division'])
+            sentence += get_str(DM['State']['disease'])
+            sentence += get_str(DM['State']['doctor'])
             sentence += "的門診時間為：\n"
-            sentence += ", ".join(CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time())
+            sentence += ", ".join(CrawlerTimeTable.Timetable(get_str(DM["State"]["doctor"])).get_time())
         elif DM["Intent"] == 5:
             sentence += "已幫您預約掛號 "
-            if DM['State']['division'] != None:
-                sentence += DM['State']['division']
-            if DM['State']['disease'] != None:
-                sentence += DM['State']['disease']
-            if DM['State']['doctor'] != None:
-                sentence += DM['State']['doctor']
-            if DM['State']['time'] != None:
-                sentence += DM['State']['time']
+            sentence += get_str(DM['State']['division'])
+            sentence += get_str(DM['State']['disease'])
+            sentence += get_str(DM['State']['doctor'])
+            sentence += get_str(DM['State']['time'])
             sentence += " 的門診\n"
         sentence += "\n\n謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
     elif(DM["Request"] == "info"):
@@ -177,7 +176,7 @@ def get_sentence(DM):
             sentence += "醫生名稱："
         elif DM['Slot'][0] == "time":
             sentence += "看診時間："
-        sentence += " , ".join(DM['State'][DM['Slot'][0]])
+        sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
     return sentence
 
 def main():
