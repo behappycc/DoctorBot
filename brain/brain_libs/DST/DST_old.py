@@ -22,7 +22,7 @@ import time
 DIR_NAME = '../../../../DoctorBot/doctorbot/'
 import sqlite3
 conn = sqlite3.connect(DIR_NAME + 'db.sqlite3')
-fb = conn.cursor()
+#fb = conn.cursor()
 
 
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
@@ -134,47 +134,46 @@ def DM_request(DM):
 
     return DM
 
+def get_str(input):
+    if input == None:
+        return ""
+    elif type(input) == list:
+        return ", ".join(input)
+    elif type(input) == str:
+        return input
+
 def get_sentence(DM):
     sentence =""
     if(DM["Request"] == "end"):
         if DM["Intent"] == 1:
-            sentence += DM['State']['disease']
+            sentence += get_str(DM['State']['disease'])
             sentence += "的相關症狀有：\n"
-            for data in collection_disease.find({"disease_c": {"$regex": DM['State']['disease']}}):
+            for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                sentence += ", ".join(data['symptom'])
         elif DM["Intent"] == 2:
-            sentence += DM['State']['disease']
+            sentence += get_str(DM['State']['disease'])
             sentence += "的相關科別為：\n"
-            for data in collection_disease.find({"disease_c": {"$regex": DM['State']['disease']}}):
+            for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                 sentence += ", ".join(data['department'])
         elif DM["Intent"] == 3:
-            if DM['State']['division'] != None:
-                sentence += DM['State']['division']
-            if DM['State']['disease'] != None:
-                sentence += DM['State']['disease']
+            sentence += get_str(DM['State']['division'])
+            sentence += get_str(DM['State']['disease'])
             sentence += "的醫生有：\n"
-            for data in collection_division.find({"$and": [{"disease": {"$regex": DM['State']['disease']}},
-                                                          {"department": {"$regex": DM['State']['division'][0]}}]}):
+            for data in collection_division.find({"$and": [{"disease": {"$regex": get_str(DM['State']['disease'])}},
+                                                          {"department": {"$regex": get_str(DM['State']['division'])}}]}):
                 sentence += (data['department'] + " 醫師: " + ", ".join(data['doctor']))
         elif DM["Intent"] == 4:
-            if DM['State']['division'] != None:
-                sentence += DM['State']['division']
-            if DM['State']['disease'] != None:
-                sentence += DM['State']['disease']
-            if DM['State']['doctor'] != None:
-                sentence += DM['State']['doctor']
+            sentence += get_str(DM['State']['division'])
+            sentence += get_str(DM['State']['disease'])
+            sentence += get_str(DM['State']['doctor'])
             sentence += "的門診時間為：\n"
-            sentence += ", ".join(CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time())
+            sentence += ", ".join(CrawlerTimeTable.Timetable(get_str(DM["State"]["doctor"])).get_time())
         elif DM["Intent"] == 5:
             sentence += "已幫您預約掛號 "
-            if DM['State']['division'] != None:
-                sentence += DM['State']['division']
-            if DM['State']['disease'] != None:
-                sentence += DM['State']['disease']
-            if DM['State']['doctor'] != None:
-                sentence += DM['State']['doctor']
-            if DM['State']['time'] != None:
-                sentence += DM['State']['time']
+            sentence += get_str(DM['State']['division'])
+            sentence += get_str(DM['State']['disease'])
+            sentence += get_str(DM['State']['doctor'])
+            sentence += get_str(DM['State']['time'])
             sentence += " 的門診\n"
         sentence += "\n\n謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
     elif(DM["Request"] == "info"):
@@ -195,8 +194,9 @@ def get_sentence(DM):
             sentence += "醫生名稱："
         elif DM['Slot'][0] == "time":
             sentence += "看診時間："
-        sentence += " , ".join(DM['State'][DM['Slot'][0]])
+        sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
     return sentence
+
 
 def main():
 
@@ -223,17 +223,49 @@ def main():
     
     fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
     vid = fb.fetchone()[0]    #fb id number ex:235
-    print("initial vid= "+str(vid))
+    #print("initial vid= "+str(vid))
     print("waiting for the fb input...")
     print (os.getcwd())
+    def multiuser(buffer2,after):
+        buffer2=[]
+        fb.execute('select content from fb_doctor_chatbot_fb_db')
+        #all_id = fb.fetchall()
+        buffer2.extend(after)
+        buffer2=list(set(buffer2))
+        return buffer2 
+    fb = conn.cursor()
+    fb.execute('select * from fb_doctor_chatbot_fb_db')
+    init = fb.fetchall()   #
+
     while True:
-        fb.execute('select * from fb_doctor_chatbot_fb_db where ID=(select MAX(ID) from fb_doctor_chatbot_fb_db) ')
-        message = fb.fetchone()
-        print("input_id ="+str(message[0]))
-        if(message[0] != vid):    
-            sentence = message[3]
-            if os.path.exists("DM.json"):
-                with open("DM.json", 'r') as f:
+        fb = conn.cursor()
+        fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db') 
+        new_id = fb.fetchone()[0]
+        multi_id=[]     #ids' list
+        if(new_id !=vid or multi_id != 0): #有新輸入的時候或還有使用者輸入沒有完成的時候
+            fb.execute('select * from fb_doctor_chatbot_fb_db') 
+            after = fb.fetchall()
+            after = list(set(after)-set(init))
+        #print(after)
+        #print("after")
+        #if after:  
+            #print(after) 
+            multi_id = multiuser(multi_id,after)    #列出所有的輸入sender_id
+            print("multi_id")
+            print(multi_id)
+        
+            vid = multi_id.pop(0)    #取出第一個sender_id
+         
+            fb.execute("select * from fb_doctor_chatbot_fb_db where content='"+vid[0]+"'")  #取出第一個sender_id的內容
+            message = fb.fetchall()   #此輸入者所有的輸入     TODO 可能要看先前的句子是否存在
+            print(message)
+            mes_fir = list(message.pop(0))     #最先的輸入句子
+            mes_fir_id = mes_fir[0]     #最先的輸入句子的id
+            mes_fir_sen = mes_fir[3]    #最先的輸入句子的content
+        #if(True):    
+            sentence = mes_fir_sen
+            if os.path.exists("DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
+                with open("DM_"+name+".json", 'r') as f:
                      DM = json.load(f)
             slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
 
@@ -274,13 +306,17 @@ def main():
                 print (i, DM[i])
             DM_path = "DM_" + str(vid)+".json"
             print (os.path)
-            with open("DM.json", 'w') as fp:
+            name=""
+            for i in range(8,len(vid[0])-2):      #save json with sender's id 
+                name+=vid[0][i]
+            with open("DM_"+name+".json", 'w') as fp:
                 json.dump(DM, fp)
                 print("save succeed.")
             if DM["Request"] == "end":
                 sys.exit()
-            vid += 1
-            print("update vid = " +str(vid))
+            #vid += 1
+            #print("update vid = " +str(vid))
+            time.sleep(0.5)
         time.sleep(0.5) #wait 0.5 secone to listen to if a fb new data stored.
 
 
