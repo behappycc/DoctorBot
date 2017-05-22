@@ -34,7 +34,7 @@ class Doctor(generic.View):
             for message in entry['messaging']:
                 if 'message' in message:
                     pprint(message)
-                    savetodb(message,message['message']['text'])
+                    savetodb(message,message['message']['text'],message['sender'])
                     time.sleep(0.5)
                     post_facebook_message(message['sender']['id'])
         return HttpResponse()
@@ -48,24 +48,33 @@ class Doctor(generic.View):
 # def fb_database_init(requests):
     # fb_db.objects.all().delete()
     #savetodb(request, *args, **kwargs)
-def savetodb(message,text):
+def savetodb(message,text,sender_id):
    #message = json.loads(self.request.body.decode('utf-8'))
     #for entry in message['entry']:    
     #    for message in entry['messaging']:
     #        if 'message' != None:
-    message = json.dumps(message)
-    fb_db.objects.create(content = message,title=text)
+    #message = json.dumps(message)
+    sender_id = json.dumps(sender_id)
+    fb_db.objects.create(content = sender_id,title=text)
 
 
 
-# This function should be outside the BotsView class
 def post_facebook_message(fbid):
     #dst = DST_joint_model.DST_model()
     #dst.dst()
+    print("fbid")
+    print(fbid)
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
-    with open(json_dir + "DM.json") as json_file:
+    with open(json_dir + "DM_"+fbid+".json") as json_file:
         line = json.load(json_file)
-        line = json.dumps(line)
-    response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": line}})
+    text = ""
+    for k, v in line.items():
+        text = text + str(k) + " " + str(v) + '\n'
+    response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": text}})
+   #     print("line")
+   #     print(line) 
+   #     line = json.dumps(line['Sentence'],encoding="utf-8")
+   #     print(line)
+   # response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": line}})
     requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
 

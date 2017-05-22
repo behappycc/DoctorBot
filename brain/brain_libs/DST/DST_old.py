@@ -279,8 +279,9 @@ def main():
         #if(True):    
             sentence = mes_fir_sen
             name=""
-            for i in range(8,len(vvid[1])-2):      #save json with sender's id 
-                name+=vvid[1][i]
+            for i in range(8,len(vvid)-2):      #save json with sender's id 
+                name+=vvid[i]
+            print("name")
             print(name)
             if os.path.exists("DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
                 with open("DM_"+name+".json", 'r') as f:
