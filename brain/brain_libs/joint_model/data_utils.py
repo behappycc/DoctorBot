@@ -11,6 +11,7 @@ from __future__ import print_function
 import os
 import re
 import random
+import numpy as np
 
 from tensorflow.python.platform import gfile
 
@@ -327,3 +328,97 @@ def prepare_multi_task_data(data_dir, in_vocab_size, out_vocab_size):
           in_seq_dev_ids_path, out_seq_dev_ids_path, label_dev_ids_path,
           in_seq_test_ids_path, out_seq_test_ids_path, label_test_ids_path,
           in_vocab_path, out_vocab_path, label_path)
+
+
+def load_fasttext(filename, max_vocab=None, word_embedding_size=None):
+    vocab = []; embd = []
+    print('Initialize vocabulary')
+    with open(filename, mode = 'r') as infile:
+        for i, line in enumerate(infile):
+            if i >= (max_vocab + 1) and max_vocab:
+                print("Reach max_vocab size: {}".format(max_vocab))
+                break
+            if i != 0:
+                row = line.strip().split(' ')
+                vocab.append(row[0])
+                if word_embedding_size:
+                    embd.append(row[1:word_embedding_size + 1])
+                else:
+                    embd.append(row[1:])
+    print('Loaded Fasttext pre-trained model')
+    return vocab, np.asarray(embd, dtype=np.float32)
+
+
+def prepare_pretrained_data(data_dir, in_vocab_size, word_embedding_size,
+                            vocabulary_path, normalize_digits=False):
+    # Create token ids for the training data form pre-trained vocab
+    pretrained_path = 'word_vector'
+    train_path_ = pretrained_path + '/train/'
+    train_path = data_dir + '/train/'
+    dev_path = data_dir + '/valid/'
+    test_path = data_dir + '/test/'
+    if not gfile.Exists(train_path_):
+        os.makedirs(train_path_)
+    dev_path_ = pretrained_path + '/valid/'
+    if not gfile.Exists(dev_path_):
+        os.makedirs(dev_path_)
+    test_path_ = pretrained_path + '/test/'
+    if not gfile.Exists(test_path_):
+        os.makedirs(test_path_)
+    in_vocab_path = os.path.join(pretrained_path, "in_vocab_%d.txt" % in_vocab_size)
+    vocab_, embedding = load_fasttext('word_vector/wiki.zh_classical.vec', in_vocab_size,
+                              word_embedding_size)
+    if not gfile.Exists(in_vocab_path):
+        print("Creating vocabulary %s from data %s" % (in_vocab_path, train_path))
+        n_word = len(vocab_); n1_word = 0
+        # Concatenate original vocabulary
+        _, rev_vocab = initialize_vocabulary(vocabulary_path)
+        for i, w in enumerate(rev_vocab):
+            if i > len(START_VOCAB_dict['with_padding']) - 1:
+                if w not in vocab_:
+                    vocab_.append(w)
+                    n1_word += 1
+        vocab_list = START_VOCAB_dict['with_padding'] + vocab_
+        print(vocab_list) # Debug
+        print(len(vocab_list))
+        print(n_word)
+        print(n1_word)
+
+        temp = in_vocab_size + n1_word + len(START_VOCAB_dict['with_padding'])
+        if len(vocab_list) > temp:
+            vocab_list = vocab_list[:temp]
+
+        n_new = len(vocab_list) - n_word - len(START_VOCAB_dict['with_padding'])
+        print("Total vocabulary size: {}".format(len(vocab_list)))
+        print("Supplemental words: {}".format(n1_word))
+        print("Prefix vocabulary:{}".format(len(START_VOCAB_dict['with_padding'])))
+        with gfile.GFile(in_vocab_path, mode="w") as vocab_file:
+            for w in vocab_list:
+                vocab_file.write(w + "\n")
+    else:
+        _, rev_vocab = initialize_vocabulary(in_vocab_path)
+        print(len(rev_vocab))
+        n_new = len(rev_vocab) - len(embedding) - len(START_VOCAB_dict['with_padding'])
+
+    # Expand embedding
+    new_embedding = np.matlib.repmat(np.zeros(word_embedding_size),
+                                     len(START_VOCAB_dict['with_padding']), 1)
+    embedding = np.concatenate((embedding, new_embedding), axis=0)
+    new_embedding = np.matlib.repmat(np.zeros(word_embedding_size),
+                    n_new, 1)
+    embedding = np.concatenate((embedding, new_embedding), axis=0)
+
+    in_seq_train_ids_path = pretrained_path + ("/train/train.ids%d.seq.in" % in_vocab_size)
+    data_to_token_ids(train_path + "train.seq.in", in_seq_train_ids_path,
+                      in_vocab_path, tokenizer=naive_tokenizer)
+    # Create token ids for the development data.
+    in_seq_dev_ids_path = pretrained_path + ("/valid/valid.ids%d.seq.in" % in_vocab_size)
+    data_to_token_ids(dev_path + "valid.seq.in", in_seq_dev_ids_path, in_vocab_path,
+                      tokenizer=naive_tokenizer)
+    # Create token ids for the test data.
+    in_seq_test_ids_path = pretrained_path + ("/test/test.ids%d.seq.in" % in_vocab_size)
+    data_to_token_ids(test_path + "test.seq.in", in_seq_test_ids_path, in_vocab_path,
+                      tokenizer=naive_tokenizer)
+
+    return (in_seq_train_ids_path, in_seq_dev_ids_path,
+            in_seq_test_ids_path, in_vocab_path, embedding)

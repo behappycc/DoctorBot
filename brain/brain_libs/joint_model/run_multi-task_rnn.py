@@ -31,17 +31,17 @@ tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
 tf.app.flags.DEFINE_integer("batch_size", 16,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("word_embedding_size", 128, "Size of the word embedding")
+tf.app.flags.DEFINE_integer("word_embedding_size", 299, "Size of the word embedding") # 128
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("in_vocab_size", 10000, "max vocab Size.")
+tf.app.flags.DEFINE_integer("in_vocab_size", 10696, "max vocab Size.")  # 10696
 tf.app.flags.DEFINE_integer("out_vocab_size", 10000, "max tag vocab Size.")
 tf.app.flags.DEFINE_string("data_dir", "../joint_model/data/hospital", "Data directory")
 tf.app.flags.DEFINE_string("train_dir", "../joint_model/model_tmp", "Training directory.")
 tf.app.flags.DEFINE_integer("max_train_data_size", 0,
                             "Limit on the size of training data (0: no limit).")
-tf.app.flags.DEFINE_integer("steps_per_checkpoint", 300,
+tf.app.flags.DEFINE_integer("steps_per_checkpoint", 300,  # 300
                             "How many training steps to do per checkpoint.")
-tf.app.flags.DEFINE_integer("max_training_steps", 10000,
+tf.app.flags.DEFINE_integer("max_training_steps", 10000,  # 10000
                             "Max training steps.")
 tf.app.flags.DEFINE_integer("max_test_data_size", 0,
                             "Max size of test set.")
@@ -53,6 +53,8 @@ tf.app.flags.DEFINE_float("dropout_keep_prob", 0.5,
                           "dropout keep cell input and output prob.")
 tf.app.flags.DEFINE_boolean("bidirectional_rnn", True,
                             "Use birectional RNN")
+tf.app.flags.DEFINE_boolean("use_pretrained_word_emb", True,
+                            "Use pretrained word embedding")
 tf.app.flags.DEFINE_string("task", "joint", "Options: joint; intent; tagging")
 #tf.app.flags.DEFINE_string("task", None, "Options: joint; intent; tagging")
 FLAGS = tf.app.flags.FLAGS
@@ -170,7 +172,7 @@ def read_data(source_path, target_path, label_path, max_size=None):
           source, target, label = source_file.readline(), target_file.readline(), label_file.readline()
   return data_set # 3 outputs in each unit: source_ids, target_ids, label_ids
 
-def create_model(session, source_vocab_size, target_vocab_size, label_vocab_size):
+def create_model(session, source_vocab_size, target_vocab_size, label_vocab_size, embedding=None):
   """Create model and initialize or load parameters in session."""
   with tf.variable_scope("model", reuse=None):
     model_train = multi_task_model.MultiTaskModel(
@@ -198,6 +200,11 @@ def create_model(session, source_vocab_size, target_vocab_size, label_vocab_size
   else:
     print("Created model with fresh parameters.")
     session.run(tf.initialize_all_variables())
+    if FLAGS.use_pretrained_word_emb:
+        #embedding_placeholder = tf.placeholder(tf.float32, [FLAGS.in_vocab_size, FLAGS.word_embedding_size])
+        embedding_placeholder = tf.placeholder(tf.float32, [source_vocab_size, FLAGS.word_embedding_size])
+        embedding_init = model_train.embedding.assign(embedding_placeholder)
+        session.run(embedding_init, feed_dict={embedding_placeholder: embedding})
   return model_train, model_test
 
 def train():
@@ -222,6 +229,9 @@ def train():
    out_seq_dev, label_dev, in_seq_test, out_seq_test,
    label_test, vocab_path, tag_vocab_path, label_vocab_path) = data_utils.prepare_multi_task_data(
        FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.out_vocab_size)
+  if FLAGS.use_pretrained_word_emb:
+      (in_seq_train, in_seq_dev, in_seq_test, vocab_path, embedding) = data_utils.prepare_pretrained_data(
+          FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.word_embedding_size, vocab_path)
 
   result_dir = FLAGS.train_dir + '/test_results'
   if not os.path.isdir(result_dir):
@@ -239,7 +249,11 @@ def train():
     print("Max sequence length: %d." % _buckets[0][0])
     print("Creating %d layers of %d units." % (FLAGS.num_layers, FLAGS.size))
 
-    model, model_test = create_model(sess, len(vocab), len(tag_vocab), len(label_vocab))
+    if FLAGS.use_pretrained_word_emb:
+        print(len(vocab), embedding.shape)
+        model, model_test = create_model(sess, len(vocab), len(tag_vocab), len(label_vocab), embedding)
+    else:
+        model, model_test = create_model(sess, len(vocab), len(tag_vocab), len(label_vocab))
     print ("Creating model with source_vocab_size=%d, target_vocab_size=%d, and label_vocab_size=%d." % (len(vocab), len(tag_vocab), len(label_vocab)))
 
     # Read data into buckets and compute their sizes.

@@ -23,6 +23,7 @@ def generate_embedding_RNN_output(encoder_inputs,
                                   cell,
                                   num_encoder_symbols,
                                   word_embedding_size,
+                                  embedding,
                                   num_heads=1,
                                   dtype=dtypes.float32,
                                   scope=None,
@@ -39,8 +40,12 @@ def generate_embedding_RNN_output(encoder_inputs,
     if bidirectional_rnn:
       encoder_cell_fw = cell
       encoder_cell_bw = cell
-      embedding = variable_scope.get_variable("embedding", [num_encoder_symbols, word_embedding_size])
+      #embedding = variable_scope.get_variable("embedding", [num_encoder_symbols, word_embedding_size])
       encoder_embedded_inputs = list()
+      #n_symbol, embed_size = embedding.shape
+      #X = variable_scope.get_variable("X", [embed_size, embed_size])
+      #b = variable_scope.get_variable("b", [embed_size])
+      #encoder_embedded_inputs = [tf.multiply(embedding_ops.embedding_lookup(embedding, encoder_input), X) + b for encoder_input in encoder_inputs]
       encoder_embedded_inputs = [embedding_ops.embedding_lookup(embedding, encoder_input) for encoder_input in encoder_inputs]
       encoder_outputs, encoder_state_fw, encoder_state_bw = rnn.static_bidirectional_rnn(
           encoder_cell_fw, encoder_cell_bw, encoder_embedded_inputs, sequence_length=sequence_length, dtype=dtype)

@@ -19,6 +19,7 @@ import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 from tensorflow.python.framework import dtypes
+from tensorflow.python.ops import variable_scope
 
 
 import data_utils
@@ -48,8 +49,8 @@ class MultiTaskModel(object):
       single_cell = tf.contrib.rnn.BasicLSTMCell(size)
     cell = single_cell
     if num_layers > 1:
-      #cell = tf.contrib.rnn.MultiRNNCell([single_cell for _ in range(num_layers)])
-      cell = tf.contrib.rnn.MultiRNNCell([single_cell] * num_layers)
+      cell = tf.contrib.rnn.MultiRNNCell([single_cell for _ in range(num_layers)])
+      #cell = tf.contrib.rnn.MultiRNNCell([single_cell] * num_layers)
 
     if not forward_only and dropout_keep_prob < 1.0:
       cell = tf.contrib.rnn.DropoutWrapper(cell,
@@ -73,10 +74,15 @@ class MultiTaskModel(object):
                                                 name="weight{0}".format(i)))
     self.labels.append(tf.placeholder(tf.float32, shape=[None], name="label"))
 
+    # Initiate embedding
+    self.embedding = variable_scope.get_variable("embedding", [self.source_vocab_size, word_embedding_size])
+    #self.embedding = tf.Variable(tf.constant(0.0, shape= [self.source_vocab_size, word_embedding_size]), name="embedding")
+
     base_rnn_output = generate_encoder_output.generate_embedding_RNN_output(self.encoder_inputs,
                                                                             cell,
                                                                             self.source_vocab_size,
                                                                             word_embedding_size,
+                                                                            embedding=self.embedding,
                                                                             dtype=dtypes.float32,
                                                                             scope=None,
                                                                             sequence_length=self.sequence_length,

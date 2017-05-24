@@ -20,9 +20,9 @@ tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
 tf.app.flags.DEFINE_integer("batch_size", 16,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("word_embedding_size", 128, "Size of the word embedding")
+tf.app.flags.DEFINE_integer("word_embedding_size", 299, "Size of the word embedding")  # 128
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers in the model.")
-tf.app.flags.DEFINE_integer("in_vocab_size", 10000, "max vocab Size.")
+tf.app.flags.DEFINE_integer("in_vocab_size", 10696, "max vocab Size.")
 tf.app.flags.DEFINE_integer("out_vocab_size", 10000, "max tag vocab Size.")
 tf.app.flags.DEFINE_string("data_dir", DIR3+"data/hospital", "Data directory")
 tf.app.flags.DEFINE_string("train_dir", DIR3+"model_tmp", "Training directory.")
@@ -35,6 +35,8 @@ tf.app.flags.DEFINE_float("dropout_keep_prob", 0.5,
 tf.app.flags.DEFINE_boolean("bidirectional_rnn", True,
                             "Use birectional RNN")
 tf.app.flags.DEFINE_string("task", "joint", "Options: joint; intent; tagging")
+tf.app.flags.DEFINE_boolean("use_pretrained_word_emb", True,
+                            "Use pretrained word embedding")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -53,6 +55,11 @@ _buckets = [(FLAGS.max_sequence_length, FLAGS.max_sequence_length)]
 vocab_path = os.path.join(FLAGS.data_dir, "in_vocab_%d.txt" % FLAGS.in_vocab_size)
 tag_vocab_path = os.path.join(FLAGS.data_dir, "out_vocab_%d.txt" % FLAGS.out_vocab_size)
 label_vocab_path = os.path.join(FLAGS.data_dir, "label.txt")
+
+if FLAGS.use_pretrained_word_emb:
+    pretrained_path = 'word_vector'
+    vocab_path = os.path.join(pretrained_path, "in_vocab_%d.txt" % FLAGS.in_vocab_size)
+
 
 vocab, rev_vocab = data_utils.initialize_vocabulary(vocab_path)
 tag_vocab, rev_tag_vocab = data_utils.initialize_vocabulary(tag_vocab_path)
