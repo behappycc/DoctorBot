@@ -19,27 +19,27 @@ from tensorflow.contrib import rnn
 #from tensorflow.python.ops import rnn
 from tensorflow.python.ops import variable_scope
 
-#def generate_embedding_RNN_output(encoder_inputs,
-#                                  cell,
-#                                  num_encoder_symbols,
-#                                  word_embedding_size,
-#                                  embedding,
-#                                  num_heads=1,
-#                                  dtype=dtypes.float32,
-#                                  scope=None,
-#                                  initial_state_attention=False,
-#                                  sequence_length=None,
-#                                  bidirectional_rnn=False):
 def generate_embedding_RNN_output(encoder_inputs,
                                   cell,
                                   num_encoder_symbols,
                                   word_embedding_size,
+                                  embedding,
                                   num_heads=1,
                                   dtype=dtypes.float32,
                                   scope=None,
                                   initial_state_attention=False,
                                   sequence_length=None,
                                   bidirectional_rnn=False):
+#def generate_embedding_RNN_output(encoder_inputs,
+#                                  cell,
+#                                  num_encoder_symbols,
+#                                  word_embedding_size,
+#                                  num_heads=1,
+#                                  dtype=dtypes.float32,
+#                                  scope=None,
+#                                  initial_state_attention=False,
+#                                  sequence_length=None,
+#                                  bidirectional_rnn=False):
   """
   Generate RNN state outputs with word embeddings as inputs
       - Note that this example code does not include output label dependency modeling.
@@ -50,7 +50,7 @@ def generate_embedding_RNN_output(encoder_inputs,
     if bidirectional_rnn:
       encoder_cell_fw = cell
       encoder_cell_bw = cell
-      embedding = variable_scope.get_variable("embedding", [num_encoder_symbols, word_embedding_size])
+      #embedding = variable_scope.get_variable("embedding", [num_encoder_symbols, word_embedding_size])
       encoder_embedded_inputs = list()
       #n_symbol, embed_size = embedding.shape
       #X = variable_scope.get_variable("X", [embed_size, embed_size])

@@ -20,7 +20,7 @@ tf.app.flags.DEFINE_float("max_gradient_norm", 5.0,
 tf.app.flags.DEFINE_integer("batch_size", 16,
                             "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("size", 128, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("word_embedding_size", 299, "Size of the word embedding")
+tf.app.flags.DEFINE_integer("word_embedding_size", 299, "Size of the word embedding")  # 128
 tf.app.flags.DEFINE_integer("num_layers", 1, "Number of layers in the model.")
 tf.app.flags.DEFINE_integer("in_vocab_size", 10696, "max vocab Size.")
 tf.app.flags.DEFINE_integer("out_vocab_size", 10000, "max tag vocab Size.")
@@ -35,7 +35,7 @@ tf.app.flags.DEFINE_float("dropout_keep_prob", 0.5,
 tf.app.flags.DEFINE_boolean("bidirectional_rnn", True,
                             "Use birectional RNN")
 tf.app.flags.DEFINE_string("task", "joint", "Options: joint; intent; tagging")
-tf.app.flags.DEFINE_boolean("use_pretrained_word_emb", False,
+tf.app.flags.DEFINE_boolean("use_pretrained_word_emb", True,
                             "Use pretrained word embedding")
 
 FLAGS = tf.app.flags.FLAGS

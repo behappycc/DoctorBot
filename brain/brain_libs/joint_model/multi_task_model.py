@@ -75,26 +75,26 @@ class MultiTaskModel(object):
     self.labels.append(tf.placeholder(tf.float32, shape=[None], name="label"))
 
     # Initiate embedding
-    #self.embedding = variable_scope.get_variable("embedding", [self.source_vocab_size, word_embedding_size])
-    ##self.embedding = tf.Variable(tf.constant(0.0, shape= [self.source_vocab_size, word_embedding_size]), name="embedding")
+    self.embedding = variable_scope.get_variable("embedding", [self.source_vocab_size, word_embedding_size])
+    #self.embedding = tf.Variable(tf.constant(0.0, shape= [self.source_vocab_size, word_embedding_size]), name="embedding")
 
-    #base_rnn_output = generate_encoder_output.generate_embedding_RNN_output(self.encoder_inputs,
-    #                                                                        cell,
-    #                                                                        self.source_vocab_size,
-    #                                                                        word_embedding_size,
-    #                                                                        embedding=self.embedding,
-    #                                                                        dtype=dtypes.float32,
-    #                                                                        scope=None,
-    #                                                                        sequence_length=self.sequence_length,
-    #                                                                        bidirectional_rnn=bidirectional_rnn)
     base_rnn_output = generate_encoder_output.generate_embedding_RNN_output(self.encoder_inputs,
                                                                             cell,
                                                                             self.source_vocab_size,
                                                                             word_embedding_size,
+                                                                            embedding=self.embedding,
                                                                             dtype=dtypes.float32,
                                                                             scope=None,
                                                                             sequence_length=self.sequence_length,
                                                                             bidirectional_rnn=bidirectional_rnn)
+    #base_rnn_output = generate_encoder_output.generate_embedding_RNN_output(self.encoder_inputs,
+    #                                                                        cell,
+    #                                                                        self.source_vocab_size,
+    #                                                                        word_embedding_size,
+    #                                                                        dtype=dtypes.float32,
+    #                                                                        scope=None,
+    #                                                                        sequence_length=self.sequence_length,
+    #                                                                        bidirectional_rnn=bidirectional_rnn)
     encoder_outputs, encoder_state, attention_states = base_rnn_output
 
     if task['tagging'] == 1:
