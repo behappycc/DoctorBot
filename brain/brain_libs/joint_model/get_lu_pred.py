@@ -57,8 +57,8 @@ tag_vocab_path = os.path.join(FLAGS.data_dir, "out_vocab_%d.txt" % FLAGS.out_voc
 label_vocab_path = os.path.join(FLAGS.data_dir, "label.txt")
 
 if FLAGS.use_pretrained_word_emb:
-    (in_seq_train, in_seq_dev, in_seq_test, vocab_path, embedding) = data_utils.prepare_pretrained_data(
-        FLAGS.data_dir, FLAGS.in_vocab_size, FLAGS.word_embedding_size, vocab_path)
+    pretrained_path = 'word_vector'
+    vocab_path = os.path.join(pretrained_path, "in_vocab_%d.txt" % FLAGS.in_vocab_size)
 
 
 vocab, rev_vocab = data_utils.initialize_vocabulary(vocab_path)

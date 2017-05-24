@@ -30,16 +30,6 @@ def generate_embedding_RNN_output(encoder_inputs,
                                   initial_state_attention=False,
                                   sequence_length=None,
                                   bidirectional_rnn=False):
-#def generate_embedding_RNN_output(encoder_inputs,
-#                                  cell,
-#                                  num_encoder_symbols,
-#                                  word_embedding_size,
-#                                  num_heads=1,
-#                                  dtype=dtypes.float32,
-#                                  scope=None,
-#                                  initial_state_attention=False,
-#                                  sequence_length=None,
-#                                  bidirectional_rnn=False):
   """
   Generate RNN state outputs with word embeddings as inputs
       - Note that this example code does not include output label dependency modeling.

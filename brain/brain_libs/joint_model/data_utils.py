@@ -352,11 +352,11 @@ def load_fasttext(filename, max_vocab=None, word_embedding_size=None):
 def prepare_pretrained_data(data_dir, in_vocab_size, word_embedding_size,
                             vocabulary_path, normalize_digits=False):
     # Create token ids for the training data form pre-trained vocab
+    pretrained_path = 'word_vector'
+    train_path_ = pretrained_path + '/train/'
     train_path = data_dir + '/train/'
     dev_path = data_dir + '/valid/'
     test_path = data_dir + '/test/'
-    pretrained_path = 'word_vector'
-    train_path_ = pretrained_path + '/train/'
     if not gfile.Exists(train_path_):
         os.makedirs(train_path_)
     dev_path_ = pretrained_path + '/valid/'

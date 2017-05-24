@@ -87,14 +87,6 @@ class MultiTaskModel(object):
                                                                             scope=None,
                                                                             sequence_length=self.sequence_length,
                                                                             bidirectional_rnn=bidirectional_rnn)
-    #base_rnn_output = generate_encoder_output.generate_embedding_RNN_output(self.encoder_inputs,
-    #                                                                        cell,
-    #                                                                        self.source_vocab_size,
-    #                                                                        word_embedding_size,
-    #                                                                        dtype=dtypes.float32,
-    #                                                                        scope=None,
-    #                                                                        sequence_length=self.sequence_length,
-    #                                                                        bidirectional_rnn=bidirectional_rnn)
     encoder_outputs, encoder_state, attention_states = base_rnn_output
 
     if task['tagging'] == 1:
