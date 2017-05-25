@@ -57,7 +57,7 @@ tag_vocab_path = os.path.join(FLAGS.data_dir, "out_vocab_%d.txt" % FLAGS.out_voc
 label_vocab_path = os.path.join(FLAGS.data_dir, "label.txt")
 
 if FLAGS.use_pretrained_word_emb:
-    pretrained_path = 'word_vector'
+    pretrained_path = DIR3+"word_vector"
     vocab_path = os.path.join(pretrained_path, "in_vocab_%d.txt" % FLAGS.in_vocab_size)
 
 
