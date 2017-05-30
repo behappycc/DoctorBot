@@ -296,5 +296,8 @@ class User(object):
             response, reward = self.response_dm_confirm()
         elif self.observation["request"] == "end":
             response, reward = self.response_dm_end()
-        return response, reward
+        if self.observation["request"] == "end":
+            return response, reward, True
+        else:
+            return response, reward, False 
                 # respond DM's confirm, inform, or request
