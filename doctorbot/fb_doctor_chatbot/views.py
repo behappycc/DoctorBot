@@ -40,28 +40,27 @@ class Doctor(generic.View):
         return HttpResponse()
 
     def get(self, request):#, *args, **kwargs):
+        print("=======")
+        print(request.build_absolute_uri() )
+        print("print")
+        print(self.request.GET['*'])
         if self.request.GET['hub.verify_token'] == verify_token:
+            print("print") 
+            print(self.request.GET['*'])
             return HttpResponse(self.request.GET['hub.challenge'])
         else:
             return HttpResponse('Error,invalid token')
 
-# def fb_database_init(requests):
-    # fb_db.objects.all().delete()
-    #savetodb(request, *args, **kwargs)
 def savetodb(message,text,sender_id):
-   #message = json.loads(self.request.body.decode('utf-8'))
-    #for entry in message['entry']:    
-    #    for message in entry['messaging']:
-    #        if 'message' != None:
-    #message = json.dumps(message)
     sender_id = json.dumps(sender_id)
     fb_db.objects.create(content = sender_id,title=text)
+    fbid=""
+    for i in range(8,len(sender_id)-2):
+        fbid += str(sender_id[i])
 
 
 
 def post_facebook_message(fbid):
-    #dst = DST_joint_model.DST_model()
-    #dst.dst()
     print("fbid")
     print(fbid)
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
@@ -71,10 +70,5 @@ def post_facebook_message(fbid):
     for k, v in line.items():
         text = text + str(k) + " " + str(v) + '\n'
     response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": text}})
-   #     print("line")
-   #     print(line) 
-   #     line = json.dumps(line['Sentence'],encoding="utf-8")
-   #     print(line)
-   # response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": line}})
     requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
 

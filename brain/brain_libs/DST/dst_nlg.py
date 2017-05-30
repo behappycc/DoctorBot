@@ -288,18 +288,76 @@ def main():
     #         doctor.append(line)
     lu_model = get_lu_pred.LuModel()
     
-    
+    fb = conn.cursor()
     fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
     vid = fb.fetchone()[0]    #fb id number ex:235
-    print("initial vid= "+str(vid))
+    print("initial vid= ")
+    print(vid)
     print("waiting for the fb input...")
-    #print (os.getcwd())
+    def multiuser(buffer2,after):
+        buffer2=[]
+        fb.execute('select content from fb_doctor_chatbot_fb_db')
+        buffer2.extend(after)
+        buffer2=list(set(buffer2))
+        return buffer2
+    fb.execute('select * from fb_doctor_chatbot_fb_db')
+    init = fb.fetchall()   #
+
     while True:
-        fb.execute('select * from fb_doctor_chatbot_fb_db where ID=(select MAX(ID) from fb_doctor_chatbot_fb_db) ')
-        message = fb.fetchone()
-        print("input_id ="+str(message[0]))
-        if(message[0] != vid):    
-            sentence = message[3]
+        fb = conn.cursor()
+        fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
+        new_id = fb.fetchone()[0]
+        multi_id=[]     #ids' list
+        if(new_id !=vid or len(multi_id) != 0): #有新輸入的時候或還有使用者輸入沒有完成的時候
+            print("==============")
+            fb.execute('select * from fb_doctor_chatbot_fb_db ')
+            after = fb.fetchall()
+            after = list(set(after)-set(init))   #只要這次執行DST.py之後的FB輸入
+            print("after")
+            print(after)
+            fb.execute('select max(id) from fb_doctor_chatbot_fb_db ')
+            vid = fb.fetchone()[0]
+            print("vid")
+            print(vid)
+            after_id = []
+            for i in range(0,len(after)):
+                after_id.append(list(after[i])[1])
+            print("after_id")
+            print(after_id)
+        #if after:  
+          #  multi_id = multiuser(multi_id,after_id)    #列出所有的輸入sender_id
+            multi_id = list(set(after_id))
+            print("multi_id")
+            print(multi_id)
+            vvid = multi_id.pop(0)    #取出第一個sender_id
+            #vid = vvid[0]    
+            print("vvid")
+            print(vvid)
+            fb.execute("select * from fb_doctor_chatbot_fb_db where content='"+str(vvid)+"'")  #取出第一個sender_id的內容
+            message = fb.fetchall()   #此輸入者所有的輸入     TODO 可能要看先前的句子是否存在
+            message = list(set(message)-set(init))   #只要這次執行DST.py之後的FB輸入
+            print("this sender's message")
+            print(message)
+            mes_fir = list(message.pop(0))     #最先的輸入句子
+            print("first message")
+            print(mes_fir)
+            mes_fir_id = mes_fir[0]     #最先的輸入句子的id
+            mes_fir_sen = mes_fir[3]    #最先的輸入句子的content
+        #if(True):    
+            sentence = mes_fir_sen
+            name=""
+            for i in range(8,len(vvid)-2):      #save json with sender's id 
+                name+=vvid[i]
+            print("name")
+            print(name)
+            if os.path.exists("DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
+                with open("DM_"+name+".json", 'r') as f:
+                    DM = json.load(f)
+            else:
+                with open("DM_"+name+".json",'w') as f:
+                    DM = initialize() 
+
+            slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
             if sentence == '謝謝':
                 DM = initialize()
                 DM['Sentence'] = "謝謝惠顧"
@@ -350,15 +408,23 @@ def main():
             print ("[ DM ]")
             for i in DM:
                 print (i, DM[i])
-            #DM_path = "DM_" + str(vid)+".json"
+            DM_path = "DM_" + str(vid)+".json"
             #print (os.path)
-            with open("DM.json", 'w', os.O_NONBLOCK) as fp:
+            with open("DM_"+name+".json", 'w',os.O_NONBLOCK) as fp:
                 json.dump(DM_nlg, fp)
                 print("save succeed.")
             #if DM["Request"] == "end":
             #    sys.exit()
-            vid += 1
-            print("update vid = " +str(vid))
+            #vid += 1
+            #print("update vid = " +str(vid))
+            print("vid")
+            print(vid)
+            print("new_id")
+            print(new_id)
+            print("multi_id")
+            print(multi_id)
+            #break
+            time.sleep(0.5)
         time.sleep(0.5) #wait 0.5 secone to listen to if a fb new data stored.
 
 
