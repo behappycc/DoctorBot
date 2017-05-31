@@ -11,6 +11,7 @@ sys.path.pop()
 sys.path.append('../data_resource')
 import CrawlerTimeTable
 sys.path.pop()
+sys.path.append('/user_data')
 import time
 #import djanigo
 #sys.path.append('../../../doctorbot')
@@ -35,10 +36,6 @@ collection_disease = client[DB_NAME]["disease"]
 def initialize():
     state = {"intent": None, "disease": None, "division": None, "doctor": None, "time": None}
     DM = {"Request": None, "Intent": None, "Slot": None, "State": state}
-    #if os.path.exists("DM.json"):
-        #os.remove("DM.json")
-    #with open("DM.json", 'w') as f:
-    #    json.dump(DM,f)
     return DM
 #################################################################################################
 #                   search for division or doctor from database                                 #
@@ -216,16 +213,11 @@ def main():
     with open('../data_resource/division_dict.txt', 'r', encoding='utf-8') as r_division:
         for line in r_division:
             division.append(line.replace('\n',''))
-    # with open('../data_resource/doctor_dict.txt','r') as r_doctor:
-    #     for line in r_doctor:
-    #         doctor.append(line)
     lu_model = get_lu_pred.LuModel()
     
     fb = conn.cursor()
     fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
     vid = fb.fetchone()[0]    #fb id number ex:235
-    print("initial vid= ")
-    print(vid)
     print("waiting for the fb input...")
     def multiuser(buffer2,after):
         buffer2=[]
@@ -257,8 +249,6 @@ def main():
                 after_id.append(list(after[i])[1])
             print("after_id")
             print(after_id)
-        #if after:  
-          #  multi_id = multiuser(multi_id,after_id)    #列出所有的輸入sender_id
             multi_id = list(set(after_id))
             print("multi_id")
             print(multi_id)
@@ -287,8 +277,8 @@ def main():
                 with open("user_data/DM_"+name+".json", 'r') as f:
                     DM = json.load(f)
             else:
-                with open("user_data/DM_"+name+".json",'w') as f:
-                    DM = initialize() 
+                open("user_data/DM_"+name+".json",'w')
+                DM = initialize() 
 
             slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
             if sentence == '謝謝':
