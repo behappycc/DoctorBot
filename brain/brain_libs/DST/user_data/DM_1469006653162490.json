@@ -1,0 +1,1 @@
+{"State": {"disease": null, "intent": null, "division": null, "time": null, "doctor": null}, "Sentence": "\u8acb\u544a\u8a34\u6211 \u75be\u75c5\u540d\u7a31 ,\u8b1d\u8b1d!", "Request": "info", "Slot": ["disease"], "Intent": 2}

@@ -1,0 +1,1 @@
+{"Sentence": "\u8acb\u544a\u8a34\u6211 \u75be\u75c5\u540d\u7a31 ,\u8b1d\u8b1d!", "Slot": ["disease"], "Request": "info", "Intent": 2, "State": {"doctor": null, "intent": null, "disease": null, "division": null, "time": null}}
