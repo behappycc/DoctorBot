@@ -261,7 +261,7 @@ def main():
             message = list(set(message)-set(init))   #只要這次執行DST.py之後的FB輸入
             print("this sender's message")
             print(message)
-            mes_fir = list(message.pop(0))     #最先的輸入句子
+            mes_fir = list(message.pop())     #最先的輸入句子
             print("first message")
             print(mes_fir)
             mes_fir_id = mes_fir[0]     #最先的輸入句子的id
@@ -274,8 +274,8 @@ def main():
             print("name")
             print(name)
             if os.path.exists("DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
-                with open("user_data/DM_"+name+".json", 'r') as f:
-                    DM = json.load(f)
+                #with open("user_data/DM_"+name+".json", 'r') as f:
+                DM = json.load(f)
             else:
                 open("user_data/DM_"+name+".json",'w')
                 DM = initialize() 
