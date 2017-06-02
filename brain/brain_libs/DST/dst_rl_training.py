@@ -178,7 +178,7 @@ def trainNetwork(s, readout, h_fc1, sess):
     #x_t = cv2.cvtColor(cv2.resize(x_t, (80, 80)), cv2.COLOR_BGR2GRAY)
     #ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
 
-    s_t,s_t_verbose = state_update(observation=x_t, original_state=None,original_state_verbose=None action=None)
+    s_t,s_t_verbose = state_update(observation=x_t, original_state=None,original_state_verbose=None,action=None)
 
     # saving and loading networks
     saver = tf.train.Saver()
