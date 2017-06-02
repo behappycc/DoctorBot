@@ -6,7 +6,7 @@
 import tensorflow as tf
 import cv2
 import sys
-ys.path.append("game/")
+sys.path.append("game/")
 import wrapped_flappy_bird as game
 import random
 import numpy as np
@@ -65,7 +65,7 @@ def select(slot,state,DM):
 def confirm(slot,state,DM):
     DM['request'] = 'confirm'
     DM['slot'] = slot
-    
+
 def state_initial():
     state = np.zeros(STATES)
     return state
@@ -90,7 +90,7 @@ def state_update(observation, original_state=None, original_state_verbose = None
         if value!='':
             state_verbose[key] = value
             state[state_dict[key]+4] = 1
-    if action['request']=='confirm': 
+    if action['request']=='confirm':
         state[action['slot']+9] = 1
     temp = original_state_verbose
     DM['state'] = temp.pop('intent')
@@ -174,10 +174,10 @@ def trainNetwork(s, readout, h_fc1, sess):
     # get the first state by doing nothing and preprocess the image to 80x80x4
     do_nothing = None
     x_t, r_0, terminal = sim_user.step(do_nothing)
-    
+
     #x_t = cv2.cvtColor(cv2.resize(x_t, (80, 80)), cv2.COLOR_BGR2GRAY)
     #ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
-    
+
     s_t,s_t_verbose = state_update(observation=x_t, original_state=None,original_state_verbose=None action=None)
 
     # saving and loading networks
@@ -206,10 +206,10 @@ def trainNetwork(s, readout, h_fc1, sess):
             action_index = np.argmax(readout_t)
             a_t[action_index] = 1
         action_dict[action_index]()
-        
+
         #else:
         #    a_t[0] = 1 # do nothing
-        
+
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
@@ -219,10 +219,10 @@ def trainNetwork(s, readout, h_fc1, sess):
         #x_t1 = cv2.cvtColor(cv2.resize(x_t1_colored, (80, 80)), cv2.COLOR_BGR2GRAY)
         #ret, x_t1 = cv2.threshold(x_t1, 1, 255, cv2.THRESH_BINARY)
 
-                
+
         #LU model
         #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
-        
+
         s_t1,s_t_verbose,DM = state_update(user_word,s_t,s_t_verbose,DM)
 
         # store the transition in D
@@ -261,7 +261,7 @@ def trainNetwork(s, readout, h_fc1, sess):
         # update the old values
         s_t = s_t1
         t += 1
-        
+
         if terminal == True:
             sim_user.initial()
             s_t = state_initial()
