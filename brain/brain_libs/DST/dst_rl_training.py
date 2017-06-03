@@ -1,25 +1,27 @@
-# ICB Workplace
-```python
 #!/usr/bin/env python
-
-
 import tensorflow as tf
-import cv2
 import sys
-ys.path.append("game/")
-import wrapped_flappy_bird as game
 import random
 import numpy as np
-sys.path.append('../brain/brain_libs/joint_model')
-import get_lu_pred as nlu
-from collections import deque
+
 #############################
-sys.path.append('../brain/brain_libs/user_simulator')
+
+sys.path.append('../joint_model')
+import get_lu_pred
+from collections import deque
+sys.path.append('../user_simulator')
 from CompleteUser import *
+sys.path.append('../LU_model')
+import db
+import dst
 
+DB_IP = "104.199.131.158"  # doctorbot GCP ip
+DB_PORT = 27017  # default MongoDB port
+DB_NAME = "doctorbot"  # use the collection
 
-#GAME = 'bird' # the name of the game being played for log files
-ACTIONS = 13 # number of valid actions
+############ SETTINGS #############
+
+ACTIONS = 12 # number of valid actions
 GAMMA = 0.99 # decay rate of past observations
 OBSERVE = 100000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
@@ -27,24 +29,61 @@ FINAL_EPSILON = 0.0001 # final value of epsilon
 INITIAL_EPSILON = 0.0001 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
-#FRAME_PER_ACTION = 1
 STATES = 15
+n_hidden_1 = 256  # 1st layer number of features
+n_hidden_2 = 256  # 2nd layer number of features
+n_input = STATES  # MNIST data input (img shape: 28*28)
+n_classes = ACTIONS # MNIST total classes (0-9 digits)
+
+def end(DM):
+    DM['request'] = 'end'
+def inform(slot, DM):
+    DM['request'] = 'inform'
+    DM['slot'] = [slot]
+
+def select(slot, DM):
+    DM['request'] = 'choose'
+    if slot == "division":  
+        DM['slot'] = ["division"]
+        if DM["state"]["disease"] != []:
+            DM["state"]["division"] = dst.get_dbinfo(DM["state"]["disease"],"department",0)
+        else:
+           inform("disease",DM)
+    elif slot == "doctor":
+        DM['slot'] = ["doctor"]
+        if DM["state"]["division"] != []:
+            DM["state"]["doctor"] = dst.get_dbinfo(DM["state"]["division"],"doctor",1)
+        elif DM["state"]["disease"] != []:
+            DM["state"]["doctor"] = dst.get_dbinfo(DM["state"]["disease"],"doctor",0)
+        else:
+            inform("division",DM)
+    elif slot == "time":
+        DM["slot"] = ["time"]
+        if DM["state"]["doctor"] != []:
+            DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
+        else:
+           inform("doctor", DM)
 
 
-#request_to_user = None
-#slot_to_user = None
+def confirm(slot, DM):
+    DM['request'] = 'confirm'
+    DM['slot'] = [slot]
+#  state = [] #5intent 5state 5confirm
 
-def DM_initial():
-    DM = {
-        "request":None,
-        "intent":None,
-        "slot": None,
-        "state":None
-    }
-    return DM
-state = [] #5intent 5state 5confirm
+action_dict = {0:end,
+        1:lambda s:inform("disease",s),     # inform
+        2:lambda s:inform("division",s),
+        3:lambda s:inform("doctor",s),
+        4:lambda s:inform('time',s),
+        5:lambda s:select("division",s),    # choose
+        6:lambda s:select("doctor",s),
+        7:lambda s:select("time",s),
+        8:lambda s:confirm("disease",s),    # confirm
+        9:lambda s:confirm("division",s),
+        10:lambda s:confirm("doctor",s),
+        11:lambda s:confirm("time",s)
+        }
 
-action_dict = {0:end,1:lambda s:inform("disease",s),2:lambda s:inform("division",s),3:lambda s:inform("doctor",s),4:lambda s:inform('time',s),5:lambda s:select("disease",s),6:lambda s:select("division",s),7:lambda s:select("doctor",s),8:lambda s:select("time",s),9:lambda s:confirm("disease",s),10:lambda s:confirm("division",s),11:lambda s:confirm("doctor",s),12:lambda s:confirm("time",s)}
 slot_dict = {
     "intent":1,
     "disease":2,
@@ -54,48 +93,55 @@ slot_dict = {
 }
 
 
-def end(DM):
-    DM['request'] = 'end'
-def inform(slot,state,DM):
-    DM['request'] = 'inform'
-    DM['slot'] = slot
-def select(slot,state,DM):
-    DM['request'] = 'select'
-    DM['slot'] = slot
-def confirm(slot,state,DM):
-    DM['request'] = 'confirm'
-    DM['slot'] = slot
+
     
 def state_initial():
-    state = np.zeros(STATES)
-    return state
+    return np.zeros(STATES)
+
 def state_verbose_initial():
-    state_verbose = {
-        "intent":None,
-        "disease":None,
-        "division":None,
-        "doctor":None,
-        "time":None
-    }
-    return state_verbose
-def state_update(observation, original_state=None, original_state_verbose = None, action=None){
-    x_t1 = nlu.semantic_frame(self, observation)
+    return {"intent":[], "disease":[], "division":[], "doctor":[], "time":[]}
+
+def state_update(observation, semantic_frame, old_state=None, old_state_verbose = None):
+    ##  arguments:
+    ##      observation is user's response
+    ##      semantic_frame is a slot-detecting and intent-detecting function
+    ##      old_state 由三部份組成的binary list：照順序是intent(5)是哪個，state(5)有沒有，confirm(5)過了沒
+    ##      old_state_verbose 
+    ##  return:
+    ##      state: updated binary list  
+    ##      state_verbose: updated dictionary
+
+    x_t1 = semantic_frame(observation)
     if(original_state==None):
-        original_state=state_initial()
-        original_state_verbose = original_state_initial()
+        state = state_initial()
+        state_verbose = original_state_initial()
+    else:
+        state = old_state.copy()
+        state_verbose = old_state_verbose
     if x_t1['intent']!= '':
-        state_verbose['intent'] = x_t1['intent']
+        state_verbose['intent'] = [x_t1['intent']]
         state[x_t1['intent']-1] = 1 ######must bugs here zzz
     for key,value in x_t1['slot'].items(): #state
         if value!='':
-            state_verbose[key] = value
-            state[state_dict[key]+4] = 1
-    if action['request']=='confirm': 
-        state[action['slot']+9] = 1
-    temp = original_state_verbose
-    DM['state'] = temp.pop('intent')
-    return original_state,original_state_verbose,DM
-}
+            state_verbose[key] = [value]
+            state[slot_dict[key]+4] = 1
+    return state, state_verbose
+
+def action_affect_state(action_index, state):
+    if action_index >= 8 and action_index <= 11:
+        state[action_index + 2] = 1 
+
+def generate_DM_frame(state_verbose, action):
+    assert state_verbose != None
+    DM_frame = {}
+    DM_frame["state"] = state_verbose
+    # the intent in state is a list, while intent in intent is an int
+    if state_verbose["intent"] != []:
+        DM_frame["intent"] = state_verbose["intent"][0]
+    else:
+        DM_frame["intent"] = None
+    action(DM_frame) # deal with "request" and "slot"
+    return DM_frame
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev = 0.01)
@@ -112,44 +158,26 @@ def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = "SAME")
 
 def createNetwork():
+    s = tf.placeholder("float", [None, n_input])
+    weights = {
+        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
+        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
+    }
+    biases = {
+        'b1': tf.Variable(tf.random_normal([n_hidden_1])),
+        'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+        'out': tf.Variable(tf.random_normal([n_classes]))
+    }
     # network weights
-    W_conv1 = weight_variable([8, 8, 4, 32])
-    b_conv1 = bias_variable([32])
-
-    W_conv2 = weight_variable([4, 4, 32, 64])
-    b_conv2 = bias_variable([64])
-
-    W_conv3 = weight_variable([3, 3, 64, 64])
-    b_conv3 = bias_variable([64])
-
-    W_fc1 = weight_variable([1600, 512])
-    b_fc1 = bias_variable([512])
-
-    W_fc2 = weight_variable([512, ACTIONS])
-    b_fc2 = bias_variable([ACTIONS])
-
-    # input layer
-    s = tf.placeholder("float", [None, 80, 80, 4])
-
-    # hidden layers
-    h_conv1 = tf.nn.relu(conv2d(s, W_conv1, 4) + b_conv1)
-    h_pool1 = max_pool_2x2(h_conv1)
-
-    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2, 2) + b_conv2)
-    #h_pool2 = max_pool_2x2(h_conv2)
-
-    h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3, 1) + b_conv3)
-    #h_pool3 = max_pool_2x2(h_conv3)
-
-    #h_pool3_flat = tf.reshape(h_pool3, [-1, 256])
-    h_conv3_flat = tf.reshape(h_conv3, [-1, 1600])
-
-    h_fc1 = tf.nn.relu(tf.matmul(h_conv3_flat, W_fc1) + b_fc1)
-
-    # readout layer
-    readout = tf.matmul(h_fc1, W_fc2) + b_fc2
-
-    return s, readout, h_fc1
+    layer_1 = tf.add(tf.matmul(s, weights['h1']), biases['b1'])
+    layer_1 = tf.nn.relu(layer_1)
+    # Hidden layer with RELU activation
+    layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+    layer_2 = tf.nn.relu(layer_2)# h1_fc
+    # Output layer with linear activation
+    readout = tf.matmul(layer_2, weights['out']) + biases['out']
+    return s, readout, layer_2
 
 def trainNetwork(s, readout, h_fc1, sess):
     # define the cost function
@@ -160,10 +188,12 @@ def trainNetwork(s, readout, h_fc1, sess):
     cost = tf.reduce_mean(tf.square(y - readout_action))
     train_step = tf.train.AdamOptimizer(1e-6).minimize(cost)
 
+
     # open up a game state to communicate with emulator
     # game_state = game.GameState()
     sim_user = CompleteUser()
-    DM = DM_initial()
+    lu_model = get_lu_pred.LuModel()
+    sematic_frame_DM = DM_initial()
     # store the previous observations in replay memory
     D = deque()
 
@@ -174,11 +204,7 @@ def trainNetwork(s, readout, h_fc1, sess):
     # get the first state by doing nothing and preprocess the image to 80x80x4
     do_nothing = None
     x_t, r_0, terminal = sim_user.step(do_nothing)
-    
-    #x_t = cv2.cvtColor(cv2.resize(x_t, (80, 80)), cv2.COLOR_BGR2GRAY)
-    #ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
-    
-    s_t,s_t_verbose = state_update(observation=x_t, original_state=None,original_state_verbose=None action=None)
+    s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, original_state=None, original_state_verbose=None)
 
     # saving and loading networks
     saver = tf.train.Saver()
@@ -205,17 +231,19 @@ def trainNetwork(s, readout, h_fc1, sess):
         else:
             action_index = np.argmax(readout_t)
             a_t[action_index] = 1
-        action_dict[action_index]()
-        
-        #else:
-        #    a_t[0] = 1 # do nothing
+
+        action_affect_state(action_index, state)
+
+        # some function using action_index and state_verbose to generate
+        # semantic frame for the user simulator or the NLG module
+        DM_frame = generate_DM_frame(s_t_verbose, action_dict[action_index])
         
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
 
         # run the selected action and observe next state and reward
-        user_word, r_t, terminal = sim_user.step(DM)
+        user_word, r_t, terminal = sim_user.step(DM_frame)
         #x_t1 = cv2.cvtColor(cv2.resize(x_t1_colored, (80, 80)), cv2.COLOR_BGR2GRAY)
         #ret, x_t1 = cv2.threshold(x_t1, 1, 255, cv2.THRESH_BINARY)
 
@@ -223,7 +251,7 @@ def trainNetwork(s, readout, h_fc1, sess):
         #LU model
         #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
         
-        s_t1,s_t_verbose,DM = state_update(user_word,s_t,s_t_verbose,DM)
+        s_t1, s_t_verbose = state_update(user_word, lu_model.semantic_frame, s_t,s_t_verbose, DM)
 
         # store the transition in D
         D.append((s_t, a_t, r_t, s_t1, terminal))
@@ -299,5 +327,4 @@ def main():
     playGame()
 
 if __name__ == "__main__":
-main()
-```
+    main()

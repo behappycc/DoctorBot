@@ -6,8 +6,8 @@ from random import uniform
 def extract_time(s):
     return s.replace("."," ").replace("("," ").replace(")","").split()
 
-# if you use python 3.6 , this function can be 
-# replaced with random.choices() 
+# if you use python 3.6 , this function can be
+# replaced with random.choices()
 def weighted_choice(option):
     option = list(option)
     total  = sum(w for c, w in option)
@@ -28,7 +28,7 @@ class User(object):
     reward_repeat = -3
     reward_success = 20
     reward_fail = -100
-    SUCCESS_CHECK = [lambda x: x["disease"] != None, 
+    SUCCESS_CHECK = [lambda x: x["disease"] != None,
                      lambda x: x["disease"] != None,
                      lambda x: x["disease"] != None or x["division"] != None,
                      lambda x: x["doctor"]  != None,
@@ -56,11 +56,11 @@ class User(object):
         self.state = {"disease": False, "division": False, "doctor": False, "time": False}
         self.observation = None
         self.reward_accumalation = 0
-        if self.slot["time"] != None: 
+        if self.slot["time"] != None:
             self.time = extract_time(self.slot["time"])
     def error_date(self):
-        wrong_date = str(int(self.time[2]) + choice([-3,-2,-1,1,2,3])) 
-        return self.time[0] + "." + self.time[1] + "." + wrong_date 
+        wrong_date = str(int(self.time[2]) + choice([-3,-2,-1,1,2,3]))
+        return self.time[0] + "." + self.time[1] + "." + wrong_date
 
     # for NLG
     def nlg_intent_1(self,response_slot):
@@ -118,7 +118,7 @@ class User(object):
         "time":[time+"的",time,"我"+time+"可以","我"+time+"有空"
         ],
         "doctor":["我要掛"+doctor]
-        }        
+        }
         return choice(pattern_dic[response_slot])
 
     def check_if_something_wrong(self):
@@ -127,7 +127,7 @@ class User(object):
         reward = User.reward_per_response
         response = ""
         for key in self.slot:
-            if (self.state[key] == True 
+            if (self.state[key] == True
             and self.observation['state'][key] != None):
                 if self.slot[key] != self.observation['state'][key]:
                     if key == "disease" or key == "division":
@@ -157,7 +157,7 @@ class User(object):
         if self.intent == 5:
             response, reward = "我想要掛號", -1
         return response, reward
- 
+
 
 
     def response_dm_request(self):
@@ -174,7 +174,7 @@ class User(object):
             else:
                 self.state[slot_to_respond[0]] = True
             return self.nlg_intent_1(slot_to_respond[0]), -1
-                
+
         elif self.intent == 2:
             for slot in self.observation["slot"]:
                 if self.slot[slot] != None:
@@ -185,7 +185,7 @@ class User(object):
             else:
                 self.state[slot_to_respond[0]] = True
             return self.nlg_intent_2(slot_to_respond[0]), -1
-                
+
         elif self.intent == 3:
             for slot in self.observation["slot"]:
                 if self.slot[slot] != None:
@@ -205,7 +205,7 @@ class User(object):
                 return self.nlg_intent_4(slot_to_respond[0]), User.reward_repeat
             else:
                 self.state[slot_to_respond[0]] = True
-            return self.nlg_intent_4(slot_to_respond[0]), -1    
+            return self.nlg_intent_4(slot_to_respond[0]), -1
         elif self.intent == 5:
             for slot in self.observation["slot"]:
                 if self.slot[slot] != None:
@@ -228,7 +228,7 @@ class User(object):
                 self.state[choose_slot] = True
                 return self.slot[choose_slot], User.reward_per_response
         else:
-            return self.say_intent_again() # I don't know if it is appropriate to say user's intent again when the slot is not in choose list     
+            return self.say_intent_again() # I don't know if it is appropriate to say user's intent again when the slot is not in choose list
         #choosing principle?
         #1. random
         #2. base on other slot(flexible)?
@@ -243,12 +243,12 @@ class User(object):
                 return choice(["我是說","不，我是說"]) + self.slot[s] + " 不是" + self.observation['state'][s], User.reward_per_response
         if correct:
             return choice(["對","是的","沒錯","就是這樣"]), User.reward_per_response
-            
+
     def response_dm_end(self):
-        #check if mission complete 
+        #check if mission complete
         #1. intent compare
         #2. slot compare
-        #INTENT CHANGING? 問到醫生之後再問時間? 
+        #INTENT CHANGING? 問到醫生之後再問時間?
         #answer checking
         self.success = True
         if(self.intent == self.observation["intent"]):
@@ -267,12 +267,12 @@ class User(object):
             return "我病得更嚴重了", User.reward_fail
 
     def respond(self,observation):
-        reward = -1                
+        reward = -1
         self.observation = observation
         wrong, response, reward = self.check_if_something_wrong()
         if wrong and self.observation["request"] != 'end' and self.observation["request"] != 'confirm':
             return response, reward
-        if self.observation == None:
+        if self.observation == None or self.observation["intent"] == None:
             if self.intent == 1:
                 self.state["disease"] = True
                 response, reward = "請問得"+self.slot["disease"]+"會怎樣", -1
@@ -296,8 +296,8 @@ class User(object):
             response, reward = self.response_dm_confirm()
         elif self.observation["request"] == "end":
             response, reward = self.response_dm_end()
-        if self.observation["request"] == "end":
+        if self.observation != None and self.observation["request"] == "end":
             return response, reward, True
         else:
-            return response, reward, False 
+            return response, reward, False
                 # respond DM's confirm, inform, or request
