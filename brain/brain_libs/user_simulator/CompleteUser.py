@@ -5,10 +5,11 @@ class CompleteUser(object):
         MAX_TURN = 100
         user_intent = None
         user_slot = None
-        generate = UserSimulation.intent_slot_generator()
-        user_intent = generate.goal["intent"]
-        user_slot = generate.goal["slot"]
-        sim_user = User(intent = user_intent, slot = user_slot)
+        #  generate = UserSimulation.intent_slot_generator()
+        #  user_intent = generate.goal["intent"]
+        #  user_slot = generate.goal["slot"]
+        #  sim_user = User(intent = user_intent, slot = user_slot)
+        sim_user=User(None,None)
         turn = 0
         @staticmethod
         def initial():

@@ -13,7 +13,8 @@ sys.path.append('../user_simulator')
 from CompleteUser import *
 sys.path.append('../LU_model')
 import db
-import dst
+sys.path.append('../data_resource')
+import CrawlerTimeTable
 
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
@@ -35,6 +36,26 @@ n_hidden_2 = 256  # 2nd layer number of features
 n_input = STATES  # MNIST data input (img shape: 28*28)
 n_classes = ACTIONS # MNIST total classes (0-9 digits)
 
+def get_dbinfo(slot1,slot2, choose):
+    client = db.MongoClient(DB_IP, DB_PORT)
+
+    collection_division = client[DB_NAME]["division"]
+    collection_disease = client[DB_NAME]["disease"]
+    #use disease to find division
+    if slot2 == "department":
+        for data in collection_disease.find({"disease_c": {"$regex": slot1}}):
+            return  data['department']
+    #use disease to find doctors
+    elif slot2 == "doctor" and choose == 0:
+        for data in collection_division.find({"$and": [{"disease": {"$regex": slot1}},
+                                                       {"department": {"$regex": ""}}]}):
+            return data['doctor']
+    #use division to find doctors
+    elif slot2 == "doctor" and choose == 1:
+        for data in collection_division.find({"$and": [{"disease": {"$regex": ''}},
+                                                       {"department": {"$regex": slot1}}]}):
+            return data['doctor']
+
 def end(DM):
     DM['request'] = 'end'
 def inform(slot, DM):
@@ -43,18 +64,18 @@ def inform(slot, DM):
 
 def select(slot, DM):
     DM['request'] = 'choose'
-    if slot == "division":  
+    if slot == "division":
         DM['slot'] = ["division"]
         if DM["state"]["disease"] != []:
-            DM["state"]["division"] = dst.get_dbinfo(DM["state"]["disease"],"department",0)
+            DM["state"]["division"] = get_dbinfo(DM["state"]["disease"],"department",0)
         else:
            inform("disease",DM)
     elif slot == "doctor":
         DM['slot'] = ["doctor"]
         if DM["state"]["division"] != []:
-            DM["state"]["doctor"] = dst.get_dbinfo(DM["state"]["division"],"doctor",1)
+            DM["state"]["doctor"] = get_dbinfo(DM["state"]["division"],"doctor",1)
         elif DM["state"]["disease"] != []:
-            DM["state"]["doctor"] = dst.get_dbinfo(DM["state"]["disease"],"doctor",0)
+            DM["state"]["doctor"] = get_dbinfo(DM["state"]["disease"],"doctor",0)
         else:
             inform("division",DM)
     elif slot == "time":
@@ -104,9 +125,9 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
     ##      observation is user's response
     ##      semantic_frame is a slot-detecting and intent-detecting function
     ##      old_state 由三部份組成的binary list：照順序是intent(5)是哪個，state(5)有沒有，confirm(5)過了沒
-    ##      old_state_verbose 
+    ##      old_state_verbose
     ##  return:
-    ##      state: updated binary list  
+    ##      state: updated binary list
     ##      state_verbose: updated dictionary
 
     x_t1 = semantic_frame(observation)
@@ -127,7 +148,7 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
 
 def action_affect_state(action_index, state):
     if action_index >= 8 and action_index <= 11:
-        state[action_index + 2] = 1 
+        state[action_index + 2] = 1
 
 def generate_DM_frame(state_verbose, action):
     assert state_verbose != None
@@ -237,7 +258,7 @@ def trainNetwork(s, readout, h_fc1, sess):
         # some function using action_index and state_verbose to generate
         # semantic frame for the user simulator or the NLG module
         DM_frame = generate_DM_frame(s_t_verbose, action_dict[action_index])
-        
+
 
         #else:
         #    a_t[0] = 1 # do nothing
@@ -254,7 +275,7 @@ def trainNetwork(s, readout, h_fc1, sess):
 
         #LU model
         #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
-        
+
         s_t1, s_t_verbose = state_update(user_word, lu_model.semantic_frame, s_t,s_t_verbose, DM)
 
 
