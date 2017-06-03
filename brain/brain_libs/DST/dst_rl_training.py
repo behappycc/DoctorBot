@@ -93,8 +93,6 @@ slot_dict = {
 }
 
 
-
-    
 def state_initial():
     return np.zeros(STATES)
 
@@ -206,6 +204,8 @@ def trainNetwork(s, readout, h_fc1, sess):
     x_t, r_0, terminal = sim_user.step(do_nothing)
     s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, original_state=None, original_state_verbose=None)
 
+    #x_t = cv2.cvtColor(cv2.resize(x_t, (80, 80)), cv2.COLOR_BGR2GRAY)
+    #ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
     # saving and loading networks
     saver = tf.train.Saver()
     sess.run(tf.initialize_all_variables())
@@ -238,6 +238,10 @@ def trainNetwork(s, readout, h_fc1, sess):
         # semantic frame for the user simulator or the NLG module
         DM_frame = generate_DM_frame(s_t_verbose, action_dict[action_index])
         
+
+        #else:
+        #    a_t[0] = 1 # do nothing
+
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
@@ -247,11 +251,12 @@ def trainNetwork(s, readout, h_fc1, sess):
         #x_t1 = cv2.cvtColor(cv2.resize(x_t1_colored, (80, 80)), cv2.COLOR_BGR2GRAY)
         #ret, x_t1 = cv2.threshold(x_t1, 1, 255, cv2.THRESH_BINARY)
 
-                
+
         #LU model
         #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
         
         s_t1, s_t_verbose = state_update(user_word, lu_model.semantic_frame, s_t,s_t_verbose, DM)
+
 
         # store the transition in D
         D.append((s_t, a_t, r_t, s_t1, terminal))
@@ -289,7 +294,7 @@ def trainNetwork(s, readout, h_fc1, sess):
         # update the old values
         s_t = s_t1
         t += 1
-        
+
         if terminal == True:
             sim_user.initial()
             s_t = state_initial()
