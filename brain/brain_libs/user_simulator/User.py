@@ -271,7 +271,7 @@ class User(object):
         self.observation = observation
         wrong, response, reward = self.check_if_something_wrong()
         if wrong and self.observation["request"] != 'end' and self.observation["request"] != 'confirm':
-            return response, reward
+            return response, reward, False
         if self.observation == None or self.observation["intent"] == None:
             if self.intent == 1:
                 self.state["disease"] = True

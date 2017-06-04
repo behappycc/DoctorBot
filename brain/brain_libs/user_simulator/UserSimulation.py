@@ -6,7 +6,7 @@ sys.path.pop()
 sys.path.append('../data_resource')
 import CrawlerTimeTable
 
-DB_IP = "104.199.131.158"  # doctorbot GCP ip
+DB_IP = "localhost" # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
 DB_NAME = "doctorbot"  # use the collection
 

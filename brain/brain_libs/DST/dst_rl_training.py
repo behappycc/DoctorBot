@@ -6,8 +6,7 @@ import numpy as np
 
 #############################
 
-sys.path.append('../joint_model')
-import get_lu_pred
+
 from collections import deque
 sys.path.append('../user_simulator')
 from CompleteUser import *
@@ -15,22 +14,27 @@ sys.path.append('../LU_model')
 import db
 sys.path.append('../data_resource')
 import CrawlerTimeTable
+sys.path.append('../joint_model')
+import get_lu_pred
+lu_model = get_lu_pred.LuModel()
 
-DB_IP = "104.199.131.158"  # doctorbot GCP ip
+DB_IP = "localhost"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
 DB_NAME = "doctorbot"  # use the collection
 
 ############ SETTINGS #############
 
-ACTIONS = 12 # number of valid actions
+GAME = 'ICB' # the name of the game being played for log files
 GAMMA = 0.99 # decay rate of past observations
-OBSERVE = 100000. # timesteps to observe before training
+N_SAVE_PROGRESS = 1000 # save progress every 1000 iteration
+OBSERVE = 100 # 100000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 0.0001 # starting value of epsilon
+INITIAL_EPSILON = 0.1 #0.0001 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
-STATES = 15
+ACTIONS = 12 # number of valid actions
+STATES = 15 # number of states 
 n_hidden_1 = 256  # 1st layer number of features
 n_hidden_2 = 256  # 2nd layer number of features
 n_input = STATES  # MNIST data input (img shape: 28*28)
@@ -41,6 +45,7 @@ def get_dbinfo(slot1,slot2, choose):
 
     collection_division = client[DB_NAME]["division"]
     collection_disease = client[DB_NAME]["disease"]
+    slot1 = slot1[0]
     #use disease to find division
     if slot2 == "department":
         for data in collection_disease.find({"disease_c": {"$regex": slot1}}):
@@ -81,7 +86,7 @@ def select(slot, DM):
     elif slot == "time":
         DM["slot"] = ["time"]
         if DM["state"]["doctor"] != []:
-            DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
+            DM["state"]["time"] = CrawlerTimeTable.Timetable(str(DM["state"]["doctor"])).get_time()
         else:
            inform("doctor", DM)
 
@@ -131,15 +136,16 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
     ##      state_verbose: updated dictionary
 
     x_t1 = semantic_frame(observation)
-    if(original_state==None):
+    print("LU: ",x_t1)
+    if(old_state==None):
         state = state_initial()
-        state_verbose = original_state_initial()
+        state_verbose = state_verbose_initial()
     else:
         state = old_state.copy()
         state_verbose = old_state_verbose
     if x_t1['intent']!= '':
         state_verbose['intent'] = [x_t1['intent']]
-        state[x_t1['intent']-1] = 1 ######must bugs here zzz
+        state[int(x_t1['intent'])-1] = 1 ######must bugs here zzz
     for key,value in x_t1['slot'].items(): #state
         if value!='':
             state_verbose[key] = [value]
@@ -154,6 +160,7 @@ def generate_DM_frame(state_verbose, action):
     assert state_verbose != None
     DM_frame = {}
     DM_frame["state"] = state_verbose
+    #  print(DM_frame)
     # the intent in state is a list, while intent in intent is an int
     if state_verbose["intent"] != []:
         DM_frame["intent"] = state_verbose["intent"][0]
@@ -196,23 +203,23 @@ def createNetwork():
     layer_2 = tf.nn.relu(layer_2)# h1_fc
     # Output layer with linear activation
     readout = tf.matmul(layer_2, weights['out']) + biases['out']
-    return s, readout, layer_2
+    var = [item for key,item in weights.items()] + [item for key, item in biases.items()]
+    return s, readout, layer_2, var
 
-def trainNetwork(s, readout, h_fc1, sess):
+def trainNetwork(s, readout, h_fc1, sess, var):
     # define the cost function
     # readout is the action-predicting net
+    start_training = False
     a = tf.placeholder("float", [None, ACTIONS]) # placeholder for the chosen action
     y = tf.placeholder("float", [None])          # placeholder for reward
     readout_action = tf.reduce_sum(tf.multiply(readout, a), reduction_indices=1)
     cost = tf.reduce_mean(tf.square(y - readout_action))
-    train_step = tf.train.AdamOptimizer(1e-6).minimize(cost)
+    train_step = tf.train.AdamOptimizer(1e-6).minimize(cost, var_list=var)
 
 
     # open up a game state to communicate with emulator
-    # game_state = game.GameState()
     sim_user = CompleteUser()
-    lu_model = get_lu_pred.LuModel()
-    sematic_frame_DM = DM_initial()
+
     # store the previous observations in replay memory
     D = deque()
 
@@ -223,10 +230,8 @@ def trainNetwork(s, readout, h_fc1, sess):
     # get the first state by doing nothing and preprocess the image to 80x80x4
     do_nothing = None
     x_t, r_0, terminal = sim_user.step(do_nothing)
-    s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, original_state=None, original_state_verbose=None)
+    s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
 
-    #x_t = cv2.cvtColor(cv2.resize(x_t, (80, 80)), cv2.COLOR_BGR2GRAY)
-    #ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
     # saving and loading networks
     saver = tf.train.Saver()
     sess.run(tf.initialize_all_variables())
@@ -241,7 +246,7 @@ def trainNetwork(s, readout, h_fc1, sess):
     t = 0
     while "intelligent bot" != "idiotic bot":
         # choose an action epsilon greedily
-        readout_t = readout.eval(feed_dict={s : [s_t]})[0]
+        readout_t = readout.eval(feed_dict={s : [s_t]}, session= sess)[0]
         a_t = np.zeros([ACTIONS])
         action_index = 0
         #if t % FRAME_PER_ACTION == 0:
@@ -253,31 +258,18 @@ def trainNetwork(s, readout, h_fc1, sess):
             action_index = np.argmax(readout_t)
             a_t[action_index] = 1
 
-        action_affect_state(action_index, state)
-
         # some function using action_index and state_verbose to generate
         # semantic frame for the user simulator or the NLG module
         DM_frame = generate_DM_frame(s_t_verbose, action_dict[action_index])
-
-
-        #else:
-        #    a_t[0] = 1 # do nothing
 
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
 
         # run the selected action and observe next state and reward
-        user_word, r_t, terminal = sim_user.step(DM_frame)
-        #x_t1 = cv2.cvtColor(cv2.resize(x_t1_colored, (80, 80)), cv2.COLOR_BGR2GRAY)
-        #ret, x_t1 = cv2.threshold(x_t1, 1, 255, cv2.THRESH_BINARY)
-
-
-        #LU model
-        #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
-
-        s_t1, s_t_verbose = state_update(user_word, lu_model.semantic_frame, s_t,s_t_verbose, DM)
-
+        x_t1, r_t, terminal = sim_user.step(DM_frame)
+        s_t1, s_t_verbose = state_update(x_t1, lu_model.semantic_frame, s_t,s_t_verbose)
+        action_affect_state(action_index, s_t1)
 
         # store the transition in D
         D.append((s_t, a_t, r_t, s_t1, terminal))
@@ -286,6 +278,9 @@ def trainNetwork(s, readout, h_fc1, sess):
 
         # only train if done observing
         if t > OBSERVE:
+            if not start_training:
+                start_training = True
+                print('\033[93m' + "--- after observation, start training ---" + '\033[0m')
             # sample a minibatch to train on
             minibatch = random.sample(D, BATCH)
 
@@ -296,7 +291,7 @@ def trainNetwork(s, readout, h_fc1, sess):
             s_j1_batch = [d[3] for d in minibatch]
 
             y_batch = []
-            readout_j1_batch = readout.eval(feed_dict = {s : s_j1_batch})
+            readout_j1_batch = readout.eval(feed_dict = {s : s_j1_batch}, session = sess)
             for i in range(0, len(minibatch)):
                 terminal = minibatch[i][4]
                 # if terminal, only equals reward
@@ -309,19 +304,26 @@ def trainNetwork(s, readout, h_fc1, sess):
             train_step.run(feed_dict = {
                 y : y_batch,
                 a : a_batch,
-                s : s_j_batch}
+                s : s_j_batch},
+                session = sess
             )
-
+        print("user: ", x_t)
+        print("DoctorBot: ",DM_frame)
         # update the old values
         s_t = s_t1
+        x_t = x_t1
         t += 1
 
         if terminal == True:
+            print(x_t)
+            print("--- initializing user simulator ---")
             sim_user.initial()
-            s_t = state_initial()
-            s_t_verbose = original_state_initial()
-        # save progress every 10000 iterations
-        if t % 10000 == 0:
+            do_nothing = None
+            x_t, r_0, terminal = sim_user.step(do_nothing)
+            s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
+
+        # save progress every N_SAVE_PROGRESS iterations
+        if t % N_SAVE_PROGRESS == 0:
             saver.save(sess, 'saved_networks/' + GAME + '-dqn', global_step = t)
 
         # print info
@@ -345,9 +347,9 @@ def trainNetwork(s, readout, h_fc1, sess):
         '''
 
 def playGame():
-    sess = tf.InteractiveSession()
-    s, readout, h_fc1 = createNetwork()
-    trainNetwork(s, readout, h_fc1, sess)
+    sess = tf.Session()
+    s, readout, h_fc1, var = createNetwork()
+    trainNetwork(s, readout, h_fc1, sess, var)
 
 def main():
     playGame()
