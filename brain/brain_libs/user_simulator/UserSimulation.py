@@ -45,14 +45,15 @@ class intent_slot_generator(object):
                 name = doctor_list[0]
 
             if not notfind:
-                time_list = CrawlerTimeTable.Timetable(name).get_time()
-                #print(time_list)
-                if len(time_list) is 0:
-                    notfind = True
-                elif len(time_list) > 1:
-                    time = time_list[random.randint(0, len(time_list)-1)]
-                else:
-                    time = time_list[0]
+                time = '106.6.5'
+                #  time_list = CrawlerTimeTable.Timetable(name).get_time()
+                #  #print(time_list)
+                #  if len(time_list) is 0:
+                #      notfind = True
+                #  elif len(time_list) > 1:
+                #      time = time_list[random.randint(0, len(time_list)-1)]
+                #  else:
+                #      time = time_list[0]
 
         self.goal = {'intent': random.randint(1, 5),
                      'slot': {'disease': disease, 'division': division, 'doctor': name, 'time': time}}

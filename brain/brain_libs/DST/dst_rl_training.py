@@ -3,7 +3,7 @@ import tensorflow as tf
 import sys
 import random
 import numpy as np
-
+import re 
 #############################
 
 
@@ -30,7 +30,7 @@ N_SAVE_PROGRESS = 1000 # save progress every 1000 iteration
 OBSERVE = 100 # 100000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 0.1 #0.0001 # starting value of epsilon
+INITIAL_EPSILON = 0.5 #0.0001 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 ACTIONS = 12 # number of valid actions
@@ -39,7 +39,7 @@ n_hidden_1 = 256  # 1st layer number of features
 n_hidden_2 = 256  # 2nd layer number of features
 n_input = STATES  # MNIST data input (img shape: 28*28)
 n_classes = ACTIONS # MNIST total classes (0-9 digits)
-
+NDEBUG = False# if False print dialogue detail
 def get_dbinfo(slot1,slot2, choose):
     client = db.MongoClient(DB_IP, DB_PORT)
 
@@ -134,23 +134,29 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
     ##  return:
     ##      state: updated binary list
     ##      state_verbose: updated dictionary
+    ##      LU_frame
 
-    x_t1 = semantic_frame(observation)
-    print("LU: ",x_t1)
+    LU_frame = semantic_frame(observation)
+
     if(old_state==None):
         state = state_initial()
         state_verbose = state_verbose_initial()
     else:
         state = old_state.copy()
         state_verbose = old_state_verbose
-    if x_t1['intent']!= '':
-        state_verbose['intent'] = [x_t1['intent']]
-        state[int(x_t1['intent'])-1] = 1 ######must bugs here zzz
-    for key,value in x_t1['slot'].items(): #state
+    if LU_frame['intent']!= '':
+        if state_verbose['intent']==[]:
+            state_verbose['intent'] = [LU_frame['intent']]
+            state[int(LU_frame['intent'])-1] = 1 ######must bugs here zzz
+    for key,value in LU_frame['slot'].items(): #state
         if value!='':
             state_verbose[key] = [value]
             state[slot_dict[key]+4] = 1
-    return state, state_verbose
+    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+    match = pattern.search(observation)
+    if match:
+        state_verbose["time"] = observation[match.start():match.end()]
+    return state, state_verbose, LU_frame
 
 def action_affect_state(action_index, state):
     if action_index >= 8 and action_index <= 11:
@@ -222,15 +228,16 @@ def trainNetwork(s, readout, h_fc1, sess, var):
 
     # store the previous observations in replay memory
     D = deque()
-
+    n_success = 0
+    n_fail = 0
     # printing
     #a_file = open("logs_" + GAME + "/readout.txt", 'w')
     #h_file = open("logs_" + GAME + "/hidden.txt", 'w')
 
     # get the first state by doing nothing and preprocess the image to 80x80x4
     do_nothing = None
-    x_t, r_0, terminal = sim_user.step(do_nothing)
-    s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
+    x_t, r_0, Terminal, Success = sim_user.step(do_nothing)
+    s_t, s_t_verbose, LU_frame = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
 
     # saving and loading networks
     saver = tf.train.Saver()
@@ -241,7 +248,7 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         print("Successfully loaded:", checkpoint.model_checkpoint_path)
     else:
         print("Could not find old network weights")
-    # start training
+    # the training loop
     epsilon = INITIAL_EPSILON
     t = 0
     while "intelligent bot" != "idiotic bot":
@@ -257,22 +264,24 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         else:
             action_index = np.argmax(readout_t)
             a_t[action_index] = 1
-
+        if not NDEBUG: print("User: ", x_t)
+        if not NDEBUG: print("LU: ",LU_frame)
         # some function using action_index and state_verbose to generate
         # semantic frame for the user simulator or the NLG module
         DM_frame = generate_DM_frame(s_t_verbose, action_dict[action_index])
+        if not NDEBUG: print("DoctorBot: ",DM_frame)
 
         # scale down epsilon
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
 
         # run the selected action and observe next state and reward
-        x_t1, r_t, terminal = sim_user.step(DM_frame)
-        s_t1, s_t_verbose = state_update(x_t1, lu_model.semantic_frame, s_t,s_t_verbose)
+        x_t1, r_t, Terminal, Success = sim_user.step(DM_frame)
+        s_t1, s_t_verbose, LU_frame = state_update(x_t1, lu_model.semantic_frame, s_t,s_t_verbose)
         action_affect_state(action_index, s_t1)
 
         # store the transition in D
-        D.append((s_t, a_t, r_t, s_t1, terminal))
+        D.append((s_t, a_t, r_t, s_t1, Terminal))
         if len(D) > REPLAY_MEMORY:
             D.popleft()
 
@@ -283,11 +292,10 @@ def trainNetwork(s, readout, h_fc1, sess, var):
                 print('\033[93m' + "--- after observation, start training ---" + '\033[0m')
             # sample a minibatch to train on
             minibatch = random.sample(D, BATCH)
-
             # get the batch variables
-            s_j_batch = [d[0] for d in minibatch]
-            a_batch = [d[1] for d in minibatch]
-            r_batch = [d[2] for d in minibatch]
+            s_j_batch  = [d[0] for d in minibatch]
+            a_batch    = [d[1] for d in minibatch]
+            r_batch    = [d[2] for d in minibatch]
             s_j1_batch = [d[3] for d in minibatch]
 
             y_batch = []
@@ -307,20 +315,26 @@ def trainNetwork(s, readout, h_fc1, sess, var):
                 s : s_j_batch},
                 session = sess
             )
-        print("user: ", x_t)
-        print("DoctorBot: ",DM_frame)
+
+
         # update the old values
         s_t = s_t1
         x_t = x_t1
         t += 1
 
-        if terminal == True:
-            print(x_t)
+        if Terminal == True:
+            n_success = n_success + 1 if     Success else n_success
+            n_fail    = n_fail + 1    if not Success else n_fail
+            print("User: ", x_t)
+            print("==============================>ENDING", r_t)
+            print("n_success: ", n_success,"\nn_fail: ", n_fail)
             print("--- initializing user simulator ---")
             sim_user.initial()
             do_nothing = None
-            x_t, r_0, terminal = sim_user.step(do_nothing)
-            s_t,s_t_verbose = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
+            x_t, r_0, Terminal, Success = sim_user.step(do_nothing)
+            s_t,s_t_verbose, LU_frame = state_update(x_t, 
+                    lu_model.semantic_frame, old_state=None, old_state_verbose=None)
+            #  print('\033[93m' + "User: " + '\033[0m' + x_t)
 
         # save progress every N_SAVE_PROGRESS iterations
         if t % N_SAVE_PROGRESS == 0:
@@ -335,9 +349,9 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         else:
             state = "train"
 
-        print("TIMESTEP", t, "/ STATE", state, \
-            "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
-            "/ Q_MAX %e" % np.max(readout_t))
+#        print("TIMESTEP", t, "/ STATE", state, \
+#            "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
+#            "/ Q_MAX %e" % np.max(readout_t))
         # write info to files
         '''
         if t % 10000 <= 100:

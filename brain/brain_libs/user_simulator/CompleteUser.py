@@ -11,23 +11,30 @@ class CompleteUser(object):
         sim_user = User(intent = user_intent, slot = user_slot)
         #  sim_user=User(None,None)
         turn = 0
+
         @staticmethod
         def initial():
+                CompleteUser.generate = UserSimulation.intent_slot_generator()
                 CompleteUser.user_intent = CompleteUser.generate.goal["intent"]
                 CompleteUser.user_slot = CompleteUser.generate.goal["slot"]
+                print(CompleteUser.user_slot)
                 CompleteUser.sim_user = User(intent = CompleteUser.user_intent, slot = CompleteUser.user_slot)
                 CompleteUser.turn = 0
         @staticmethod
         def step(DM):
+            end = False
+            Success = False
             if CompleteUser.turn == 0:
-                user_word, reward_once, end = CompleteUser.sim_user.respond(None)
+                user_word, reward_once, end, Success = CompleteUser.sim_user.respond(None)
                 CompleteUser.turn += 1
             elif CompleteUser.turn > CompleteUser.MAX_TURN:
-                CompleteUser.initial()
-                return '浪費我時間', User.reward_fail,True 
+                #  CompleteUser.initial()
+                print(True)
+                return '浪費我時間', -100, True, False
             else:
-                user_word , reward_once, end = CompleteUser.sim_user.respond(DM)
+                user_word , reward_once, end, Success = CompleteUser.sim_user.respond(DM)
                 CompleteUser.turn += 1
-            if end == True:
-                CompleteUser.initial()
-            return user_word , reward_once, end
+            #  if end == True:
+            #      user_word, reward_once, end = ComplereUser.sim_user.respond(DM)
+            #      CompleteUser.initial()
+            return user_word , reward_once, end, Success

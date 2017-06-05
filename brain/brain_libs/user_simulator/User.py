@@ -68,14 +68,20 @@ class User(object):
         "disease":[self.slot["disease"]+"會怎樣",self.slot["disease"],"我想問"+self.slot["disease"],
         self.slot["disease"]+"會有什麼症狀"]
         }
-        return choice(pattern_dic[response_slot])
+        if response_slot in ['disease']:
+            return choice(pattern_dic[response_slot])
+        else:
+            return "不要亂問"
     def nlg_intent_2(self,response_slot):
         pattern_dic = {
         "disease":[self.slot["disease"]+"要看什麼科",self.slot["disease"],"我想問"+self.slot["disease"],
         self.slot["disease"]+"屬於哪科",
         ]
         }
-        return choice(pattern_dic[response_slot])
+        if response_slot in ['disease']:
+            return choice(pattern_dic[response_slot])
+        else:
+            return "不要亂問"
     def nlg_intent_3(self,response_slot):
         pattern_dic = {
         "disease":[self.slot["disease"]+"要看什麼科",self.slot["disease"],"我想問"+self.slot["disease"],
@@ -85,7 +91,10 @@ class User(object):
         self.slot["time"]+"有哪些醫生可以","我"+self.slot["time"]+"可以","我"+self.slot["time"]+"有空"
         ]
         }
-        return choice(pattern_dic[response_slot])
+        if response_slot in ['disease','time']:
+            return choice(pattern_dic[response_slot])
+        else:
+            return "不要亂問"
     def nlg_intent_4(self,response_slot):
         if weighted_choice(zip([True, False],[User.ERROR_RATE["doctor"], 1 - User.ERROR_RATE["doctor"]])):
             doctor = choice(User.WRONG_DOCTOR_LIST)
@@ -101,7 +110,10 @@ class User(object):
         "time":[ time +"的", time, time +"的時刻表"],
         "division":[self.slot["division"]+"的",self.slot["division"]]
         }
-        return choice(pattern_dic[response_slot])
+        if response_slot in ['intent']:
+            return '不要亂'
+        else:
+            return choice(pattern_dic[response_slot])
     def nlg_intent_5(self,response_slot):
         if weighted_choice(zip([True, False],[User.ERROR_RATE["doctor"], 1 - User.ERROR_RATE["doctor"]])):
             doctor = choice(User.WRONG_DOCTOR_LIST)
@@ -117,9 +129,13 @@ class User(object):
         ],
         "time":[time+"的",time,"我"+time+"可以","我"+time+"有空"
         ],
-        "doctor":["我要掛"+doctor]
+        "doctor":["我要掛"+doctor],
+        "division": self.slot['division']
         }
-        return choice(pattern_dic[response_slot])
+        if response_slot in ['intent']:
+            return "幹"
+        else:
+            return choice(pattern_dic[response_slot])
 
     def check_if_something_wrong(self):
         # check if observation is consistent with users intent and slots
@@ -153,7 +169,7 @@ class User(object):
             self.state["time"] = True
             response, reward = "我是說請問"+self.slot["time"]+"有哪些醫生可以", -1
         if self.intent == 4:
-            response, reward = "我要問時間", -1
+            response, reward = "請問門診時間", -1
         if self.intent == 5:
             response, reward = "我想要掛號", -1
         return response, reward
@@ -207,7 +223,9 @@ class User(object):
                 self.state[slot_to_respond[0]] = True
             return self.nlg_intent_4(slot_to_respond[0]), -1
         elif self.intent == 5:
+#            print("++++++++ASKING+++++++")
             for slot in self.observation["slot"]:
+                print(slot)
                 if self.slot[slot] != None:
                     slot_to_respond.append(slot)
             shuffle(slot_to_respond)
@@ -219,6 +237,7 @@ class User(object):
         # def response_dm_confirm(self):
         # def response_dm_inform(self):
     def response_dm_choose(self):
+        print('++++++++++++++++++++++++++++++++++++++++++++++++')
         choose_slot = self.observation["slot"][0]
         if self.slot[choose_slot] in self.observation["state"][choose_slot]:
             if choose_slot == "time":
@@ -239,8 +258,8 @@ class User(object):
         for s in check_slots:
             if self.observation['state'][s] != self.slot[s]:
                 if s == "doctor":
-                    return choice(["我是說我要掛","不，我是說我要掛"]) + self.slot[s] + " 不是" + self.observation['state'][s], User.reward_per_response
-                return choice(["我是說","不，我是說"]) + self.slot[s] + " 不是" + self.observation['state'][s], User.reward_per_response
+                    return choice(["我是說我要掛","不，我是說我要掛"]) + str(self.slot[s]) + " 不是" + str(self.observation['state'][s]), User.reward_per_response
+                return choice(["我是說","不，我是說"]) + self.slot[s] + " 不是" + str(self.observation['state'][s]), User.reward_per_response
         if correct:
             return choice(["對","是的","沒錯","就是這樣"]), User.reward_per_response
 
@@ -262,42 +281,41 @@ class User(object):
         else:
             self.success = False
         if(self.success):
-            return "謝謝", User.reward_success
+            return "謝謝", User.reward_success, True, True
         else:
-            return "我病得更嚴重了", User.reward_fail
+            return "我病得更嚴重了", User.reward_fail, True, False
 
     def respond(self,observation):
         reward = -1
+        end = False
+        Success = False
         self.observation = observation
         wrong, response, reward = self.check_if_something_wrong()
-        if wrong and self.observation["request"] != 'end' and self.observation["request"] != 'confirm':
-            return response, reward, False
+        if wrong and self.observation["request"] != 'confirm':
+            return response, reward, False, False
         if self.observation == None or self.observation["intent"] == None:
             if self.intent == 1:
                 self.state["disease"] = True
                 response, reward = "請問得"+self.slot["disease"]+"會怎樣", -1
             elif self.intent == 2:
                 self.state["disease"] = True
-                response, reward = "請問"+self.slot["disease"]+"要看哪一科", -1
+                response, reward = "請問"+self.slot["disease"]+"要看哪科", -1
             elif self.intent == 3:
                 self.state["time"] = True
                 response, reward = "我想看"+self.slot["disease"]+"有哪些醫生可以", -1
             elif self.intent == 4:
                 response, reward = "請問門診時間", -1
             elif self.intent == 5:
-                response, reward = "我想要掛號", -1
-        elif self.observation["intent"] != self.intent:
-            response, reward = self.say_intent_again()
-        elif self.observation["request"] == "info": # request
+                response, reward = "我想要掛門診", -1
+#        elif self.observation["intent"] != self.intent:
+#            response, reward = self.say_intent_again()
+        elif self.observation["request"] == "inform": # request
             response, reward = self.response_dm_request()
         elif self.observation["request"] == "choose":
             response, reward = self.response_dm_choose()
         elif self.observation["request"] == "confirm":
             response, reward = self.response_dm_confirm()
         elif self.observation["request"] == "end":
-            response, reward = self.response_dm_end()
-        if self.observation != None and self.observation["request"] == "end":
-            return response, reward, True
-        else:
-            return response, reward, False
+            response, reward, end, Success = self.response_dm_end()
+        return response, reward, end, Success
                 # respond DM's confirm, inform, or request
