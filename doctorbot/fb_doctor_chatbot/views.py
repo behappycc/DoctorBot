@@ -10,6 +10,7 @@ import random
 import re
 import time
 import sys
+import os
 from pprint import pprint
 from .models import fb_db
 print (sys.path)
@@ -34,6 +35,8 @@ class Doctor(generic.View):
             for message in entry['messaging']:
                 if 'message' in message:
                     pprint(message)
+                    if 'text' not in message['message']:
+                        break
                     savetodb(message,message['message']['text'],message['sender'])
                     time.sleep(0.5)
                     post_facebook_message(message['sender']['id'])
@@ -45,6 +48,7 @@ class Doctor(generic.View):
         print("print")
         print(self.request.GET['*'])
         if self.request.GET['hub.verify_token'] == verify_token:
+
             print("print") 
             print(self.request.GET['*'])
             return HttpResponse(self.request.GET['hub.challenge'])
@@ -66,11 +70,25 @@ def post_facebook_message(fbid):
     print("fbid")
     print(fbid)
     post_message_url = 'https://graph.facebook.com/v2.6/me/messages?access_token=%s' % TOKEN
-    with open(json_dir + "DM_"+fbid+".json") as json_file:
+
+    json_path = json_dir + "DM_" + fbid+ ".json"
+    time.sleep(0.5) 
+    #while True:
+    with open(json_path,'r') as json_file:
         line = json.load(json_file)
     text = ""
-    for k, v in line.items():
-        text = text + str(k) + " " + str(v) + '\n'
+    if line['Use'] == 0:
+        time.sleep(0.5)
+        text = "請稍後再重新輸入(正在處理其他使用者)"
+    #        continue
+    else:
+        for k, v in line.items():
+            text = text + str(k) + " " + str(v) + '\n'
+        line['Use'] = 0
+        with open(json_path,'w') as json_file:
+            json.dump(line,json_file)
+    #        break
     response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": text}})
     requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
+           
 
