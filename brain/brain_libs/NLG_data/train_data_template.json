@@ -1,0 +1,87 @@
+[
+    [
+        "inform(slot='intent')",
+        "請問你要做什麼",
+        "請告訴我您需要什麼協助"
+    ],
+    [
+        "inform(slot='disease')",
+        "請問疾病的名稱",
+        "請告訴我疾病的名稱"
+    ],
+    [
+        "inform(slot='division')",
+        "請問是哪個科別",
+        "請告訴我科別名稱"
+    ],
+    [
+        "inform(slot='doctor')",
+        "請問要哪位醫生",
+        "請告訴我醫生名稱"
+    ],
+    [
+        "inform(slot='time')",
+        "請問要哪天",
+        "請告訴我時間"
+    ],
+    [
+        "select(slot='intent',intent='查詢症狀,掛號')",
+        "請選擇服務項目,查詢症狀,掛號",
+        "請問您想要哪個服務,查詢症狀,掛號"
+    ],
+    [
+        "select(slot='disease',disease='疾病A,疾病B')",
+        "請選擇疾病,疾病A,疾病B",
+        "請問您要選哪個疾病,疾病A,疾病B"
+    ],
+    [
+        "select(slot='division',division='科別A,科別B')",
+        "請選擇科別, 科別A,科別B",
+        "請問您要選哪個科別, 科別A,科別B"
+    ],
+    [
+        "select(slot='doctor',doctor='醫生A,醫生B')",
+        "請選擇醫生, 醫生A,醫生B",
+        "請問您想選哪位醫生, 醫生A,醫生B"
+    ],
+    [
+        "select(slot='time',time='106.5.5,106.5.6')",
+        "請選擇日期, 106.5.5,106.5.6",
+        "請問您要哪天, 106.5.5,106.5.6"
+    ],
+    [
+        "confirm(slot='intent',intent='查詢症狀')",
+        "請問您是要 查詢症狀 對嗎？",
+        "是不是要 查詢症狀"
+    ],
+    [
+        "confirm(slot='disease',disease='疾病A')",
+        "請問您是說 疾病A 嗎？",
+        "是 疾病A 對嗎？"
+    ],
+    [
+        "confirm(slot='division',division='科別A')",
+        "請問您是說 科別A 對嗎？",
+        "是 科別A 嗎？"
+    ],
+    [
+        "confirm(slot='doctor',doctor='醫生A')",
+        "請問您是要 醫生A 醫生嗎？",
+        "是 醫生A 醫生對嗎？"
+    ],
+    [
+        "confirm(slot='time',time='106.5.5')",
+        "請問您是說 106.5.5 這天嗎？",
+        "是 106.5.5 對嗎？"
+    ],
+    [
+        "end(intent='查詢症狀',disease='青光眼',results='blablabla')",
+        "已經幫您查詢症狀,以下是青光眼的症狀,blablabla",
+        "青光眼的症狀有blablabla"
+    ],
+    [
+        "end(intent='查詢科別',disease='青光眼',results='眼科')",
+        "已經幫您查詢科別,青光眼要看眼科",
+        "青光眼的相關科別是眼科"
+    ]
+]

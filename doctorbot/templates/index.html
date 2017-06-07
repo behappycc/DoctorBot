@@ -20,7 +20,6 @@
             <input type="text" style="text-align: right" class="form-control" id="user_input" name="user_input" placeholder="Say something" />
             <span class="input-group-btn"><button class="btn btn-default" id="send_button"><i class="glyphicon glyphicon-send"></i></button></span>
         </div>
-
     </div>
 </body>
 
@@ -28,42 +27,10 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
     crossorigin="anonymous"></script>
 <script>
-    'use strict';
-    var bot_message = ['<li class="list-group-item" style="text-align: left">',
-    '<img class="media-object img-circle" style="display: inline; margin-right:8px;" src="https://api.adorable.io/avatars/32/neural_net_based_chatbot.png">',
-    'TEXT',
-    '</li>'];
-
-    var user_message = ['<li class="list-group-item" style="text-align: right">',
-    'TEXT',
-    '<img class="media-object img-circle" style="display: inline; margin-left:8px;" src="https://www.tinkercad.com/images/bJ5DWBROmgB/t40.jpg?t=0">',
-    '</li>'];
-    var sendMessage = function (e) {
-        if (e.type === 'click' || e.which === 13){
-            var user_input = $('#user_input').val();
-            var message = user_message.join('\n').replace('TEXT', user_input);
-            $('#messages').append(message);
-            $('#user_input').val('');
-            $('#messages').scrollTop($('ul li').last().position().top + $('ul li').last().height());
-
-            $.ajax('./respond', {
-                type: 'POST',
-                data: { message: user_input },
-                dataType: 'json',
-                success: function(result) {
-                    var text = bot_message.join('\n').replace('TEXT', result.response);
-                    $('#messages').append(text);
-                    $('#messages').scrollTop($('ul li').last().position().top + $('ul li').last().height());
-                }
-            });
-            return false;
-        }
-    };
-
-    $(document).ready(function() {
-        $('#send_button').on('click', sendMessage)
+     $(document).ready(function() {
+        var i=0;  //use for data-id 
+        $('#send_button').on('click', sendMessage);
         $('#user_input').on('keypress', sendMessage);
-
         $('#user_input').on('keyup blur', function () {
             if($('#user_input').val().length > 0) {
                 $('#send_button').prop('disabled', false); 
@@ -71,7 +38,96 @@
                 $('#send_button').prop('disabled', 'disabled'); 
             }
         });
+        $('#messages').on('click','#ms_api_r',function(){
+	console.log('button');
+        $.ajax({
+        url:'/ms_api',
+        type:'GET',
+        data:{'status':'ok'},
+        contentType:'application/json',
+        success:function(){console.log('send api')}       
+	})
+        return false;
+
+      });
+        i = i+1;
     });
+
+    'use strict';
+    var bot_message = ['<li class="list-group-item" data=0 style="text-align: left">',
+    'TEXT',
+    '<button id="ms_api_r" class="btn btn-default" style="text-align: right">播放</button>',
+    '</li>'];
+
+    var user_message = ['<li class="list-group-item" data=1 style="text-align: right">',
+    'TEXT',
+    '<button class="btn btn-default" id="ms_api" >播放</button>',
+    '</li>'];
+    var sendMessage = function (e) {
+       if (e.type === 'click' || e.which === 13){
+            var user_input = $('#user_input').val();
+            var message = user_message.join('\n').replace('TEXT', user_input);
+            var post_data = {
+                'message' : user_input
+            }
+            //var ii=i;
+            $('#messages').append(message);
+            $('#user_input').val('');
+            $('#messages').scrollTop($('ul li').last().position().top + $('ul li').last().height());
+           function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }   
+    });
+            $.ajax({
+                url:'/query/', 
+                type: 'GET',
+                data: post_data,
+                contentType: 'application/json;charset=utf-8',
+                success: function(data) {
+                    console.log(post_data)
+                   
+                    var result = JSON.parse(JSON.stringify(data));
+                    if (result.error){
+                        console.log(result.error_text);
+                    }
+                    console.log(result);
+                    var text = bot_message.join('\n').replace('TEXT', result);//.replace(0,ii);
+                    //text['data'] = '1';
+                    $('#messages').append(text);
+                    $('#messages').scrollTop($('ul li').last().position().top + $('ul li').last().height());
+                   
+                }
+            });
+            return false;
+        }
+    };
+
+    // using jQuery
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+
 </script>
 
 </html>
