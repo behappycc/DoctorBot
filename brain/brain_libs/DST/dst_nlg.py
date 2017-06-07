@@ -24,6 +24,9 @@ DIR_NAME = '../../../../DoctorBot/doctorbot/'
 import sqlite3
 conn = sqlite3.connect(DIR_NAME + 'db.sqlite3')
 fb = conn.cursor()
+from random import shuffle
+#from apscheduler.schedulers.blocking import BlockingScheduler
+#from datetime import datetime
 
 
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
@@ -194,7 +197,10 @@ def get_sentence(DM):
         sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
     return sentence
 
-
+#def job(fb):
+#    print (datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+#    init = fb.fetchall()
+#    return init
 
 def main():
 
@@ -226,8 +232,10 @@ def main():
         buffer2=list(set(buffer2))
         return buffer2
     fb.execute('select * from fb_doctor_chatbot_fb_db')
+    
     init = fb.fetchall()   #
-
+    
+    
     while True:
         fb = conn.cursor()
         fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
@@ -252,6 +260,7 @@ def main():
             multi_id = list(set(after_id))
             print("multi_id")
             print(multi_id)
+            shuffle(multi_id)
             vvid = multi_id.pop(0)    #取出第一個sender_id
             #vid = vvid[0]    
             print("vvid")
@@ -259,6 +268,7 @@ def main():
             fb.execute("select * from fb_doctor_chatbot_fb_db where content='"+str(vvid)+"'")  #取出第一個sender_id的內容
             message = fb.fetchall()   #此輸入者所有的輸入     TODO 可能要看先前的句子是否存在
             message = list(set(message)-set(init))   #只要這次執行DST.py之後的FB輸入
+            message.sort(key=lambda tup: tup[0])
             print("this sender's message")
             print(message)
             mes_fir = list(message.pop())     #最先的輸入句子
@@ -268,25 +278,32 @@ def main():
             mes_fir_sen = mes_fir[3]    #最先的輸入句子的content
         #if(True):    
             sentence = mes_fir_sen
+            #if sentence == 'dst restart!':
+            #    del lu_model
+            #    raise MyException('restart')
             name=""
             for i in range(8,len(vvid)-2):      #save json with sender's id 
                 name+=vvid[i]
             print("name")
             print(name)
-            if os.path.exists("DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
-                #with open("user_data/DM_"+name+".json", 'r') as f:
-                DM = json.load(f)
+            if os.path.exists("./user_data/DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
+                with open("user_data/DM_"+name+".json", 'r') as f:
+                    DM = json.load(f)
+                    print ("\nLoad DM Success.\n")
             else:
-                open("user_data/DM_"+name+".json",'w')
-                DM = initialize() 
-
+                with open("user_data/DM_"+name+".json",'w') as f:
+                    DM = initialize()
+                    DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                    DM['Use']=1
+                    json.dump(DM,f)
             slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
-            if sentence == '謝謝':
+            if sentence == '謝謝' or sentence == '你好' or sentence == '嗨':
                 DM = initialize()
-                DM['Sentence'] = "謝謝惠顧"
-                with open('DM.json','w') as f_w:
+                DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                with open('./user_data/DM_'+name+'.json','w') as f_w:
+                    DM['Use'] = 1
                     json.dump(DM,f_w)
-                time.sleep(0.5)
+                #time.sleep(0.5)
                 continue
             if DM['Request'] == 'end':
                 DM = initialize()
@@ -311,7 +328,10 @@ def main():
             else:
                 semantic_frame = lu_model.semantic_frame(sentence)
                 slot_dictionary = semantic_frame['slot']
-
+            print ('[ Before LU ]')
+            #for key, value in DM:
+            #    print (key,':', value)
+            print (DM)
             print("[ LU ]")    
             for slot, value in semantic_frame['slot'].items():
                 print(slot, ": ", value)
@@ -329,11 +349,12 @@ def main():
             DM_nlg = DM
             DM_nlg['Sentence'] = get_sentence(DM)
             print ("[ DM ]")
-            for i in DM:
-                print (i, DM[i])
+            for i in DM_nlg:
+                print (i, DM_nlg[i])
             DM_path = "DM_" + str(vid)+".json"
             #print (os.path)
-            with open("user_data/DM_"+name+".json", 'w',os.O_NONBLOCK) as fp:
+            with open("user_data/DM_"+name+".json", 'w') as fp:
+                DM_nlg['Use'] = 1
                 json.dump(DM_nlg, fp)
                 print("save succeed.")
             #if DM["Request"] == "end":
@@ -347,9 +368,20 @@ def main():
             print("multi_id")
             print(multi_id)
             #break
-            time.sleep(0.5)
+            #time.sleep(0.5)
         time.sleep(0.5) #wait 0.5 secone to listen to if a fb new data stored.
 
-
+class MyException(Exception):
+    def __init__(self, value):
+        self.value = value
 if __name__ == '__main__':
+    #sched = BlockingScheduler()
+    #sched.add_job(main, 'interval', seconds=1800)
+    #sched.start()
     main()
+    #while True:
+    #    try:
+    #        main()
+    #    except MyException as e:
+    #        if e.value == 'restart':
+    #            continue
