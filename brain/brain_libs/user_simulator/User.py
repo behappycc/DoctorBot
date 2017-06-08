@@ -144,13 +144,14 @@ class User(object):
         response = ""
         for key in self.slot:
             if (self.state[key] == True
-            and self.observation['state'][key] != None):
-                if self.slot[key] != self.observation['state'][key]:
+            and self.observation['state'][key] != None
+            and self.observation['state'][key] != []):
+                if self.slot[key] != self.observation['state'][key][0]:
                     if key == "disease" or key == "division":
                         wrong = True
                         response = "我是說" + self.slot[key]
                         break
-                    if key == "time" and ".".join(self.time[:3]) != self.observation['state']['time']:
+                    if key == "time" and ".".join(self.time[:3]) != self.observation['state']['time'][0]:
                         wrong = True
                         response = "我是說" + ".".join(self.time[:3])
                     if key == "doctor":
@@ -239,6 +240,8 @@ class User(object):
     def response_dm_choose(self):
         print('++++++++++++++++++++++++++++++++++++++++++++++++')
         choose_slot = self.observation["slot"][0]
+        if not self.observation['state'][choose_slot]:
+            return self.say_intent_again()
         if self.slot[choose_slot] in self.observation["state"][choose_slot]:
             if choose_slot == "time":
                 self.state["time"] = True
@@ -256,7 +259,9 @@ class User(object):
         check_slots = self.observation["slot"]
         print(check_slots)
         for s in check_slots:
-            if self.observation['state'][s] != self.slot[s]:
+            if not self.observation['state'][s]:
+                return "你沒查問屁問哦幹", User.reward_per_response
+            elif self.observation['state'][s][0] != self.slot[s]:
                 if s == "doctor":
                     return choice(["我是說我要掛","不，我是說我要掛"]) + str(self.slot[s]) + " 不是" + str(self.observation['state'][s]), User.reward_per_response
                 return choice(["我是說","不，我是說"]) + self.slot[s] + " 不是" + str(self.observation['state'][s]), User.reward_per_response
@@ -273,8 +278,8 @@ class User(object):
         if(self.intent == self.observation["intent"]):
             if User.SUCCESS_CHECK[self.intent-1](self.observation["state"]):
                 for key in self.slot:
-                    if self.observation['state'][key] != None:
-                        if self.slot[key] != self.observation['state'][key]:
+                    if self.observation['state'][key] != None and self.observation['state'][key] !=[]:
+                        if self.slot[key] != self.observation['state'][key][0]:
                             if not(key == "time" and ".".join(self.time[:3]) == self.observation['state']['time']):
                                 self.success = False
                                 break
@@ -317,5 +322,5 @@ class User(object):
             response, reward = self.response_dm_confirm()
         elif self.observation["request"] == "end":
             response, reward, end, Success = self.response_dm_end()
-        return response, reward, end, Success
+        return response, reward, False, Success
                 # respond DM's confirm, inform, or request

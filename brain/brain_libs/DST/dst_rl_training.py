@@ -155,7 +155,7 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
     pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
     match = pattern.search(observation)
     if match:
-        state_verbose["time"] = observation[match.start():match.end()]
+        state_verbose["time"] = [observation[match.start():match.end()]]
     return state, state_verbose, LU_frame
 
 def action_affect_state(action_index, state):
@@ -264,7 +264,7 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         else:
             action_index = np.argmax(readout_t)
             a_t[action_index] = 1
-        if not NDEBUG: print("User: ", x_t)
+        if not NDEBUG: print("\033[1;33;40mUser: ", x_t,"\033[0m")
         if not NDEBUG: print("LU: ",LU_frame)
         # some function using action_index and state_verbose to generate
         # semantic frame for the user simulator or the NLG module
@@ -349,9 +349,9 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         else:
             state = "train"
 
-#        print("TIMESTEP", t, "/ STATE", state, \
-#            "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
-#            "/ Q_MAX %e" % np.max(readout_t))
+        print("TIMESTEP", t, "/ STATE", state, \
+            "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
+            "/ Q_MAX %e" % np.max(readout_t))
         # write info to files
         '''
         if t % 10000 <= 100:
