@@ -278,7 +278,7 @@ class User(object):
         if(self.intent == self.observation["intent"]):
             if User.SUCCESS_CHECK[self.intent-1](self.observation["state"]):
                 for key in self.slot:
-                    if self.observation['state'][key] != None and self.observation['state'][key] !=[]:
+                    if self.observation['state'][key] != None and self.observation['state'][key] !=[] and key != 'division':
                         if self.slot[key] != self.observation['state'][key][0]:
                             if not(key == "time" and ".".join(self.time[:3]) == self.observation['state']['time']):
                                 self.success = False
