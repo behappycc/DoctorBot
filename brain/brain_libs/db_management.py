@@ -78,7 +78,7 @@ def main():
     # for disease in collection_disease.find({"symptom": {"$regex": "流鼻"}}):
     #     print (disease)
 
-    for disease in collection_disease.find({"$and": [{"symptom": {"$regex": "流鼻"}}, {"disease_c": {"$regex": "百日"}}]}):
+    for disease in collection_disease.find({"disease_c": "白內障"}):
         print(disease)
 
 
