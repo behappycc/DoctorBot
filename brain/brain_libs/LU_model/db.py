@@ -44,20 +44,21 @@ class DataBase(object):
         collection_disease.insert_one(disease).inserted_id
 
     def create_collection_division(self, collection_division):
-        DataBase.remove_all_documents(collection_division)
-        with open('data_resource/division.csv', 'r') as csvfile:
+        self.remove_all_documents(collection_division)
+        with open('../data_resource/division.csv', 'r') as csvfile:
             for row in csv.reader(csvfile):
-                DataBase.create_division(collection_division, row)
+                self.create_division(collection_division, row)
 
     def create_collection_disease(self, collection_disease):
-        DataBase.remove_all_documents(collection_disease)
-        with open('data_resource/disease.csv', 'r') as csvfile:
+        self.remove_all_documents(collection_disease)
+        with open('../data_resource/disease.csv', 'r') as csvfile:
             for row in csv.reader(csvfile):
-                DataBase.create_disease(collection_disease, row)
+                self.create_disease(collection_disease, row)
 
 
 def main():
     client = MongoClient(DB_IP, DB_PORT)
+    db = DataBase()
     # drop_db(client, DB_NAME)
 
     collection_division = client[DB_NAME]["division"]
@@ -66,8 +67,8 @@ def main():
     # print(collection_division.count())
     # print(collection_disease.count())
 
-    # create_collection_division(collection_division)
-    # create_collection_disease(collection_disease)
+    # db.create_collection_division(collection_division)
+    # db.create_collection_disease(collection_disease)
 
     for division in collection_division.find({"disease": "白內障"}):
          print(division)

@@ -63,8 +63,8 @@ def main():
     collection_division = client[DB_NAME]["division"]
     collection_disease = client[DB_NAME]["disease"]
 
-    print(collection_division.count())
-    print(collection_disease.count())
+    # print(collection_division.count())
+    # print(collection_disease.count())
 
     db.create_collection_division(collection_division)
     db.create_collection_disease(collection_disease)
