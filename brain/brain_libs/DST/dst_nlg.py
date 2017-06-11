@@ -222,17 +222,9 @@ def main():
     lu_model = get_lu_pred.LuModel()
     
     fb = conn.cursor()
-    fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
-    vid = fb.fetchone()[0]    #fb id number ex:235
     print("waiting for the fb input...")
-    def multiuser(buffer2,after):
-        buffer2=[]
-        fb.execute('select content from fb_doctor_chatbot_fb_db')
-        buffer2.extend(after)
-        buffer2=list(set(buffer2))
-        return buffer2
     fb.execute('select * from fb_doctor_chatbot_fb_db')
-    init = fb.fetchall()   #
+    init = fb.fetchall()   
     
     while True:
         fb = conn.cursor()
@@ -249,7 +241,6 @@ def main():
             after.sort(key=lambda tup:tup[0])
             print("after")
             print(after)
-            print('====')
             mess = after.pop(0)
             print(mess)
             sender_id = mess[1]
@@ -315,7 +306,6 @@ def main():
                     print ("[ DM ]")
                     for i in DM_nlg:
                         print (i, DM_nlg[i])
-                    DM_path = "DM_" + str(vid)+".json"
                     with open("user_data/DM_"+name+".json", 'w') as fp:
                         #DM_nlg['Use'] = 1
                         json.dump(DM_nlg, fp)
