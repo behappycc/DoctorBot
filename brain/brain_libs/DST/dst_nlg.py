@@ -232,156 +232,95 @@ def main():
         buffer2=list(set(buffer2))
         return buffer2
     fb.execute('select * from fb_doctor_chatbot_fb_db')
-    
     init = fb.fetchall()   #
-    
     
     while True:
         fb = conn.cursor()
         fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
         new_id = fb.fetchone()[0]
         multi_id=[]     #ids' list
-        if(new_id !=vid or len(multi_id) != 0): #有新輸入的時候或還有使用者輸入沒有完成的時候
-            print("==============")
-            fb.execute('select * from fb_doctor_chatbot_fb_db ')
-            after = fb.fetchall()
-            after = list(set(after)-set(init))   #只要這次執行DST.py之後的FB輸入
+        #if(new_id !=vid or len(multi_id) != 0): #有新輸入的時候或還有使用者輸入沒有完成的時候
+        fb.execute('select * from fb_doctor_chatbot_fb_db ')
+        after = fb.fetchall()
+        after = list(sorted(set(after)-set(init)))  #只要這次執行DST.py之後的FB輸入
+        if not after :
+            continue
+        else:
+            after.sort(key=lambda tup:tup[0])
             print("after")
             print(after)
-            fb.execute('select max(id) from fb_doctor_chatbot_fb_db ')
-            vid = fb.fetchone()[0]
-            print("vid")
-            print(vid)
-            after_id = []
-            for i in range(0,len(after)):
-                after_id.append(list(after[i])[1])
-            print("after_id")
-            print(after_id)
-            multi_id = list(set(after_id))
-            print("multi_id")
-            print(multi_id)
-            shuffle(multi_id)
-            vvid = multi_id.pop(0)    #取出第一個sender_id
-            #vid = vvid[0]    
-            print("vvid")
-            print(vvid)
-            fb.execute("select * from fb_doctor_chatbot_fb_db where content='"+str(vvid)+"'")  #取出第一個sender_id的內容
-            message = fb.fetchall()   #此輸入者所有的輸入     TODO 可能要看先前的句子是否存在
-            message = list(set(message)-set(init))   #只要這次執行DST.py之後的FB輸入
-            message.sort(key=lambda tup: tup[0])
-            print("this sender's message")
-            print(message)
-            mes_fir = list(message.pop())     #最先的輸入句子
-            print("first message")
-            print(mes_fir)
-            mes_fir_id = mes_fir[0]     #最先的輸入句子的id
-            mes_fir_sen = mes_fir[3]    #最先的輸入句子的content
-        #if(True):    
-            sentence = mes_fir_sen
-            #if sentence == 'dst restart!':
-            #    del lu_model
-            #    raise MyException('restart')
-            name=""
-            for i in range(8,len(vvid)-2):      #save json with sender's id 
-                name+=vvid[i]
-            print("name")
-            print(name)
-            if os.path.exists("./user_data/DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
-                with open("user_data/DM_"+name+".json", 'r') as f:
-                    DM = json.load(f)
-                    print ("\nLoad DM Success.\n")
-            else:
-                with open("user_data/DM_"+name+".json",'w') as f:
-                    DM = initialize()
-                    DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-                    DM['Use']=1
-                    json.dump(DM,f)
-            slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
-            if sentence == '謝謝' or sentence == '你好' or sentence == '嗨':
-                DM = initialize()
-                DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-                with open('./user_data/DM_'+name+'.json','w') as f_w:
-                    DM['Use'] = 1
-                    json.dump(DM,f_w)
-                #time.sleep(0.5)
-                continue
-            if DM['Request'] == 'end':
-                DM = initialize()
-            #if os.path.exists("DM.json"):
-            #    with open("DM.json", 'r') as f:
-            #         DM = json.load(f)
-            slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
+            print('====')
+            mess = after.pop(0)
+            print(mess)
+            sender_id = mess[1]
+            name = sender_id[8:-2]
+            sentence = mess[3]
+            init.append(mess)
+            if True:
+                 if True:
+                    if os.path.exists("./user_data/DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
+                        with open("user_data/DM_"+name+".json", 'r') as f:
+                            DM = json.load(f)
+                            print ("\nLoad DM Success.\n")
+                    else:
+                        with open("user_data/DM_"+name+".json",'w') as f:
+                            DM = initialize()
+                            DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                            #DM['Use']=1
+                            json.dump(DM,f)
+                            print('write json DM')
+                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
+                    if sentence == '謝謝' or sentence == '你好' or sentence == '嗨':
+                        DM = initialize()
+                        DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                        with open('./user_data/DM_'+name+'.json','w') as f_w:
+                            #DM['Use'] = 1
+                            json.dump(DM,f_w)
+                            print("update DM success")
+                        continue
+                    if DM['Request'] == 'end':
+                        DM = initialize()
+                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
+                    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+                    match = pattern.match(sentence)
+                    if match:
+                        DM["State"]["time"] = sentence
+                    elif sentence in week:
+                        DM["State"]["time"] = sentence
+                    elif sentence in division:
+                        DM["State"]["division"] = sentence
+                    elif sentence in disease:
+                        DM["State"]["disease"] = sentence
+                    else:
+                        semantic_frame = lu_model.semantic_frame(sentence)
+                        slot_dictionary = semantic_frame['slot']
+                    print ('[ Before LU ]')
+                    print (DM)
+                    print("[ LU ]")    
+                    for slot, value in semantic_frame['slot'].items():
+                        print(slot, ": ", value)
+                    for slot in slot_dictionary:
+                        if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
+                            DM["State"][slot] = slot_dictionary[slot]
 
-	    #sentence = input('U: ')
-            pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
-            match = pattern.match(sentence)
-            if match:
-                DM["State"]["time"] = sentence
-            elif sentence in week:
-                DM["State"]["time"] = sentence
-	# elif sentence in doctor:
-	#     DM["State"]["doctor"] = sentence
-            elif sentence in division:
-                DM["State"]["division"] = sentence
-            elif sentence in disease:
-                DM["State"]["disease"] = sentence
-            else:
-                semantic_frame = lu_model.semantic_frame(sentence)
-                slot_dictionary = semantic_frame['slot']
-            print ('[ Before LU ]')
-            #for key, value in DM:
-            #    print (key,':', value)
-            print (DM)
-            print("[ LU ]")    
-            for slot, value in semantic_frame['slot'].items():
-                print(slot, ": ", value)
-            for slot in slot_dictionary:
-                if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
-                    DM["State"][slot] = slot_dictionary[slot]
+                    if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
+                        DM["State"]["time"] = None
 
-            if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
-                DM["State"]["time"] = None
-
-            if DM["Intent"] == None:
-                DM["Intent"] = int(semantic_frame['intent'])
-                print("Intent : ", DM["Intent"])
-            DM = DM_request(DM)
-            DM_nlg = DM
-            DM_nlg['Sentence'] = get_sentence(DM)
-            print ("[ DM ]")
-            for i in DM_nlg:
-                print (i, DM_nlg[i])
-            DM_path = "DM_" + str(vid)+".json"
-            #print (os.path)
-            with open("user_data/DM_"+name+".json", 'w') as fp:
-                DM_nlg['Use'] = 1
-                json.dump(DM_nlg, fp)
-                print("save succeed.")
-            #if DM["Request"] == "end":
-            #    sys.exit()
-            #vid += 1
-            #print("update vid = " +str(vid))
-            print("vid")
-            print(vid)
-            print("new_id")
-            print(new_id)
-            print("multi_id")
-            print(multi_id)
-            #break
-            #time.sleep(0.5)
+                    if DM["Intent"] == None:
+                        DM["Intent"] = int(semantic_frame['intent'])
+                    print("Intent : ", DM["Intent"])
+                    DM = DM_request(DM)
+                    DM_nlg = DM
+                    DM_nlg['Sentence'] = get_sentence(DM)
+                    print ("[ DM ]")
+                    for i in DM_nlg:
+                        print (i, DM_nlg[i])
+                    DM_path = "DM_" + str(vid)+".json"
+                    with open("user_data/DM_"+name+".json", 'w') as fp:
+                        #DM_nlg['Use'] = 1
+                        json.dump(DM_nlg, fp)
+                        print("save succeed.")
         time.sleep(0.5) #wait 0.5 secone to listen to if a fb new data stored.
 
-class MyException(Exception):
-    def __init__(self, value):
-        self.value = value
 if __name__ == '__main__':
-    #sched = BlockingScheduler()
-    #sched.add_job(main, 'interval', seconds=1800)
-    #sched.start()
     main()
-    #while True:
-    #    try:
-    #        main()
-    #    except MyException as e:
-    #        if e.value == 'restart':
-    #            continue
