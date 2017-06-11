@@ -63,8 +63,8 @@ def main():
     collection_division = client[DB_NAME]["division"]
     collection_disease = client[DB_NAME]["disease"]
 
-    print(collection_division.count())
-    print(collection_disease.count())
+    # print(collection_division.count())
+    # print(collection_disease.count())
 
     db.create_collection_division(collection_division)
     db.create_collection_disease(collection_disease)
@@ -78,7 +78,7 @@ def main():
     # for disease in collection_disease.find({"symptom": {"$regex": "流鼻"}}):
     #     print (disease)
 
-    for disease in collection_disease.find({"$and": [{"symptom": {"$regex": "流鼻"}}, {"disease_c": {"$regex": "百日"}}]}):
+    for disease in collection_disease.find({"disease_c": "白內障"}):
         print(disease)
 
 
