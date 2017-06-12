@@ -3,7 +3,7 @@ import tensorflow as tf
 import sys
 import random
 import numpy as np
-import re 
+import re
 #############################
 
 
@@ -34,12 +34,13 @@ INITIAL_EPSILON = 0.5 #0.0001 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 ACTIONS = 12 # number of valid actions
-STATES = 15 # number of states 
+STATES = 15 # number of states
 n_hidden_1 = 256  # 1st layer number of features
 n_hidden_2 = 256  # 2nd layer number of features
 n_input = STATES  # MNIST data input (img shape: 28*28)
 n_classes = ACTIONS # MNIST total classes (0-9 digits)
 NDEBUG = False# if False print dialogue detail
+
 def get_dbinfo(slot1,slot2, choose):
     client = db.MongoClient(DB_IP, DB_PORT)
 
@@ -109,7 +110,7 @@ action_dict = {0:end,
         10:lambda s:confirm("doctor",s),
         11:lambda s:confirm("time",s)
         }
-
+example_answer = [[],[1,0],[1,0],[1,5,0],[3,0],[3,4,0]]
 slot_dict = {
     "intent":1,
     "disease":2,
@@ -135,7 +136,7 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
     ##      state: updated binary list
     ##      state_verbose: updated dictionary
     ##      LU_frame
-
+    addRulebase = True
     LU_frame = semantic_frame(observation)
 
     if(old_state==None):
@@ -146,7 +147,10 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
         state_verbose = old_state_verbose
     if LU_frame['intent']!= '':
         if state_verbose['intent']==[]:
-            state_verbose['intent'] = [LU_frame['intent']]
+            if "我想要掛門診" in observation and addRulebase:
+                state_verbose['intent'] = [5]
+            else:
+                state_verbose['intent'] = [int(LU_frame['intent'])]
             state[int(LU_frame['intent'])-1] = 1 ######must bugs here zzz
     for key,value in LU_frame['slot'].items(): #state
         if value!='':
@@ -248,6 +252,7 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         print("Successfully loaded:", checkpoint.model_checkpoint_path)
     else:
         print("Could not find old network weights")
+
     # the training loop
     epsilon = INITIAL_EPSILON
     t = 0
@@ -332,7 +337,7 @@ def trainNetwork(s, readout, h_fc1, sess, var):
             sim_user.initial()
             do_nothing = None
             x_t, r_0, Terminal, Success = sim_user.step(do_nothing)
-            s_t,s_t_verbose, LU_frame = state_update(x_t, 
+            s_t,s_t_verbose, LU_frame = state_update(x_t,
                     lu_model.semantic_frame, old_state=None, old_state_verbose=None)
             #  print('\033[93m' + "User: " + '\033[0m' + x_t)
 
@@ -359,6 +364,31 @@ def trainNetwork(s, readout, h_fc1, sess, var):
             h_file.write(",".join([str(x) for x in h_fc1.eval(feed_dict={s:[s_t]})[0]]) + '\n')
             cv2.imwrite("logs_tetris/frame" + str(t) + ".png", x_t1)
         '''
+def UserSimDebug():
+    sim_user = CompleteUser()
+    for i in range(1,6):
+        print("--- initializing user simulator ---")
+        CompleteUser.initial(i)
+        answers = example_answer[CompleteUser.user_intent]
+        do_nothing = None
+        x_t, r_0, Terminal, Success = sim_user.step(do_nothing)
+        s_t, s_t_verbose, LU_frame = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
+        for a in answers:
+            a_t = np.zeros([ACTIONS])
+            a_t[a] = 1
+            print("\033[1;33;40mUser: ", x_t,"\033[0m")
+            print("LU: ",LU_frame)
+            # some function using action_index and state_verbose to generate
+            # semantic frame for the user simulator or the NLG module
+            DM_frame = generate_DM_frame(s_t_verbose, action_dict[a])
+            print("DoctorBot: ",DM_frame)
+            x_t1, r_t, Terminal, Success = sim_user.step(DM_frame)
+            s_t1, s_t_verbose, LU_frame = state_update(x_t1, lu_model.semantic_frame, s_t,s_t_verbose)
+            action_affect_state(a, s_t1)
+            print("/ ACTION", a, "/ REWARD", r_t,)
+            s_t = s_t1
+            x_t = x_t1
+        print("\033[1;33;40mUser: ", x_t,"\033[0m")
 
 def playGame():
     sess = tf.Session()
@@ -366,7 +396,8 @@ def playGame():
     trainNetwork(s, readout, h_fc1, sess, var)
 
 def main():
-    playGame()
+    UserSimDebug()
+    #  playGame()
 
 if __name__ == "__main__":
     main()

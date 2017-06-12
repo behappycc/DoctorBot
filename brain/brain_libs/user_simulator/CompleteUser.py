@@ -13,9 +13,10 @@ class CompleteUser(object):
         turn = 0
 
         @staticmethod
-        def initial():
+        def initial(intent = 0):
                 CompleteUser.generate = UserSimulation.intent_slot_generator()
-                CompleteUser.user_intent = CompleteUser.generate.goal["intent"]
+                CompleteUser.user_intent = CompleteUser.generate.goal["intent"] if intent == 0 else intent
+                print(CompleteUser.user_intent)
                 CompleteUser.user_slot = CompleteUser.generate.goal["slot"]
                 print(CompleteUser.user_slot)
                 CompleteUser.sim_user = User(intent = CompleteUser.user_intent, slot = CompleteUser.user_slot)
@@ -38,3 +39,11 @@ class CompleteUser(object):
             #      user_word, reward_once, end = ComplereUser.sim_user.respond(DM)
             #      CompleteUser.initial()
             return user_word , reward_once, end, Success
+
+def main():
+    sim_user = CompleteUser()
+    for i in range(1,6):
+        print("--- initializing user simulator ---")
+        CompleteUser.initial(intent = i)
+if __name__ == "__main__":
+    main()
