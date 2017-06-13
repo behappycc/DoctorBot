@@ -52,6 +52,26 @@ def create_json_list(json_list, select_list, sen1, sen2, sen3):
         json_list.append(item)
         item = []
 
+
+def write_to_json(file_name, json_list):
+    with open(file_name, "w", encoding='utf-8') as data_write:
+        print("[", file=data_write)
+        for j, items in enumerate(json_list):
+            json_len = len(json_list)-1
+            print("    [", file=data_write)
+            for i, sen in enumerate(items):
+                item_len = len(items)-1
+                if i == item_len:
+                    print('        "' + sen + '"', file=data_write)
+                else:
+                    print('        "' + sen + '",', file=data_write)
+            if j == json_len:
+                print("    ]", file=data_write)
+            else:
+                print("    ],", file=data_write)
+        print("]", file=data_write)
+    data_write.close()
+
 def main():
 
     with open('division.csv', 'r') as div_rf:
@@ -300,27 +320,9 @@ def main():
     print("-----------------")
     print(len(test_json))
 
-    with open("train.json", "w") as data_write:
-        print("[", file=data_write)
-        for items in train_json:
-            print("    [", file=data_write)
-            for sen in items:
-                print('        "' + sen + '",', file=data_write)
-    data_write.close()
-    with open("valid.json", "w") as data_write:
-        print("[", file=data_write)
-        for items in valid_json:
-            print("    [", file=data_write)
-            for sen in items:
-                print('        "' + sen + '",', file=data_write)
-    data_write.close()
-    with open("test.json", "w") as data_write:
-        print("[", file=data_write)
-        for items in test_json:
-            print("    [", file=data_write)
-            for sen in items:
-                print('        "' + sen + '",', file=data_write)
-    data_write.close()
+    write_to_json("train.json", train_json)
+    write_to_json("valid.json", valid_json)
+    write_to_json("test.json", test_json)
 
 if __name__ == '__main__':
     main()

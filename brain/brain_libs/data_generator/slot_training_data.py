@@ -66,15 +66,15 @@ def main():
     disease_list = []
     division_list = []
     doctor_list = []
-    time_list = ['星期一,', '星期二,', '星期三,', '星期四,', '星期五,', '星期六,', '星期日,', '星期天,',
-                 '禮拜一,', '禮拜二,', '禮拜三,', '禮拜四,', '禮拜五,', '禮拜六,', '禮拜日,', '禮拜天,', '']
+    time_list = ['106.5.5', '106.1.6', '106.5.16', '106.2.5',
+                 '106.5.6', '106.9.5', '106.7.6', '106.3.6', '']
     disease_list_generator(disease_file, disease_list, division_list)
     doctor_list_generator(division_file, doctor_list)
 
     disease_list_sample = ['青光眼']
     division_list_sample = ['外科']
     doctor_list_sample = ['王大明']
-    time_list_sample = ['星期一', '']
+    time_list_sample = ['106.5.6', '']
 
     pattern_list = [
         [['請問', ''], ['得', ''], disease_list_sample, ['會'], ['怎麼樣', '怎樣'], [',&1']],
@@ -94,7 +94,7 @@ def main():
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list_sample, division_list_sample, ['的門診', ''], [',&5']],
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list_sample, disease_list_sample, ['的門診'], [',&5']]
     ]
-
+    sentence_count = 0
     st_wf = open("slot_training.txt", "w")
     for lis in pattern_list:
         for sen in data_generator(lis):
@@ -124,8 +124,9 @@ def main():
             for slot_sen in data_generator(slot_parse):
                 modify_sen = slot_sen[:len(slot_sen)-1]
                 output = "([" + modify_sen + "],[" + slot_tag + "])"
+                sentence_count += 1
                 print(output, file=st_wf)
-
+    print(sentence_count)
     div_rf.close()
     dis_rf.close()
     st_wf.close()

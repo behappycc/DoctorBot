@@ -64,8 +64,8 @@ def main():
     disease_list = []
     division_list = []
     doctor_list = []
-    time_list = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日', '星期天',
-                 '禮拜一', '禮拜二', '禮拜三', '禮拜四', '禮拜五', '禮拜六', '禮拜日', '禮拜天', '']
+    time_list = ['106.5.5', '106.1.6', '106.5.16', '106.2.5',
+                 '106.5.6', '106.9.5', '106.7.6', '106.3.6', '']
     disease_list_generator(disease_file, disease_list, division_list)
     doctor_list_generator(division_file, doctor_list)
 
@@ -87,12 +87,13 @@ def main():
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, division_list, ['的門診', ''], [',&5']],
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], time_list, disease_list, ['的門診', ''], [',&5']]
     ]
-
+    sentence_count = 0
     it_wf = open("intent_training.txt", "w")
     for lis in pattern_list:
         for sen in data_generator(lis):
+            sentence_count += 1
             print(sen, file=it_wf)
-
+    print(sentence_count)
     div_rf.close()
     dis_rf.close()
     it_wf.close()
