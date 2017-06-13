@@ -13,7 +13,7 @@ Total data will be split into the following parts:
 import csv
 import ast
 import math
-
+import json, codecs
 
 def search_disease_file(file, disease_name, column):
     for row in file:
@@ -55,6 +55,8 @@ def create_json_list(json_list, select_list, sen1, sen2, sen3):
 
 def write_to_json(file_name, json_list):
     with open(file_name, "w", encoding='utf-8') as data_write:
+        json.dump(json_list, data_write, ensure_ascii=False)
+        """
         print("[", file=data_write)
         for j, items in enumerate(json_list):
             json_len = len(json_list)-1
@@ -70,6 +72,7 @@ def write_to_json(file_name, json_list):
             else:
                 print("    ],", file=data_write)
         print("]", file=data_write)
+        """
     data_write.close()
 
 def main():
@@ -123,17 +126,17 @@ def main():
     select_intent = ['查詢症狀,查詢科別', '查詢症狀,查詢醫生', '查詢症狀,查詢時刻表', '查詢症狀,掛號',
                      '查詢科別,查詢醫生', '查詢科別,查詢時刻表', '查詢科別,掛號',
                      '查詢醫生,查詢時刻表', '查詢時刻表,掛號', '查詢醫生掛號']
-    create_json_list(json_list, select_intent, "select(slot='intent',intent='",
+    create_json_list(json_list, select_intent, "select(slot='intent';intent='",
                      "請選擇服務項目,", "請問您想要哪個服務,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
 
-    create_json_list(json_list, select_intent, "select(slot='intent',intent='",
+    create_json_list(json_list, select_intent, "select(slot='intent';intent='",
                      "請選擇您想要的服務項目,", "請問您想要選擇哪一個服務,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
 
-    create_json_list(json_list, select_intent, "select(slot='intent',intent='",
+    create_json_list(json_list, select_intent, "select(slot='intent';intent='",
                      "請選擇一個您想要的服務項目,", "您要選擇哪一個服務項目,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
@@ -143,7 +146,7 @@ def main():
         if 2 < index < len(disease_list)-2:
             select_disease.append(item + "," + disease_list[index+1])
 
-    create_json_list(json_list, select_disease, "select(slot='disease',disease='",
+    create_json_list(json_list, select_disease, "select(slot='disease';disease='",
                      "請選擇疾病名稱,", "請問是哪一個疾病,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
@@ -153,7 +156,7 @@ def main():
         if 2 < index < len(division_list)-2:
             select_division.append(item + "," + division_list[index+1])
 
-    create_json_list(json_list, select_disease, "select(slot='division',division='",
+    create_json_list(json_list, select_disease, "select(slot='division';division='",
                      "請選擇科別,", "請問您要選擇哪個科別,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
@@ -163,7 +166,7 @@ def main():
         if 2 < index < len(doctor_list)-2:
             select_doctor.append(item + "," + doctor_list[index+1])
 
-    create_json_list(json_list, select_doctor, "select(slot='division',division='",
+    create_json_list(json_list, select_doctor, "select(slot='division';division='",
                      "請選擇醫生,", "請問您要選擇哪位醫生,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
@@ -177,29 +180,29 @@ def main():
     json_list = []
 # confirm intent
     intent_list = ['查詢症狀', '查詢科別', '查詢醫生', '查詢時刻表', '掛號']
-    create_json_list(json_list, intent_list, "confirm(slot='intent',intent='",
+    create_json_list(json_list, intent_list, "confirm(slot='intent';intent='",
                      "請問您是否是要", "您是不是要")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
 # confirm disease
-    create_json_list(json_list, disease_list, "confirm(slot='disease',disease='",
+    create_json_list(json_list, disease_list, "confirm(slot='disease';disease='",
                      "請問您是不是說", "請問是不是這個疾病：")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
 # confirm division
-    create_json_list(json_list, division_list, "confirm(slot='division',division='",
+    create_json_list(json_list, division_list, "confirm(slot='division';division='",
                      "請問您是否說", "請問是不是這個科別：")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
 # confirm doctor
-    create_json_list(json_list, doctor_list, "confirm(slot='doctor',doctor='",
+    create_json_list(json_list, doctor_list, "confirm(slot='doctor';doctor='",
                      "請問您是否指的是", "請問是不是這位醫生：")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
 # confirm time
     select_time = ['106.5.5','106.5.4','106.1.6','106.5.25','106.5.16','106.2.5','106.5.4',
                    '107.5.5','106.5.6','106.9.5','106.5.6','106.5.20','106.7.6','106.5.4','106.3.6']
-    create_json_list(json_list, select_time, "confirm(slot='time',time='",
+    create_json_list(json_list, select_time, "confirm(slot='time';time='",
                      "請問是否想要這天：", "請問是不是這個日期：")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
@@ -210,7 +213,7 @@ def main():
     for dis in disease_list:
         result = search_disease_file(disease_csv, dis, 4)
         if result != "":
-            item.append("end(intent='1',disease='" + dis + "',results='" + result + "')")
+            item.append("end(intent='1';disease='" + dis + "';results='" + result + "')")
             item.append("幫您查詢症狀,以下是" + dis + "的症狀," + result)
             item.append(dis + "的症狀有" + result)
             json_list.append(item)
@@ -222,7 +225,7 @@ def main():
     for dis in disease_list:
         result = search_disease_file(disease_csv, dis, 2)
         if result != "":
-            item.append("end(intent='2',disease='" + dis + "',results='" + result + "')")
+            item.append("end(intent='2';disease='" + dis + "';results='" + result + "')")
             item.append("已查詢到科別," + dis + "的科別是," + result)
             item.append(dis + "的相關科別是" + result)
             json_list.append(item)
@@ -234,7 +237,7 @@ def main():
     for dis in disease_list:
         result = search_doctor(division_csv, dis, "")
         if result != "":
-            item.append("end(intent='3',disease='" + dis + "',results='" + result + "')")
+            item.append("end(intent='3';disease='" + dis + "';results='" + result + "')")
             item.append("已經幫您查詢到" + dis + "的主治醫生有," + result)
             item.append(dis + "的主治醫師有" + result)
             json_list.append(item)
@@ -246,7 +249,7 @@ def main():
     for dis in disease_list:
         result = search_doctor(division_csv, dis, "")
         if result != "":
-            item.append("end(intent='3',division='眼科',results='" + result + "')")
+            item.append("end(intent='3';division='眼科';results='" + result + "')")
             item.append("已查詢到眼科的醫師有," + result)
             item.append("眼科的醫生有" + result)
             json_list.append(item)
@@ -256,7 +259,7 @@ def main():
 # End intent=4
     item = []
     for dis in disease_list:
-        item.append("end(intent='4',disease='" + dis + "',doctor='胡芳蓉',results='106.5.5,106.5.6')")
+        item.append("end(intent='4';disease='" + dis + "';doctor='胡芳蓉';results='106.5.5,106.5.6')")
         item.append("查詢到" + dis + "胡芳蓉醫師的門診時刻有106.5.5,106.5.6,")
         item.append(dis + "胡芳蓉醫師的門診時刻有106.5.5,106.5.6")
         json_list.append(item)
@@ -266,7 +269,7 @@ def main():
 # End intent=4
     item = []
     for dis in division_list:
-        item.append("end(intent='4',division='" + dis + "',doctor='胡芳蓉',results='106.5.5,106.5.6')")
+        item.append("end(intent='4';division='" + dis + "';doctor='胡芳蓉';results='106.5.5,106.5.6')")
         item.append("幫您查詢到" + dis + "胡芳蓉醫師的門診時刻有106.5.5,106.5.6,")
         item.append(dis + "胡芳蓉醫生門診時間表是106.5.5,106.5.6")
         json_list.append(item)
@@ -276,7 +279,7 @@ def main():
 # End intent=5
     item = []
     for dis in disease_list:
-        item.append("end(intent='5',disease='" + dis + "',doctor='胡芳蓉',time='106.5.5')")
+        item.append("end(intent='5';disease='" + dis + "';doctor='胡芳蓉';time='106.5.5')")
         item.append("幫您預約掛號" + dis + "胡芳蓉醫師106.5.5的門診")
         item.append(dis + "胡芳蓉醫師106.5.5的門診已預約好了")
         json_list.append(item)
@@ -285,7 +288,7 @@ def main():
     json_list = []
     item = []
     for dis in disease_list:
-        item.append("end(intent='5',disease='" + dis + "',doctor='胡芳蓉',time='106.5.5')")
+        item.append("end(intent='5';disease='" + dis + "';doctor='胡芳蓉';time='106.5.5')")
         item.append("預約了" + dis + "胡芳蓉醫師106.5.5的門診")
         item.append(dis + "胡芳蓉醫師106.5.5的門診已預約完成")
         json_list.append(item)
@@ -295,7 +298,7 @@ def main():
 # End intent=5
     item = []
     for dis in division_list:
-        item.append("end(intent='5',division='" + dis + "',doctor='胡芳蓉',time='106.5.5')")
+        item.append("end(intent='5';division='" + dis + "';doctor='胡芳蓉';time='106.5.5')")
         item.append("已幫您掛號" + dis + "胡芳蓉醫師106.5.5的門診")
         item.append(dis + "胡芳蓉醫師106.5.5的門診已掛號完成")
         json_list.append(item)
@@ -304,7 +307,7 @@ def main():
     json_list = []
     item = []
     for dis in division_list:
-        item.append("end(intent='5',division='" + dis + "',doctor='胡芳蓉',time='106.5.5')")
+        item.append("end(intent='5';division='" + dis + "';doctor='胡芳蓉';time='106.5.5')")
         item.append("掛了" + dis + "胡芳蓉醫師106.5.5的門診")
         item.append(dis + "胡芳蓉醫師106.5.5的門診已掛好了")
         json_list.append(item)
