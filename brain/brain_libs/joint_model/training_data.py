@@ -73,7 +73,8 @@ def main(data_dir):
     division_list = []
     doctor_list = []
     time_list = ['星期一 ', '星期二 ', '星期三 ', '星期四 ', '星期五 ', '星期六 ', '星期日 ', '星期天 ',
-                 '禮拜一 ', '禮拜二 ', '禮拜三 ', '禮拜四 ', '禮拜五 ', '禮拜六 ', '禮拜日 ', '禮拜天 ']
+                 '禮拜一 ', '禮拜二 ', '禮拜三 ', '禮拜四 ', '禮拜五 ', '禮拜六 ', '禮拜日 ', '禮拜天 ',
+                 '明天', '後天', '今天']
     disease_list_generator(disease_file, disease_list, division_list)
     doctor_list_generator(division_file, doctor_list)
 
