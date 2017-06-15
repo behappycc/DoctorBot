@@ -13,6 +13,7 @@ a.inform_no_match
 a.inform_only_match
 a.recommend
 a.suggest
+a.select
 sv.acceptscreditcards.dontcare
 sv.acceptscreditcards.no
 sv.acceptscreditcards.yes
