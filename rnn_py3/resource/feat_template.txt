@@ -1,0 +1,10 @@
+a.inform
+a.select
+a.confirm
+a.end
+s.slot
+s.disease
+s.division
+s.doctor
+s.time
+

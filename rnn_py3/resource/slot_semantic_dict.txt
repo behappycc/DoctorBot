@@ -1,0 +1,7 @@
+{
+    "disease"       : ["disease"],
+    "division"      : ["division"],
+    "slot"          : [],
+    "doctor"        : ["doctor"],
+    "time"          : ["time"]
+}
