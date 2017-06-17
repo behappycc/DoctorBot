@@ -77,14 +77,10 @@ def post_facebook_message(fbid):
     with open(json_path,'r') as json_file:
         line = json.load(json_file)
     text = ""
-    if line['Use'] == 0:
-        time.sleep(0.5)
-        text = "請稍後再重新輸入(正在處理其他使用者)"
     #        continue
-    else:
+    if True:
         for k, v in line.items():
             text = text + str(k) + " " + str(v) + '\n'
-        line['Use'] = 0
         with open(json_path,'w') as json_file:
             json.dump(line,json_file)
     #        break
