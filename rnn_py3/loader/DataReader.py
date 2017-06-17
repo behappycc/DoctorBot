@@ -301,14 +301,31 @@ class DataReader(object):
     def genFeatVec(self,feat,cardinality,dfs):
         a,sv,s,v = [],[],[],[]
         a.append(cardinality.index('a.'+feat[0][-1]))
+        #print('feat')
+        #print(feat[0])
+        #print(feat[1:])
+        #print('feat_end')
         for item in feat[1:]:
             si,vi = item
             if 'sv.'+si+'.'+vi in cardinality:
                 sv.append(  cardinality.index('sv.'+si+'.'+vi)-dfs[1])
+                #print('==sv==')
+                #print(sv)
+                #print('==sv==')
             if 's.'+si in cardinality:
                 s.append(   cardinality.index('s.'+si)-dfs[2] )
+           #     print('==ss==')
+           #     print(s)
+           #     print(cardinality.index('s.'+si))
+           #     print(dfs[2])
+           #     print('==ss==')
             if 'v.'+vi in cardinality:
                 v.append(   cardinality.index('v.'+vi)-dfs[3] )
+                #print('====vv====')
+                #print(v)
+                #print(cardinality.index('v.'+vi))
+           #     print(dfs[3])
+           #     print('====vv====')
         if len(feat[1:])==0:
             sv.append(  cardinality.index('sv.NONE.NONE')-dfs[1])
             s.append(   cardinality.index('s.NONE')-dfs[2])
