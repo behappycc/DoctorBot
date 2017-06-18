@@ -27,33 +27,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
     crossorigin="anonymous"></script>
 <script>
-     $(document).ready(function() {
-        var i=0;  //use for data-id 
-        $('#send_button').on('click', sendMessage);
-        $('#user_input').on('keypress', sendMessage);
-        $('#user_input').on('keyup blur', function () {
-            if($('#user_input').val().length > 0) {
-                $('#send_button').prop('disabled', false); 
-            } else {
-                $('#send_button').prop('disabled', 'disabled'); 
-            }
-        });
-        $('#messages').on('click','#ms_api_r',function(){
-	console.log('button');
-        $.ajax({
-        url:'/ms_api',
-        type:'GET',
-        data:{'status':'ok'},
-        contentType:'application/json',
-        success:function(){console.log('send api')}       
-	})
-        return false;
-
-      });
-        i = i+1;
-    });
-
-    'use strict';
+     turn = 0;
     var bot_message = ['<li class="list-group-item" data=0 style="text-align: left">',
     'TEXT',
     '<button id="ms_api_r" class="btn btn-default" style="text-align: right">播放</button>',
@@ -63,15 +37,15 @@
     'TEXT',
     '<button class="btn btn-default" id="ms_api" >播放</button>',
     '</li>'];
-    var sendMessage = function (e) {
-       if (e.type === 'click' || e.which === 13){
+    function sendMessage(event) { 
+            console.log('start')
             var user_input = $('#user_input').val();
-            var message = user_message.join('\n').replace('TEXT', user_input);
+            $btn = $('<button class="btn btn-default" id="ms_api">').text('播放').attr('data-id',turn)
+            $user_mes = $('<li class="list-group-item" style="text-align:right">').attr('data-id',turn).append(user_input).append($btn)
             var post_data = {
                 'message' : user_input
             }
-            //var ii=i;
-            $('#messages').append(message);
+            $('#messages').append($user_mes);
             $('#user_input').val('');
             $('#messages').scrollTop($('ul li').last().position().top + $('ul li').last().height());
            function csrfSafeMethod(method) {
@@ -98,15 +72,18 @@
                         console.log(result.error_text);
                     }
                     console.log(result);
-                    var text = bot_message.join('\n').replace('TEXT', result);//.replace(0,ii);
+                    $btn = $('<button id="ms_api"class="btn btn-default" style="text-align:right">').text("播放").attr('data-id',turn)
+                    $li = $('<li class="list-group-item" style="text-align:left">').attr('data-id',turn).append(result).append($btn)
+                    turn +=1
+                    //var text = bot_message.join('\n').replace('TEXT', result);//.replace(0,ii);
                     //text['data'] = '1';
-                    $('#messages').append(text);
+                    $('#messages').append($li);
                     $('#messages').scrollTop($('ul li').last().position().top + $('ul li').last().height());
-                   
                 }
             });
+           turn +=1; //turn is used for identify id
             return false;
-        }
+        console.log('send_end')
     };
 
     // using jQuery
@@ -127,6 +104,48 @@
     }
     var csrftoken = getCookie('csrftoken');
 
+const synthesis = window.speechSynthesis;
+function speak(message){
+    const word = new SpeechSynthesisUtterance(message);
+    const voices = synthesis.getVoices();
+    for (i = 0; i<voices.lenth;i++){
+        if(voices[i].name ==="Google 國語（臺灣）"){
+        word.voice = voices[i];
+        }
+        }
+
+word.rate = 1.5;
+word.pitch = 1;
+synthesis.speak(word);
+}
+
+   $(document).ready(function() {
+        $('#send_button').click(turn,sendMessage);
+        $('#user_input').on('keyup blur', function () {
+            if($('#user_input').val().length > 0) {
+                $('#send_button').prop('disabled', false); 
+            } else {
+                $('#send_button').prop('disabled', 'disabled'); 
+            }
+        });
+        $('#messages').on('click','#ms_api',function(){
+        console.log('button');
+        id = $(this).attr('data-id')
+        text = $("li[data-id="+id+"]").text().replace('播放','') //- $(this).text()
+        console.log(id)      
+        console.log(typeof(text))
+        speak(text)
+        $.ajax({
+        url:'/ms_api',
+        type:'GET',
+        data:{'status':'ok'},
+        contentType:'application/json',
+        success:function(){console.log('send api')}       
+        })
+        return false;
+
+      });
+    });
 
 </script>
 

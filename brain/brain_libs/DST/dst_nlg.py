@@ -225,13 +225,93 @@ def main():
     print("waiting for the fb input...")
     fb.execute('select * from fb_doctor_chatbot_fb_db')
     init = fb.fetchall()   
-    
+    buff = "" 
     while True:
+             #website user DM
+        if os.path.exists("user_data/DM_website_input.json"):
+            with open("user_data/DM_website_input.json",'r') as f:
+                f = json.load(f)
+            sentence = f['content']
+            if buff == sentence:
+                continue
+            else:
+                print('not equal')
+                print(type(sentence))
+                buff = sentence
+                if os.path.exists("user_data/DM_website_output.json"):
+                    with open("user_data/DM_website_output.json",'r') as f:
+                        DM = json.load(f)
+                        print("\nload DM success\n")
+
+                else:
+                    with open("user_data/DM_website_output.json",'w') as f:
+                        DM = initialize()
+                        DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                        json.dump(DM,f)
+                        print("save DM success")
+                slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
+            #if True:
+                if True:
+                    if sentence == '謝謝' or sentence == '你好' or sentence == '嗨':
+                        DM = initialize()
+                        DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                        with open('./user_data/DM_website_output.json','w') as f_w:
+                            json.dump(DM,f_w)
+                            print("update DM success")
+                        continue
+                    if DM['Request'] == 'end':
+                        DM = initialize()
+                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
+                    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+                    match = pattern.match(sentence)
+                    print(match)
+                    print(sentence)
+                    if match:
+                        DM["State"]["time"] = sentence
+                        print('1')
+                    elif sentence in week:
+                        print('2')
+                        DM["State"]["time"] = sentence
+                    elif sentence in division:
+                        print('3')
+                        DM["State"]["division"] = sentence
+                    elif sentence in disease:
+                        print('4')
+                        DM["State"]["disease"] = sentence
+                        #semantic_frame = lu_model.semantic_frame(sentence)
+                        #slot_dictionary = semantic_frame['slot']
+                    else:
+                        semantic_frame = lu_model.semantic_frame(sentence)
+                        slot_dictionary = semantic_frame['slot']
+                    print ('[ Before LU ]')
+                    print (DM)
+                    print("[ LU ]")
+                    for slot, value in semantic_frame['slot'].items():
+                        print(slot, ": ", value)
+                    for slot in slot_dictionary:
+                        if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
+                            DM["State"][slot] = slot_dictionary[slot]
+
+                    if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
+                        DM["State"]["time"] = None
+
+                    if DM["Intent"] == None:
+                        DM["Intent"] = int(semantic_frame['intent'])
+                    print("Intent : ", DM["Intent"])
+                    DM = DM_request(DM)
+                    DM_nlg = DM
+                    DM_nlg['Sentence'] = get_sentence(DM)
+                    print ("[ DM ]")
+                    for i in DM_nlg:
+                        print (i, DM_nlg[i])
+                    with open("user_data/DM_website_output.json", 'w') as fp:
+                        json.dump(DM_nlg, fp)
+                        print("save succeed.")
+
         fb = conn.cursor()
         fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
         new_id = fb.fetchone()[0]
         multi_id=[]     #ids' list
-        #if(new_id !=vid or len(multi_id) != 0): #有新輸入的時候或還有使用者輸入沒有完成的時候
         fb.execute('select * from fb_doctor_chatbot_fb_db ')
         after = fb.fetchall()
         after = list(sorted(set(after)-set(init)))  #只要這次執行DST.py之後的FB輸入
@@ -257,7 +337,6 @@ def main():
                         with open("user_data/DM_"+name+".json",'w') as f:
                             DM = initialize()
                             DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-                            #DM['Use']=1
                             json.dump(DM,f)
                             print('write json DM')
                     slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
@@ -265,7 +344,6 @@ def main():
                         DM = initialize()
                         DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
                         with open('./user_data/DM_'+name+'.json','w') as f_w:
-                            #DM['Use'] = 1
                             json.dump(DM,f_w)
                             print("update DM success")
                         continue
@@ -307,10 +385,10 @@ def main():
                     for i in DM_nlg:
                         print (i, DM_nlg[i])
                     with open("user_data/DM_"+name+".json", 'w') as fp:
-                        #DM_nlg['Use'] = 1
                         json.dump(DM_nlg, fp)
                         print("save succeed.")
         time.sleep(0.5) #wait 0.5 secone to listen to if a fb new data stored.
+    time.sleep(0.5)
 
 if __name__ == '__main__':
     main()
