@@ -18,16 +18,17 @@
 
         <div class="input-group" >
             <input type="text" style="text-align: right" class="form-control" id="user_input" name="user_input" placeholder="Say something" />
-            <span class="input-group-btn"><button class="btn btn-default" id="send_button"><i class="glyphicon glyphicon-send"></i></button></span>
+            <span class="input-group-btn"><button class="btn btn-default" id="send_button"><i class="glyphicon glyphicon-send"></i></button><button class="btn btn-default" id ="speech_rec">說話</button></span>
         </div>
-        <button id="translate">click</button>
     </div>
 </body>
 
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
     crossorigin="anonymous"></script>
+<script>if (window.module) module = window.module;</script>
 <script>
+
      turn = 0;
     var bot_message = ['<li class="list-group-item" data=0 style="text-align: left">',
     'TEXT',
@@ -110,14 +111,14 @@ function text_translator(query){
     langFrom = "zh-cn";
     langTo = "en";
     var uri = "https://api.cognitive.microsoft.com/sts/v1.0/"+appId;
-    $.ajax({
-        url:uri,
-        type:'POST',
-        success:function(data){
-            console.log("post translotor")
-            console.log(data)
-        }
-    });
+   // $.ajax({
+   //     url:uri,
+   //     type:'POST',
+   //     success:function(data){
+   //         console.log("post translotor")
+   //         console.log(data)
+   //     }
+   // });
 };
 
 const synthesis = window.speechSynthesis;
@@ -131,16 +132,51 @@ function speak(message){
         }
 
 word.rate = 1.5;
-word.pitch = 1;
+word.pitch = 1.1;
 synthesis.speak(word);
 }
 
+function Recognition(){
+    const recognition = new SpeechRecognition();
+    recognition.lang='zh-TW';
+    recognition.start();
+    console.log('Ready to receive...');
+}
+
+recognition.onresult = function(event) {
+  // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+  // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+  // It has a getter so it can be accessed like an array
+  // The [last] returns the SpeechRecognitionResult at the last position.
+  // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
+  // These also have getters so they can be accessed like arrays.
+  // The [0] returns the SpeechRecognitionAlternative at position 0.
+  // We then return the transcript property of the SpeechRecognitionAlternative object
+
+  var last = event.results.length - 1;
+  var color = event.results[last][0].transcript;
+
+  diagnostic.textContent = 'Result received: ' + color + '.';
+  bg.style.backgroundColor = color;
+  console.log('Confidence: ' + event.results[0][0].confidence);
+}
+
+recognition.onspeechend = function() {
+recognition.stop();
+}
+
+
+
+
+
 var csrftoken = getCookie('csrftoken');
 
+
    $(document).ready(function() {
-        text = 'hello'
+        text='hi';
         $('#translate').click(text_translator(text));
         $('#send_button').click(turn,sendMessage);
+        $('#speech_rec').click(Recognition());
         $('#user_input').on('keyup blur', function () {
             if($('#user_input').val().length > 0) {
                 $('#send_button').prop('disabled', false); 
