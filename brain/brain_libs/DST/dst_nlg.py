@@ -145,19 +145,19 @@ def get_str(input):
 
 def greeting():
     sen_list = ["哈囉我的朋友，我是seek doctor Bot，有什麼我能幫得上忙的嗎？",
-                         "哈囉！你好，我是seek doctor Bot，請問有什麼需要幫忙的嗎？",
-                         "嗨你好，我是seek doctor Bot，吃飯了沒?",
-                         "哈囉～我是seek doctor Bot，有什麼需要幫忙的嗎？",
-                         "哈囉你好，我是seek doctor Bot，請問你有醫療上的問題嗎?",
-                         "我是Doctor Bot，專門解決各種醫療疑難雜症，請問有什麼需要幫忙的嗎？",
-                         "HELLO~我是seek doctor Bot，你最近過的怎麼樣啊?",
-                         "你好，我是seek doctor Bot，有什麼疑難雜症需要我幫忙的嗎？Doctor Bot 在這裡使命必達！",
-                         "你好！今天也活力充沛嗎~我是seek doctor Bot，請問有甚麼需要幫忙的？",
-                         "今天過得好嗎？我是Doctor Bot，很高興為您服務！",
-                         "你好，我是Doctor Bot，有任何需要幫助的，都可以跟我說哦",
-                         "你好R，我是seek doctor Bot，可以幫你什麼呢？",
-                         "您好，我是Doctor Bot，今天過的如何呢？",
-                         "安安您好！我是seek doctor Bot!"]
+                "哈囉！你好，我是seek doctor Bot，請問有什麼需要幫忙的嗎？",
+                "嗨你好，我是seek doctor Bot，吃飯了沒?",
+                "哈囉～我是seek doctor Bot，有什麼需要幫忙的嗎？",
+                "哈囉你好，我是seek doctor Bot，請問你有醫療上的問題嗎?",
+                "我是Doctor Bot，專門解決各種醫療疑難雜症，請問有什麼需要幫忙的嗎？",
+                "HELLO~我是seek doctor Bot，你最近過的怎麼樣啊?",
+                "你好，我是seek doctor Bot，有什麼疑難雜症需要我幫忙的嗎？Doctor Bot 在這裡使命必達！",
+                "你好！今天也活力充沛嗎~我是seek doctor Bot，請問有甚麼需要幫忙的？",
+                "今天過得好嗎？我是Doctor Bot，很高興為您服務！",
+                "你好，我是Doctor Bot，有任何需要幫助的，都可以跟我說哦",
+                "你好R，我是seek doctor Bot，可以幫你什麼呢？",
+                "您好，我是Doctor Bot，今天過的如何呢？",
+                "安安您好！我是seek doctor Bot!"]
     sentence = sen_list[random.randint(0, len(sen_list)-1)]
     sentence += "\n\n"
     sen_list = ["我支援的功能有", "我可以幫忙", "我能夠"]
@@ -211,6 +211,29 @@ def info_intent():
                 "請問你現在是想要做什麼呢？",
                 "嗨，您說您想要我提供什麼服務呢?",
                 "哈囉！請問您想要使用甚麼服務呢？"]
+    sentence = sen_list[random.randint(0, len(sen_list) - 1)]
+    return sentence
+
+def info_disease():
+    sen_list = ["還好嗎?生什麼病了?",
+                "跟我說疾病名稱，我就能幫你查到相關症狀資料唷！",
+                "請問你的病名是?",
+                "我要知道疾病名稱是甚麼才能回答喔",
+                "請問您的疾病名稱是?",
+                "得了什麼病呢？",
+                "請問您的疾病名稱是？",
+                "您生了什麼病呢?我有辦法幫你找到相關的資訊喔!快告訴我疾病名稱吧!",
+                "你覺得自己生了什麼病呢？",
+                "請問是生了什麼病呢？",
+                "請告訴我你的疾病名稱，我就可以提醒你該注意的地方或該知道的資訊囉",
+                "請提供疾病名稱？",
+                "告訴我您的疾病名稱吧！",
+                "您現在是要想要查什麼疾病呢？",
+                "請告訴我您想查詢的疾病名稱。",
+                "請問疾病的名稱是什麼呢？",
+                "你生什麼病R",
+                "麻煩告訴我疾病名稱，我才能幫您查到相關資訊喔><",
+                "我可以告訴你疾病對應的症狀喔，你想知道什麼呢？"]
     sentence = sen_list[random.randint(0, len(sen_list) - 1)]
     return sentence
 
