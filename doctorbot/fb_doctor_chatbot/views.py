@@ -40,15 +40,14 @@ class Doctor(generic.View):
                 if 'attachments' in message['message']:
                     for payload in message['message']['attachments']:
                         print(payload['payload'])
-                        print(payload['payload']['sticker_id'])
+                        if 'sticker' not in payload['payload']: 
+                            break
                         if payload['payload']['sticker_id']==369239263222822:
                             post_facebook(message['sender']['id'])
-                        elif 'sticker' in payload['payload']: 
-                            break
-                        else:    
-                            print(payload['payload']['url'])
-                            url = payload['payload']['url']
-                            face_api(url,message['sender']['id'])
+                        #else:    
+                        print(payload['payload']['url'])
+                        url = payload['payload']['url']
+                        face_api(url,message['sender']['id'])
                         
                 elif 'text' in message['message']:
                     savetodb(message,message['message']['text'],message['sender'])
@@ -109,7 +108,7 @@ def face_api(uri,fbid):
     'Content-Type': 'application/json',
 
     # NOTE: Replace the "Ocp-Apim-Subscription-Key" value with a valid subscription key.
-    'Ocp-Apim-Subscription-Key': 'aa017257cd20414188cd44f619ed9fc6',
+    'Ocp-Apim-Subscription-Key': '2cef9fd737ab4e959f4544cd450c2199',
     }
 
     params = urllib.parse.urlencode({
