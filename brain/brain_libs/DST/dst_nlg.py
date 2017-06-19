@@ -13,6 +13,7 @@ import CrawlerTimeTable
 sys.path.pop()
 sys.path.append('/user_data')
 import time
+import random
 #import djanigo
 #sys.path.append('../../../doctorbot')
 #from doctorbot import settings
@@ -142,6 +143,54 @@ def get_str(input):
     elif type(input) == str:
         return input
 
+def greeting():
+    greeting_template = ["哈囉我的朋友，我是seek doctor Bot，有什麼我能幫得上忙的嗎？",
+                         "哈囉！你好，我是seek doctor Bot，請問有什麼需要幫忙的嗎？",
+                         "嗨你好，我是seek doctor Bot，吃飯了沒?",
+                         "哈囉～我是seek doctor Bot，有什麼需要幫忙的嗎？",
+                         "哈囉你好，我是seek doctor Bot，請問你有醫療上的問題嗎?",
+                         "我是Doctor Bot，專門解決各種醫療疑難雜症，請問有什麼需要幫忙的嗎？",
+                         "HELLO~我是seek doctor Bot，你最近過的怎麼樣啊?",
+                         "你好，我是seek doctor Bot，有什麼疑難雜症需要我幫忙的嗎？Doctor Bot 在這裡使命必達！",
+                         "你好！今天也活力充沛嗎~我是seek doctor Bot，請問有甚麼需要幫忙的？",
+                         "今天過得好嗎？我是Doctor Bot，很高興為您服務！",
+                         "你好，我是Doctor Bot，有任何需要幫助的，都可以跟我說哦",
+                         "你好R，我是seek doctor Bot，可以幫你什麼呢？",
+                         "您好，我是Doctor Bot，今天過的如何呢？",
+                         "安安您好！我是seek doctor Bot!"]
+    sentence = greeting_template[random.randint(0, len(greeting_template)-1)]
+    sentence += "\n"
+    sen_list = ["我支援的功能有", "我可以幫忙", "我能夠"]
+    sentence += sen_list[random.randint(0, len(sen_list)-1)]
+    sentence += "(1)查疾病的症狀, (2)查疾病的科別, (3)查醫師, (4)查門診時刻表, (5)幫忙掛號，對我說 謝謝 可以重設系統"
+    return sentence
+
+def goodbye():
+    goodbye = ["祝你身體健康唷！掰掰",
+               "感謝你，希望你接下來事事順心！",
+               "希望下次還能再為您服務",
+               "感謝使用本服務，祝平安喜樂",
+               "嘻嘻，期待下次跟您對話。",
+               "感謝您使用本服務，祝您事事順心！",
+               "祝你有個開心的一天,掰掰~",
+               "感謝您使用本服務，希望下次見面是很久以後",
+               "謝謝，祝您身體健康、萬事如意，掰掰",
+               "感謝您使用Doctor Bot服務",
+               "謝謝您的使用",
+               "預防勝於治療，要好好保養您的身體呀!祝您身體健康!",
+               "謝謝您，祝你早日康復",
+               "再見～再見～再說一聲下次再見～",
+               "祝您身體健康一切順心，有個美好的一天",
+               "祝您身體健康。",
+               "感謝您使用本服務，歡迎再次光臨",
+               "感謝您的使用，祝您身體健康！",
+               "祝福您一切平安順遂！",
+               "很高興為您服務，祝您身體健康",
+               "歲月靜好，吃好睡飽，感謝您使用本服務，祝您身體健康！",
+               "平安喜樂！再見"]
+    sentence = goodbye[random.randint(0, len(goodbye) - 1)]
+    return sentence
+
 def get_sentence(DM):
     sentence =""
     if(DM["Request"] == "end"):
@@ -175,7 +224,8 @@ def get_sentence(DM):
             sentence += get_str(DM['State']['doctor'])
             sentence += get_str(DM['State']['time'])
             sentence += " 的門診\n"
-        sentence += "\n\n謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
+        sentence += "\n\n"
+        sentence += goodbye()
     elif(DM["Request"] == "info"):
         sentence += "請告訴我"
         for index,slot in enumerate(DM['Slot']):
@@ -333,13 +383,17 @@ def main():
                     else:
                         with open("user_data/DM_"+name+".json",'w') as f:
                             DM = initialize()
-                            DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                            DM['Sentence'] = greeting()
+                            #DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
                             json.dump(DM,f)
                             print('write json DM')
                     slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
-                    if sentence == '謝謝' or sentence == '你好' or sentence == '嗨':
+                    user_greeting = ['嗨', '你好', '您好', '哈囉', '安安', 'hi', 'Hi', '嗨嗨', '早安',
+                                     '午安', '晚安', '早上好', '勢早', 'Hello', 'hello']
+                    if sentence in user_greeting:
                         DM = initialize()
-                        DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                        DM['Sentence'] = greeting()
+                        #DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
                         with open('./user_data/DM_'+name+'.json','w') as f_w:
                             json.dump(DM,f_w)
                             print("update DM success")
