@@ -42,11 +42,17 @@ def disease_list_generator(disease_file, disease_list, division_list):
         for index, col in enumerate(row):
             if index == 0:  # Generate disease_list from disease_file
                 disease_list.append(col + ' ')
+                disease_list.append(col[0:len(col)-1] + ' ')
             elif index == 2:  # Generate division_list from disease_file
                 for item in ast.literal_eval(col):
                     if division_list.count(item) == 0:
                         division_list.append(item + ' ')
-
+                        if item[len(item)-2]=='科':
+                            division_list.append(item[0:len(item)-1]+' ')
+                        else:
+                            division_list.append(item[0:len(item)-1]+'科'+' ')
+                        if len(item)>3:
+                            division_list.append(item[0:2]+'科'+' ')
 
 def doctor_list_generator(division_file, doctor_list):
     for row in division_file:
@@ -55,7 +61,8 @@ def doctor_list_generator(division_file, doctor_list):
                 for item in ast.literal_eval(col):
                     if len(item) <= 3 and doctor_list.count(item) == 0:
                         doctor_list.append(item + ' ')
-
+                        doctor_list.append(item[0] + '醫生' + ' ')
+                        doctor_list.append(item[0] + '醫師' + ' ')
 
 def main(data_dir):
 
@@ -74,7 +81,7 @@ def main(data_dir):
     doctor_list = []
     time_list = ['星期一 ', '星期二 ', '星期三 ', '星期四 ', '星期五 ', '星期六 ', '星期日 ', '星期天 ',
                  '禮拜一 ', '禮拜二 ', '禮拜三 ', '禮拜四 ', '禮拜五 ', '禮拜六 ', '禮拜日 ', '禮拜天 ',
-                 '明天', '後天', '今天']
+                 '明天 ', '後天 ', '今天 ']
     disease_list_generator(disease_file, disease_list, division_list)
     doctor_list_generator(division_file, doctor_list)
 
@@ -84,7 +91,7 @@ def main(data_dir):
     time_list_sample = ['星期一']
 
     pattern_list = [
-        [['嗨', '你好', '哈囉', '安安', 'hi', '嗨嗨', '早安', '午安', '晚安', '早上好', '勢早', 'Hello', 'hello'], [' &0']],
+        [['嗨', '你好','妳好', '哈囉', '安安', 'hi', '嗨嗨', '早安', '午安', '晚安', '早上好', '勢早', 'Hello', 'hello','ㄤㄤ','早ㄤ'],['你好','您好','r',' ',''],[' ',''],[' ',' ',''],[' ',''], [' &0']],
         [['請問', ''], ['得', ''], disease_list_sample, ['會'], ['怎麼樣', '怎樣'], [' &1']],
         [['請問', ''], ['得', ''], disease_list_sample, ['會有'], ['什麼症狀', '哪些症狀'], [' &1']],
         [['我', ''], ['想', '要', '想要'], ['查', '查詢'], disease_list_sample, ['會有', '的'], ['症狀'] , [' &1']],
@@ -92,23 +99,25 @@ def main(data_dir):
         [['我想問', ''], ['得', ''], disease_list_sample, ['會'], ['怎麼樣', '怎樣'], [' &1']],
 
 
-        [['我想知道','我想要問','我要問','想問','請問', ''], ['得', ''], disease_list_sample, ['是', '屬於', '要看', '要掛', '要掛號'], ['哪', '什麼','哪一','甚麼'], ['科','部'], [' &2']],
+        [['我想知道','我想要問','我要問','想問','請問','如果', ''], ['得','有', ''], disease_list_sample, ['是', '屬於', '要看', '要掛', '要掛'], ['哪', '什麼','哪一','甚麼'], ['科','部'], [' &2']],
+        [['我想知道','我想要問','我要問','想問','請問', ''], ['科別','部門'],[' ',''],[' ',''], [' &2']],
 
         [['請問', ''], ['星期一', ''], ['有', ''], ['什麼', '哪些'], ['醫生', '醫師'], ['可以'],
          ['看', '掛', '掛號', '預約'], disease_list_sample, ['的門診'], [' &3']],
         [['請問', ''], disease_list_sample, ['要', '可以'], ['看', '掛', '掛號', '預約'], ['什麼', '哪些'], ['醫生', '醫師'], [' &3']],
 
-        [['請給我', '給我', '請告訴我', '告訴我', '請問'], ['星期一', ''], disease_list_sample, ['的門診時刻表', '的門診時間'], [' &4']],
-        [['請給我', '給我', '請告訴我', '告訴我', '請問'], ['星期一', ''], division_list_sample, ['的門診時刻表', '的門診時間'], [' &4']],
-        [['請給我', '給我', '請告訴我', '告訴我', '請問'], ['星期一', ''], doctor_list_sample, ['的門診時刻表', '的門診時間'], [' &4']],
-        [['我', ''], ['想', '要', '想要'], ['問時間', '問門診時間', '知道時間'], [' &4']],
-        
+        [['請給我', '給我', '請告訴我', '告訴我', '請問',''], ['星期一', ''], disease_list_sample, ['的門診時刻表', '的門診時間','的時間'], [' &4']],
+        [['請給我', '給我', '請告訴我', '告訴我', '請問',''], ['星期一', ''], division_list_sample, ['的門診時刻表', '的門診時間','的時間'], [' &4']],
+        [['請給我', '給我', '請告訴我', '告訴我', '請問',''], ['星期一', ''], doctor_list_sample, ['的門診時刻表', '的門診時間','的時間','的看診時間'], [' &4']],
+        [['我', ''], ['想', '要', '想要',''], ['問時間', '問門診時間', '知道時間'],[' ',''],[' ',' ',''], [' &4']],
+        [['我', ''], ['想', '要', '想要',''],['知道','問'],doctor_list_sample, ['的時間', '的門診時間', '的看診時間'], [' &4']],
+
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], ['星期一', ''], doctor_list_sample, ['的門診', ''], [' &5']],
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], ['星期一', ''], division_list_sample, ['的門診', ''], [' &5']],
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], ['星期一', ''], disease_list_sample, ['的門診'], [' &5']],
         [['我', ''], ['想', '要', '想要'], ['看', '掛', '掛號', '預約'], ['門診',''],[' &5']],
         
-        [['謝謝', '掰掰', '結束', '再見', 'bye', '好掰掰', '拜拜', '感謝', '好窩', '謝啦', '你真棒', '謝惹'], [' &6']]
+        [['謝謝', '掰掰','掰','okbye', '結束', '再見', 'bye', '好掰掰', '拜拜', '感謝', '好窩', '謝啦', '你真棒', '謝惹','再會','你可以走了'],[' ',' ',' ',''],[' ',' ',''],[' ',' ',''],[' ',' ',''],[' ',''],[' ',''], [' &6']]
     ]
 
     st_wf = open(os.path.join(data_dir, "source_sentence.txt"), "w")
