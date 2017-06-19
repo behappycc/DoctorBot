@@ -17,7 +17,7 @@ from xml.etree import ElementTree
 #Free: https://www.microsoft.com/cognitive-services/en-us/subscriptions?productId=/products/Bing.Speech.Preview
 #Paid: https://portal.azure.com/#create/Microsoft.CognitiveServices/apitype/Bing.Speech/pricingtier/S0
 def api_func(text):
-    apiKey = "53dc447c74c547dfa9fc7bb416ae1d8c"
+    apiKey = "33cf4507d3764b51b59f7f8f2e8b5dd6"
 
     params = ""
     headers = {"Ocp-Apim-Subscription-Key": apiKey}

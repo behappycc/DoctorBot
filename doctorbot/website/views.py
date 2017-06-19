@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.views.decorators.csrf import csrf_exempt
 json_dir = "../brain/brain_libs/DST/"
 input_name = "DM_website_input.json"
-output_name = "DM_website.json"
+output_name = "DM_website_output.json"
 import json
 import os
 import time
@@ -22,9 +22,9 @@ def index_view(request):
 def query(request):
     req = request.GET['message']
     print(req)
-    name_dict = {'twz': 'Love python and Django', 'zqxt': 'I am teaching Django'}
-    with open(json_dir+"website_input/"+input_name,'w') as json_file:
+    with open(json_dir+"user_data/"+input_name,'w') as json_file:
         json.dump({'content':req},json_file)
+    time.sleep(0.5)
     with open(json_dir+"user_data/"+output_name,'r') as json_output:
         line = json.load(json_output)
     text = ""

@@ -13,21 +13,11 @@ import CrawlerTimeTable
 sys.path.pop()
 sys.path.append('/user_data')
 import time
-#import djanigo
-#sys.path.append('../../../doctorbot')
-#from doctorbot import settings
-#from fb_doctor_chatbot import models
-#setup_environ(settings)
-#os.environ['DJANGO_SETTINGS_MODULE'] = 'doctorbot.settings'
+sys.path.pop()
+#sys.path.append('/website_input')
 
-DIR_NAME = '../../../../DoctorBot/doctorbot/'
-import sqlite3
-conn = sqlite3.connect(DIR_NAME + 'db.sqlite3')
-fb = conn.cursor()
-from random import shuffle
-#from apscheduler.schedulers.blocking import BlockingScheduler
-#from datetime import datetime
-
+DIR_NAME = '../../../doctorbot/'
+from pprint import pprint
 
 DB_IP = "104.199.131.158"  # doctorbot GCP ip
 DB_PORT = 27017  # default MongoDB port
@@ -197,10 +187,7 @@ def get_sentence(DM):
         sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
     return sentence
 
-#def job(fb):
-#    print (datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-#    init = fb.fetchall()
-#    return init
+
 
 def main():
 
@@ -221,171 +208,95 @@ def main():
             division.append(line.replace('\n',''))
     lu_model = get_lu_pred.LuModel()
     
-    fb = conn.cursor()
-    print("waiting for the fb input...")
-    fb.execute('select * from fb_doctor_chatbot_fb_db')
-    init = fb.fetchall()   
+    buff = ""
+    sentence_web = ""
+    if not os.path.exists("user_data/DM_website_input.json"):
+        with open("user_data/DM_website_input.json",'w') as f:
+             sen = {'content':"預設"}
+             json.dump(sen,f)
+
     while True:
     #website user DM
-        #with open("user_data/DM_website_input.json",'r') as f:
-        #    ff = json.load(f)
-        #sentence_web = ff['content']
-   # while True:
-        #if buff == sentence_web:
-        #    continue
-        #else:
-        #    print('not equal')
-        #    print(sentence_web)
-        #    buff = sentence_web
-        #    if os.path.exists("user_data/DM_website_output.json"):
-        #        with open("user_data/DM_website_output.json",'r') as f:
-        #            DM_web = json.load(f)
-        #            print("\nload DM_web success\n")
-
-        #    else:
-        #        with open("user_data/DM_website_output.json",'w') as f:
-        #            DM_web = initialize()
-        #            DM_web['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-        #            json.dump(DM_web,f)
-        #            print("save DM_web success")
-        #    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
-        #    if True:
-        #        if True:
-        #            if sentence_web == '謝謝' or sentence_web == '你好' or sentence_web == '嗨':
-        #                DM_web = initialize()
-        #                DM_web['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-        #                with open('./user_data/DM_website_output.json','w') as f_w:
-        #                    json.dump(DM_web,f_w)
-        #                    print("update DM_web success")
-        #                continue
-        #            if DM_web['Request'] == 'end':
-        #                DM_web = initialize()
-        #            slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
-        #            pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
-        #            match = pattern.match(sentence_web)
-        #            print(sentence_web)
-        #            if match:
-        #                DM_web["State"]["time"] = sentence_web
-        #                print('1')
-        #            elif sentence_web in week:
-        #                print('2')
-        #                DM_web["State"]["time"] = sentence_web
-        #            elif sentence_web in division:
-       # #                print('3')
-        #                DM_web["State"]["division"] = sentence_web
-        #            elif sentence_web in disease:
-        #                print('4')
-        #                DM_web["State"]["disease"] = sentence_web
-        #                #semantic_frame = lu_model.semantic_frame(sentence)
-        #                #slot_dictionary = semantic_frame['slot']
-        #            else:
-        #                semantic_frame = lu_model.semantic_frame(sentence_web)
-        #                slot_dictionary = semantic_frame['slot']
-        #            print ('[ Before LU ]')
-        #            print (DM_web)
-        #            print("[ LU ]")
-        #            for slot, value in semantic_frame['slot'].items():
-        #                print(slot, ": ", value)
-        #            for slot in slot_dictionary:
-        #                if slot_dictionary[slot] != '' and (DM_web["State"][slot] == None or (type(DM_web["State"][slot]) == list and len(DM_web["State"][slot]) > 1)):
-        #                    DM_web["State"][slot] = slot_dictionary[slot]
-
-        #            if type(DM_web["State"]["time"]) == str and DM_web["State"]["time"] not in week and not match:
-        #                DM_web["State"]["time"] = None
-
-        #            if DM_web["Intent"] == None:
-        #                DM_web["Intent"] = int(semantic_frame['intent'])
-        #            print("Intent : ", DM_web["Intent"])
-        #            DM_web = DM_request(DM_web)
-        #            DM_web_nlg = DM_web
-        #            DM_web_nlg['Sentence'] = get_sentence(DM_web)
-        #            print ("[ DM_web ]")
-        #            for i in DM_web_nlg:
-        #                print (i, DM_web_nlg[i])
-        #            with open("user_data/DM_website_output.json", 'w') as fp:
-        #                json.dump(DM_web_nlg, fp)
-        #                print("save succeed.")
-        #fb = conn.cursor()
-        fb.execute('select MAX(ID) from fb_doctor_chatbot_fb_db')
-        new_id = fb.fetchone()[0]
-        multi_id=[]     #ids' list
-        fb.execute('select * from fb_doctor_chatbot_fb_db ')
-        after = fb.fetchall()
-        after = list(sorted(set(after)-set(init)))  #只要這次執行DST.py之後的FB輸入
-        if not after :
+        with open("user_data/DM_website_input.json",'r') as f:
+            ff = json.load(f)
+        sentence_web = ff['content']
+   # whie True:
+        if buff == sentence_web:
             continue
         else:
-            after.sort(key=lambda tup:tup[0])
-            print("after")
-            print(after)
-            mess = after.pop(0)
-            print(mess)
-            sender_id = mess[1]
-            name = sender_id[8:-2]
-            sentence = mess[3]
-            init.append(mess)
+            print('not equal')
+            print(sentence_web)
+            buff = sentence_web
+            if os.path.exists("user_data/DM_website_output.json"):
+                with open("user_data/DM_website_output.json",'r') as f:
+                    DM_web = json.load(f)
+                    print("\nload DM_web success\n")
+
+            else:
+                with open("user_data/DM_website_output.json",'w') as f:
+                    DM_web = initialize()
+                    DM_web['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                    json.dump(DM_web,f)
+                    print("save DM_web success")
+            slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
             if True:
-                 if True:
-                    if os.path.exists("./user_data/DM_"+name+".json"):    #如果此sender id之前有輸入的話就讀取裡面內容
-                        with open("user_data/DM_"+name+".json", 'r') as f:
-                            DM = json.load(f)
-                            print ("\nLoad DM Success.\n")
-                    else:
-                        with open("user_data/DM_"+name+".json",'w') as f:
-                            DM = initialize()
-                            DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-                            json.dump(DM,f)
-                            print('write json DM')
-                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
-                    if sentence == '謝謝' or sentence == '你好' or sentence == '嗨':
-                        DM = initialize()
-                        DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
-                        with open('./user_data/DM_'+name+'.json','w') as f_w:
-                            json.dump(DM,f_w)
-                            print("update DM success")
+                if True:
+                    if sentence_web == '謝謝' or sentence_web == '你好' or sentence_web == '嗨':
+                        DM_web = initialize()
+                        DM_web['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查>科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
+                        with open('./user_data/DM_website_output.json','w') as f_w:
+                            json.dump(DM_web,f_w)
+                            print("update DM_web success")
                         continue
-                    if DM['Request'] == 'end':
-                        DM = initialize()
+                    if DM_web['Request'] == 'end':
+                        DM_web = initialize()
                     slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
-                    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
-                    match = pattern.match(sentence)
+                    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")        
+                    match = pattern.match(sentence_web)
+                    print(sentence_web)
                     if match:
-                        DM["State"]["time"] = sentence
-                    elif sentence in week:
-                        DM["State"]["time"] = sentence
-                    elif sentence in division:
-                        DM["State"]["division"] = sentence
-                    elif sentence in disease:
-                        DM["State"]["disease"] = sentence
+                        DM_web["State"]["time"] = sentence_web
+                        print('1')
+                    elif sentence_web in week:
+                        print('2')
+                        DM_web["State"]["time"] = sentence_web
+                    elif sentence_web in division:
+                        print('3')
+                        DM_web["State"]["division"] = sentence_web
+                    elif sentence_web in disease:
+                        print('4')
+                        DM_web["State"]["disease"] = sentence_web
+                        #semantic_frame = lu_model.semantic_frame(sentence)
+                        #slot_dictionary = semantic_frame['slot']
                     else:
-                        semantic_frame = lu_model.semantic_frame(sentence)
+                        semantic_frame = lu_model.semantic_frame(sentence_web)
                         slot_dictionary = semantic_frame['slot']
                     print ('[ Before LU ]')
-                    print (DM)
-                    print("[ LU ]")    
+                    print (DM_web)
+                    print("[ LU ]")
                     for slot, value in semantic_frame['slot'].items():
                         print(slot, ": ", value)
                     for slot in slot_dictionary:
-                        if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
-                            DM["State"][slot] = slot_dictionary[slot]
+                        if slot_dictionary[slot] != '' and (DM_web["State"][slot] == None or (type(DM_web["State"][slot]) == list and len(DM_web["State"][slot]) > 1)):
+                            DM_web["State"][slot] = slot_dictionary[slot]
 
-                    if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
-                        DM["State"]["time"] = None
+                    if type(DM_web["State"]["time"]) == str and DM_web["State"]["time"] not in week and not match:
+                        DM_web["State"]["time"] = None
 
-                    if DM["Intent"] == None:
-                        DM["Intent"] = int(semantic_frame['intent'])
-                    print("Intent : ", DM["Intent"])
-                    DM = DM_request(DM)
-                    DM_nlg = DM
-                    DM_nlg['Sentence'] = get_sentence(DM)
-                    print ("[ DM ]")
-                    for i in DM_nlg:
-                        print (i, DM_nlg[i])
-                    with open("user_data/DM_"+name+".json", 'w') as fp:
-                        json.dump(DM_nlg, fp)
+                    if DM_web["Intent"] == None:
+                        DM_web["Intent"] = int(semantic_frame['intent'])
+                    print("Intent : ", DM_web["Intent"])
+                    DM_web = DM_request(DM_web)
+                    DM_web_nlg = DM_web
+                    DM_web_nlg['Sentence'] = get_sentence(DM_web)
+                    print ("[ DM_web ]")
+                    for i in DM_web_nlg:
+                        print (i, DM_web_nlg[i])
+                    with open("user_data/DM_website_output.json", 'w') as fp:
+                        json.dump(DM_web_nlg, fp)
                         print("save succeed.")
-        time.sleep(0.5) #wait 0.5 secone to listen to if a fb new data stored.
-    time.sleep(0.5)
+            time.sleep(0.1)
+
 
 if __name__ == '__main__':
     main()

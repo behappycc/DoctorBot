@@ -20,6 +20,7 @@
             <input type="text" style="text-align: right" class="form-control" id="user_input" name="user_input" placeholder="Say something" />
             <span class="input-group-btn"><button class="btn btn-default" id="send_button"><i class="glyphicon glyphicon-send"></i></button></span>
         </div>
+        <button id="translate">click</button>
     </div>
 </body>
 
@@ -101,8 +102,23 @@
         }
     }
         return cookieValue;
-    }
-    var csrftoken = getCookie('csrftoken');
+    };
+
+
+function text_translator(query){
+    appId = "4b89fe9b52954d829ef4eb0dadee6a94";
+    langFrom = "zh-cn";
+    langTo = "en";
+    var uri = "https://api.cognitive.microsoft.com/sts/v1.0/"+appId;
+    $.ajax({
+        url:uri,
+        type:'POST',
+        success:function(data){
+            console.log("post translotor")
+            console.log(data)
+        }
+    });
+};
 
 const synthesis = window.speechSynthesis;
 function speak(message){
@@ -119,7 +135,11 @@ word.pitch = 1;
 synthesis.speak(word);
 }
 
+var csrftoken = getCookie('csrftoken');
+
    $(document).ready(function() {
+        text = 'hello'
+        $('#translate').click(text_translator(text));
         $('#send_button').click(turn,sendMessage);
         $('#user_input').on('keyup blur', function () {
             if($('#user_input').val().length > 0) {

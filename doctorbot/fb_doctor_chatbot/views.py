@@ -59,7 +59,6 @@ def savetodb(message,text,sender_id):
     sender_id = json.dumps(sender_id)
     fb_db.objects.create(content = sender_id,title=text)
     fbid=""
-    open(json_dir + "DM_"+fbid+".json",'w')
         
     for i in range(8,len(sender_id)-2):
         fbid += str(sender_id[i])
@@ -76,14 +75,15 @@ def post_facebook_message(fbid):
     #while True:
     with open(json_path,'r') as json_file:
         line = json.load(json_file)
-    text = ""
+    text = line['Sentence'] 
     #        continue
+    print(line['Sentence'])
     if True:
-        for k, v in line.items():
-            text = text + str(k) + " " + str(v) + '\n'
+   #     for k, v in line.items():
+   #         text = text + str(k) + " " + str(v) + '\n'
         with open(json_path,'w') as json_file:
             json.dump(line,json_file)
-    #        break
+   #        break
     response_msg = json.dumps({"recipient": {"id": fbid}, "message": {"text": text}})
     requests.post(post_message_url, headers={"Content-Type": "application/json"}, data=response_msg)
            
