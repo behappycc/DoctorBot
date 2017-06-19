@@ -40,14 +40,16 @@ class Doctor(generic.View):
                 if 'attachments' in message['message']:
                     for payload in message['message']['attachments']:
                         print(payload['payload'])
-                        if 'sticker' not in payload['payload']: 
-                            break
-                        if payload['payload']['sticker_id']==369239263222822:
-                            post_facebook(message['sender']['id'])
-                        #else:    
-                        print(payload['payload']['url'])
-                        url = payload['payload']['url']
-                        face_api(url,message['sender']['id'])
+                        #print(payload['payload']['url'])
+                        #url = payload['payload']['url']
+                        #face_api(url,message['sender']['id'])
+                        if 'sticker_id' in payload['payload']: 
+                            if payload['payload']['sticker_id']==369239263222822:
+                                post_facebook(message['sender']['id'])
+                        elif 'sticker_id' not in payload['payload']:    
+                            print(payload['payload']['url'])
+                            url = payload['payload']['url']
+                            face_api(url,message['sender']['id'])
                         
                 elif 'text' in message['message']:
                     savetodb(message,message['message']['text'],message['sender'])
