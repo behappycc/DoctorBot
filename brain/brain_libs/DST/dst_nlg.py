@@ -214,46 +214,30 @@ def info_intent():
     sentence = sen_list[random.randint(0, len(sen_list) - 1)]
     return sentence
 
-def info_disease():
-    sen_list = ["還好嗎?生什麼病了?",
-                "跟我說疾病名稱，我就能幫你查到相關症狀資料唷！",
-                "請問你的病名是?",
-                "我要知道疾病名稱是甚麼才能回答喔",
-                "請問您的疾病名稱是?",
-                "得了什麼病呢？",
-                "請問您的疾病名稱是？",
-                "您生了什麼病呢?我有辦法幫你找到相關的資訊喔!快告訴我疾病名稱吧!",
-                "你覺得自己生了什麼病呢？",
-                "請問是生了什麼病呢？",
-                "請告訴我你的疾病名稱，我就可以提醒你該注意的地方或該知道的資訊囉",
-                "請提供疾病名稱？",
-                "告訴我您的疾病名稱吧！",
-                "您現在是要想要查什麼疾病呢？",
-                "請告訴我您想查詢的疾病名稱。",
-                "請問疾病的名稱是什麼呢？",
-                "你生什麼病R",
-                "麻煩告訴我疾病名稱，我才能幫您查到相關資訊喔><",
-                "我可以告訴你疾病對應的症狀喔，你想知道什麼呢？"]
-    sentence = sen_list[random.randint(0, len(sen_list) - 1)]
-    return sentence
 
 def get_sentence(DM):
-    sentence =""
+    sentence = ""
     if(DM["Request"] == "end"):
         if DM["Intent"] == 1:
             sentence += get_str(DM['State']['disease'])
-            sentence += "的相關症狀有：\n"
+            sen_list = ["的相關症狀有\n", "常見症狀有\n", "的話,通常罹患此病會常有\n",
+                        "通常有下列症狀\n", "關於這個疾病。患者通常會\n"]
+            sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
-               sentence += ", ".join(data['symptom'])
+                sentence += ", ".join(data['symptom'])
+                sentence += "更多資訊可以到這裡看看喔；\n"
+                sentence += data['url']
         elif DM["Intent"] == 2:
             sentence += get_str(DM['State']['disease'])
-            sentence += "的相關科別為：\n"
+            sen_list = ["的科別是：\n", "的相關科別：\n", "可以去這些科別喔：\n"]
+            sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                 sentence += ", ".join(data['department'])
         elif DM["Intent"] == 3:
             sentence += get_str(DM['State']['division'])
             sentence += get_str(DM['State']['disease'])
-            sentence += "的醫生有：\n"
+            sen_list = ["的醫生有：\n", "有這些醫生：\n", "可以找這些醫生喔：\n"]
+            sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             for data in collection_division.find({"$and": [{"disease": {"$regex": get_str(DM['State']['disease'])}},
                                                           {"department": {"$regex": get_str(DM['State']['division'])}}]}):
                 sentence += (data['department'] + " 醫師: " + ", ".join(data['doctor']))
@@ -264,7 +248,9 @@ def get_sentence(DM):
             sentence += "的門診時間為：\n"
             sentence += ", ".join(CrawlerTimeTable.Timetable(get_str(DM["State"]["doctor"])).get_time())
         elif DM["Intent"] == 5:
-            sentence += "已幫您預約掛號 "
+            sen_list = ["掛號完成~是", "幫您完成掛號了喔~", "耶！掛號完成,是",
+                        "掛號成功了！是", "已經幫您預約好", "您好,掛號已經完成,是", "恭喜您掛號完成,是"]
+            sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             sentence += get_str(DM['State']['division'])
             sentence += get_str(DM['State']['disease'])
             sentence += get_str(DM['State']['doctor'])
@@ -272,9 +258,11 @@ def get_sentence(DM):
             sentence += " 的門診\n"
         sentence += "\n\n"
         sentence += goodbye()
-    elif(DM["Request"] == "info"):
-        sentence += "請告訴我"
-        for index,slot in enumerate(DM['Slot']):
+    elif DM["Request"] == "info":
+        sen_list = ["請告訴我\n", "請問\n", "好的 請給我\n",
+                    "請問您找尋的\n", "請問您現在要查的\n"]
+        sentence += sen_list[random.randint(0, len(sen_list) - 1)]
+        for index, slot in enumerate(DM['Slot']):
             if slot == "disease":
                 sentence += " 疾病名稱 "
             elif slot == "division":
@@ -284,8 +272,10 @@ def get_sentence(DM):
             if index != len(DM['Slot'])-1:
                 sentence += "或"
         sentence += ",謝謝!"
-    elif (DM["Request"] == "choose"):
-        sentence += "請選擇一個"
+    elif DM["Request"] == "choose":
+        sen_list = ["要選哪個呢?請選擇一個吧\n", "這裡有這些可以選呢！請選擇一個吧\n", "請問您要選擇哪一個\n",
+                    "有這些可供選擇喔!請選擇一個吧\n", "找到了！請選擇一個吧\n"]
+        sentence += sen_list[random.randint(0, len(sen_list) - 1)]
         if DM['Slot'][0] == "doctor":
             sentence += "醫生名稱："
         elif DM['Slot'][0] == "time":
