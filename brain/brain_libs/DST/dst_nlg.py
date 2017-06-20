@@ -36,14 +36,68 @@ DB_NAME = "doctorbot"  # use the collection
 client = db.MongoClient(DB_IP, DB_PORT)
 collection_division = client[DB_NAME]["division"]
 collection_disease = client[DB_NAME]["disease"]
+disease = []
+week = []
+c_day = []
+division = []
+doctor = []
+with open('../data_resource/disease_dict.txt', 'r', encoding='utf-8') as r_disease:
+    for line in r_disease:
+        disease.append(line.replace('\n',''))
+with open('../data_resource/week_dict.txt', 'r', encoding='utf-8') as r_week:
+    for line in r_week:
+        week.append(line.replace('\n',''))
+with open('../data_resource/division_dict.txt', 'r', encoding='utf-8') as r_division:
+    for line in r_division:
+        division.append(line.replace('\n',''))
+c_day = ['今天','明天','後天']
+
 
 def initialize():
     state = {"intent": None, "disease": None, "division": None, "doctor": None, "time": None}
-    DM = {"Request": None, "Intent": None, "Slot": None, "State": state}
+    DM = {"Request": None, "Intent": None, "Slot": None, "State": state,"History": None}
     return DM
 #################################################################################################
 #                   search for division or doctor from database                                 #
 #################################################################################################
+##################################################
+#             adding for confirm                 #
+##################################################
+def DM_format(DM):
+    new_DM = {}
+    new_DM['request'] = DM['Request']
+    new_DM['intent'] = DM['Intent']
+    new_DM['slot'] = DM['Slot']
+    new_DM['state'] = DM['State']
+    for key,value in new_DM['state'].items():
+        if value == None:
+            new_DM['state'][key] = []
+        elif type(new_DM['state'][key]) ==str:
+            new_DM['state'][key] = [value]
+    if new_DM['request'] =='info':
+        new_DM['request'] = 'inform'
+    return new_DM
+
+def time_C_A(time_str):
+    d = int(time.strftime('%d'))
+    m = int(time.strftime('%m'))
+    y = int(time.strftime('%y'))+89
+    w = int(time.strftime('%w'))
+    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+    match = pattern.search(time_str)
+    if match!=None :
+        return match
+    for index,day in enumerate(week):
+        if time_str ==day:
+            index = (index+1)%7
+            d = d + index-w
+    if d >30:
+        d = d%30
+        m = m+1
+    return(str(y)+'.'+str(m)+'.'+str(d))
+
+
+
 def get_dbinfo(slot1,slot2, choose):
     client = db.MongoClient(DB_IP, DB_PORT)
 
@@ -76,10 +130,11 @@ def get_dbinfo(slot1,slot2, choose):
 def DM_request(DM):
     DM["Request"] = None
     DM["Slot"] = None
-
+    
     if DM["Intent"] == 1 or DM["Intent"] == 2:
         if DM["State"]["disease"]!=None:
             DM["Request"] = "end"
+            DM['History'] =='end12'
         else:
             DM["Request"] = "info"
             DM["Slot"] = ["disease"]
@@ -126,7 +181,6 @@ def DM_request(DM):
                 DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
                 DM["Request"] = "choose"
                 DM["Slot"] = ["time"]
-
         else:
             DM["Request"] = "info"
             DM["Slot"] = ["disease","division","doctor"]
@@ -142,6 +196,25 @@ def get_str(input):
         return ", ".join(input)
     elif type(input) == str:
         return input
+def get_ans(DM):
+#    if DM["Intent"] == 1:
+#        #fdaf
+    if DM["Intent"] == 2:
+#        DM['State']['division'] = []
+        for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
+            DM['State']['division'] = data['department']
+    elif DM["Intent"] == 3:
+#        DM["State"]['doctor'] =[]
+        for data in collection_division.find({"$and": [{"disease": {"$regex": get_str(DM['State']['disease'])}},
+                                                          {"department": {"$regex": get_str(DM['State']['division'])}}]}):
+            DM["State"]['doctor'] = data['doctor']
+    elif DM["Intent"] == 4:
+        DM['State']['time'] =[]
+
+        DM['State']['time']=CrawlerTimeTable.Timetable(get_str(DM["State"]["doctor"])).get_time()
+#    elif DM["Intent"] == 5:
+        #dfa
+    return DM
 
 def greeting():
     sen_list = ["哈囉我的朋友，我是seek doctor Bot，有什麼我能幫得上忙的嗎？",
@@ -213,11 +286,10 @@ def info_intent():
                 "哈囉！請問您想要使用甚麼服務呢？"]
     sentence = sen_list[random.randint(0, len(sen_list) - 1)]
     return sentence
-
-
 def get_sentence(DM):
-    sentence = ""
+    sentence =""
     if(DM["Request"] == "end"):
+        DM = get_ans(DM)
         if DM["Intent"] == 1:
             sentence += get_str(DM['State']['disease'])
             sen_list = ["的相關症狀有\n", "常見症狀有\n", "的話,通常罹患此病會常有\n",
@@ -225,8 +297,9 @@ def get_sentence(DM):
             sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                 sentence += ", ".join(data['symptom'])
-                sentence += "更多資訊可以到這裡看看喔；\n"
-                sentence += data['url']
+            sentence += ", ".join(data['symptom'])
+            sentence += "更多資訊可以到這裡看看喔；\n"
+            sentence += data['url']
         elif DM["Intent"] == 2:
             sentence += get_str(DM['State']['disease'])
             sen_list = ["的科別是：\n", "的相關科別：\n", "可以去這些科別喔：\n"]
@@ -249,20 +322,18 @@ def get_sentence(DM):
             sentence += ", ".join(CrawlerTimeTable.Timetable(get_str(DM["State"]["doctor"])).get_time())
         elif DM["Intent"] == 5:
             sen_list = ["掛號完成~是", "幫您完成掛號了喔~", "耶！掛號完成,是",
-                        "掛號成功了！是", "已經幫您預約好", "您好,掛號已經完成,是", "恭喜您掛號完成,是"]
-            sentence += sen_list[random.randint(0, len(sen_list) - 1)]
+             "掛號成功了！是", "已經幫您預約好", "您好,掛號已經完成,是", "恭喜您掛號完成,是"]
             sentence += get_str(DM['State']['division'])
             sentence += get_str(DM['State']['disease'])
             sentence += get_str(DM['State']['doctor'])
             sentence += get_str(DM['State']['time'])
             sentence += " 的門診\n"
-        sentence += "\n\n"
-        sentence += goodbye()
-    elif DM["Request"] == "info":
-        sen_list = ["請告訴我\n", "請問\n", "好的 請給我\n",
-                    "請問您找尋的\n", "請問您現在要查的\n"]
+        sentence += "\n\n謝謝您使用Seek Doctor！希望有幫助到您！Good bye~"
+    elif(DM["Request"] == "info"):
+        sen_list = ["請告訴我\n ", "請問\n", "好的 請給我\n",
+           "請問您找尋的\n", "請問您現在要查的\n"]
         sentence += sen_list[random.randint(0, len(sen_list) - 1)]
-        for index, slot in enumerate(DM['Slot']):
+        for index,slot in enumerate(DM['Slot']):
             if slot == "disease":
                 sentence += " 疾病名稱 "
             elif slot == "division":
@@ -272,17 +343,103 @@ def get_sentence(DM):
             if index != len(DM['Slot'])-1:
                 sentence += "或"
         sentence += ",謝謝!"
-    elif DM["Request"] == "choose":
+    elif (DM["Request"] == "choose"):
         sen_list = ["要選哪個呢?請選擇一個吧\n", "這裡有這些可以選呢！請選擇一個吧\n", "請問您要選擇哪一個\n",
-                    "有這些可供選擇喔!請選擇一個吧\n", "找到了！請選擇一個吧\n"]
+            "有這些可供選擇喔!請選擇一個吧\n", "找到了！請選擇一個吧\n"]
         sentence += sen_list[random.randint(0, len(sen_list) - 1)]
         if DM['Slot'][0] == "doctor":
             sentence += "醫生名稱："
+            DM['History'] = 'c_doctor'
         elif DM['Slot'][0] == "time":
             sentence += "看診時間："
-        sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
-    return sentence
+            temp = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_status()
+            for key,value in DM['State']['time']:
+                sentence += value + ' '
+                sentence += temp[key]+' '
 
+        sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
+    elif (DM["Request"] == "confirm"):
+        sentence += "你說的是" + DM["Slot"] + "?"
+
+    #####################################################
+    #                      ADDDING                      #
+    #####################################################
+#    elif (DM["Request"] == "confirm"):
+        
+    return sentence
+def intent_LU(DM,sentence):
+    if(sentence == '我要查症狀'):
+        DM["Intent"] = 1
+    elif(sentence =='我要查科別'):
+        DM["Intent"] = 2
+    elif(sentence =='我要查醫生'):
+        DM["Intent"] = 3
+    elif(sentence =='我要查時間'):
+        DM["Intent"] = 4
+    elif(sentence =='我要掛號' or sentence =='我要掛門診'or sentence =='我想要掛門診'):
+        DM["Intent"] = 5
+    if(DM['History'] =='end12'):
+        if(sentence.find('哪科')or sentence.find('哪一科') or sentence.find('什麽科')):
+            DM["Intent"] = 2
+        elif(sentence.find('掛號')or sentence.find('掛門診') or sentence.find('幫我掛')): 
+            DM["Intent"] = 5
+    return DM
+def confirm(DM):
+    if(DM["History"] == 'time_C_A'):
+        DM['Request'] == 'confirm'
+        DM['Slot'] = DM["State"]["time"]
+    elif(DM["History"] == 'vague_division'):
+        DM['Request'] == 'confirm'
+        DM['Slot'] = DM["State"]["division"]
+    DM['History'] = None
+    return DM
+LU_train(DM,sentence,lu_model):    
+    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
+    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
+    match = pattern.match(sentence)
+    found = False
+    if match:
+        DM["State"]["time"] = sentence
+        DM["State"]["time"] = time_C_A(DM["State"]["time"])
+    if sentence in week or sentence[:len(sentence)-1] in week :
+        DM["State"]["time"] = sentence
+        DM["State"]["time"] = time_C_A(DM["State"]["time"])
+    for key in c_day:
+        if sentence.find(key):
+            DM["State"]["time"] = key
+            DM["State"]["time"] = time_C_A(DM["State"]["time"])
+
+    if sentence in division:
+        DM["State"]["division"] = sentence
+    elif sentence[:len(sentence)-1] in division:
+        DM["State"]["division"] = sentence[:len(sentence)-1] + '部'
+        DM["History"] = 'vague_division'
+    elif sentence[:len(sentence)-1] + '科' in division:
+        DM["State"]["division"] = sentence[:len(sentence)-1] + '部'
+        DM["History"] = 'vague_division'
+    if sentence in disease:
+        DM["State"]["disease"] = sentence
+    if found == False:
+        semantic_frame = lu_model.semantic_frame(sentence)
+        slot_dictionary = semantic_frame['slot']
+    #Nothing found, use LU model. 
+    print ('[ Before LU ]')
+    print (DM)
+    print("[ LU ]")    
+    for slot, value in semantic_frame['slot'].items():
+        print(slot, ": ", value)
+    for slot in slot_dictionary:
+        if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) < 1)):
+            DM["State"][slot] = slot_dictionary[slot]
+
+    if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
+        DM["State"]["time"] = None
+
+    if DM["Intent"] == None:
+        DM["Intent"] = int(semantic_frame['intent'])
+        DM['State']['intent'] = [str(DM['Intent'])]
+    print("Intent : ", DM["Intent"])
+    return DM
 #def job(fb):
 #    print (datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 #    init = fb.fetchall()
@@ -434,38 +591,11 @@ def main():
                             json.dump(DM,f_w)
                             print("update DM success")
                         continue
-                    if DM['Request'] == 'end':
-                        DM = initialize()
-                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
-                    pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
-                    match = pattern.match(sentence)
-                    if match:
-                        DM["State"]["time"] = sentence
-                    elif sentence in week:
-                        DM["State"]["time"] = sentence
-                    elif sentence in division:
-                        DM["State"]["division"] = sentence
-                    elif sentence in disease:
-                        DM["State"]["disease"] = sentence
-                    else:
-                        semantic_frame = lu_model.semantic_frame(sentence)
-                        slot_dictionary = semantic_frame['slot']
-                    print ('[ Before LU ]')
-                    print (DM)
-                    print("[ LU ]")    
-                    for slot, value in semantic_frame['slot'].items():
-                        print(slot, ": ", value)
-                    for slot in slot_dictionary:
-                        if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) > 1)):
-                            DM["State"][slot] = slot_dictionary[slot]
 
-                    if type(DM["State"]["time"]) == str and DM["State"]["time"] not in week and not match:
-                        DM["State"]["time"] = None
-
-                    if DM["Intent"] == None:
-                        DM["Intent"] = int(semantic_frame['intent'])
-                    print("Intent : ", DM["Intent"])
+                    DM =LU_train(DM,sentence,lu_model)
+                    DM = intent_LU(DM,sentence)
                     DM = DM_request(DM)
+                    DM = confirm(DM)
                     DM_nlg = DM
                     DM_nlg['Sentence'] = get_sentence(DM)
                     print ("[ DM ]")
