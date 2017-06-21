@@ -18,6 +18,16 @@ from FeatParser import *
 from DataLexicaliser import *
 from utils.nlp import *
 
+import jieba
+#DIR2 = "../../brain/brain_libs/"
+DIR2 = "../brain/brain_libs/"
+jieba.load_userdict(DIR2+"data_resource/doctor_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/disease_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/division_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/week_dict.txt")
+jieba.load_userdict(DIR2+"data_resource/other_dict.txt")
+
+
 
 class DataReader(object):
     def __init__(self, seed, domain, obj,
@@ -214,10 +224,21 @@ class DataReader(object):
         container = []
         for dact,sent,base in data:
             # word tokens
+            # w_segment
+            sent = re.sub('\d{3}\.\d\.\d', '99999', sent)
+            #print('before:'+sent)
+            sent = list(jieba.cut(sent, cut_all=False))
+            sent = " ".join(sent)
+            #print('after:'+sent)
             sent = self.delexicalise(
                     normalize(re.sub(' [\.\?\!]$','',sent)),dact)
+            #print(sent)
+            base = re.sub('\d{3}\.\d\.\d', '99999', base)
+            base = list(jieba.cut(base, cut_all=False))
+            base = " ".join(base)
             base = self.delexicalise(
                     normalize(re.sub(' [\.\?\!]$','',base)),dact)
+            #print(base)
             feat = self.formatter.format(dact)
             container.append( [feat,dact,sent,base] )
 

@@ -196,6 +196,7 @@ def main():
     for dis in disease_list:
         result = search_disease_file(disease_csv, dis, 4)
         if result != "":
+            result = 'SLOT_SYMPTOM'
             item.append("end(intent='1';disease='" + dis + "';results='" + result + "')")
             item.append("幫您查詢症狀,以下是" + dis + "的症狀," + result)
             item.append(dis + "的症狀有" + result)

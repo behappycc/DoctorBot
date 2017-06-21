@@ -10,6 +10,7 @@ sys.path.append('./utils/')
 import itertools
 import nltk
 import json
+import re
 
 
 class DataLexicaliser(object):
@@ -37,17 +38,29 @@ class ExactMatchDataLexicaliser(DataLexicaliser):
         # no slot values return directly
         if len(jssv)==1 and jssv[0][1]==None:
             return sent
+        #print('be_jssv: '+str(jssv))
+        #print('be_sent: '+sent)
         for slot,value in sorted(jssv,key=lambda x:len(x[-1]),reverse=True):
+            #print('slot: '+slot)
+            #print('value: '+value)
             if  value in self.special_values : continue # special values, skip
 
             # taking care of all possible permutations of multiple values
-            vs = value.replace(' or ',' and ').split(' and ')
-            permutations =  [' and '.join(x) for x in itertools.permutations(vs)]+\
-                            [' or '.join(x) for x in itertools.permutations(vs)]
+            #print('before: '+value)
+            #vs = value.replace(' or ',' and ').split(' and ')
+            vs = value.split(',')
+            #print('after: '+str(vs))
+            #permutations =  [' and '.join(x) for x in itertools.permutations(vs)]+\
+            #                [' or '.join(x) for x in itertools.permutations(vs)]
+            permutations =  [' , '.join(x) for x in itertools.permutations(vs)]
 
+            #permutations = permutations.split(',')
+            #print(permutations)
             # try to match for each possible permutation
             isMatched = False
             for p in permutations:
+                p = re.sub('\d{3}\.\d\.\d', '99999', p) # time_slot
+                #print(sent)
                 if p in sent : # exact match , ends
                     sent = (' '+sent+' ').replace(\
                             ' '+p+' ',' SLOT_'+slot.upper()+' ',1)[1:-1]
@@ -57,6 +70,7 @@ class ExactMatchDataLexicaliser(DataLexicaliser):
                 pass
                 #raise ValueError('value "'+value+'" cannot be delexicalised!')
 
+        print(sent)
         return sent
 
     def lexicalise(self,sent,jssv):
@@ -73,6 +87,7 @@ class ExactMatchDataLexicaliser(DataLexicaliser):
             else:
                 sent=(' '+sent+' ').replace(' SLOT_'+slot.upper()+' ',' '+value+' ',1)[1:-1]
         sent = (' '+sent+' ').replace(' SLOT_TYPE ',' '+self.typetoken+' ')[1:-1]
+        #print(sent)
         return sent
 
 
