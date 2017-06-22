@@ -383,6 +383,7 @@ def intent_LU(DM,sentence):
             DM["Intent"] = 2
         elif(sentence.find('掛號')or sentence.find('掛門診') or sentence.find('幫我掛')): 
             DM["Intent"] = 5
+    
     return DM
 def confirm(DM):
     if(DM["History"] == 'time_C_A'):
@@ -583,7 +584,9 @@ def main():
                     slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
                     user_greeting = ['嗨', '你好', '您好', '哈囉', '安安', 'hi', 'Hi', '嗨嗨', '早安',
                                      '午安', '晚安', '早上好', '勢早', 'Hello', 'hello']
-                    if sentence in user_greeting:
+                    user_ending = ['謝謝', '掰掰','掰','okbye', '結束', '再見', 'bye', '好掰掰', '拜拜',
+                                   '感謝', '好窩', '謝啦', '你真棒', '謝惹','再會','你可以走了']
+                    if sentence in user_greeting or sentence in user_ending:
                         DM = initialize()
                         DM['Sentence'] = greeting()
                         #DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
