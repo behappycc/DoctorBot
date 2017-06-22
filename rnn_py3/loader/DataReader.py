@@ -19,13 +19,15 @@ from DataLexicaliser import *
 from utils.nlp import *
 
 import jieba
-#DIR2 = "../../brain/brain_libs/"
+#DIR1 = "../data/NLG_data/"
+DIR1 = "data/NLG_data/"
 DIR2 = "../brain/brain_libs/"
 jieba.load_userdict(DIR2+"data_resource/doctor_dict.txt")
 jieba.load_userdict(DIR2+"data_resource/disease_dict.txt")
 jieba.load_userdict(DIR2+"data_resource/division_dict.txt")
 jieba.load_userdict(DIR2+"data_resource/week_dict.txt")
 jieba.load_userdict(DIR2+"data_resource/other_dict.txt")
+jieba.load_userdict(DIR1+"slot_dict.txt")
 
 
 
@@ -106,6 +108,9 @@ class DataReader(object):
                         for i in range(len(sent))]
                 base = [self.lexicalise(base[i],dact) \
                         for i in range(len(base))]
+                #print(sent)
+                #print(base)
+                #print(dact)
                 # put in container
                 xvec = [a,sv,s,v,sent,dact,base]
                 for j in range(len(proc_data)):
@@ -307,9 +312,10 @@ class DataReader(object):
 
     def readVecFile(self,filename,vocab):
         with open(filename) as fin:
+            print(filename)
             # discard comment lines
-            for i in range(5):
-                fin.readline()
+            #for i in range(5):
+            #    fin.readline()
             word2vec = {}
             for line in fin.readlines():
                 tokens = line.replace('\n','').split()
@@ -335,18 +341,18 @@ class DataReader(object):
                 #print('==sv==')
             if 's.'+si in cardinality:
                 s.append(   cardinality.index('s.'+si)-dfs[2] )
-           #     print('==ss==')
-           #     print(s)
-           #     print(cardinality.index('s.'+si))
-           #     print(dfs[2])
-           #     print('==ss==')
+                #print('==ss==')
+                #print(s)
+                #print(cardinality.index('s.'+si))
+                #print(dfs[2])
+                #print('==ss==')
             if 'v.'+vi in cardinality:
                 v.append(   cardinality.index('v.'+vi)-dfs[3] )
                 #print('====vv====')
                 #print(v)
                 #print(cardinality.index('v.'+vi))
-           #     print(dfs[3])
-           #     print('====vv====')
+                #print(dfs[3])
+                #print('====vv====')
         if len(feat[1:])==0:
             sv.append(  cardinality.index('sv.NONE.NONE')-dfs[1])
             s.append(   cardinality.index('s.NONE')-dfs[2])
@@ -372,7 +378,3 @@ class DataReader(object):
         words = ['</s>'] + sent.split() + ['</s>']
         wordids = [vocab.index(w) if w in vocab else 0 for w in words]
         return wordids
-
-
-
-

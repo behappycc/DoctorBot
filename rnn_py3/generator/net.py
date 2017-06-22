@@ -190,6 +190,11 @@ class Model(object):
                 reg = 0 if random.randint(0,9)==5 else self.beta
                 # unfold data point
                 a,sv,s,v,words, _, _,cutoff_b,cutoff_f = data
+                #print('a: '+str(a))
+                #print('sv: '+str(sv))
+                #print('s: '+str(s))
+                #print('v: '+str(v))
+                #print('words: '+str(words))
                 # train net using current example
                 train_logp += self.model.train( a,sv,s,v,words,
                         cutoff_f, cutoff_b, self.lr, reg)
@@ -435,6 +440,7 @@ class Model(object):
             if data==None:
                 break
             a,sv,s,v,sents,dact,bases,cutoff_b,cutoff_f = data
+            #print(dact)
             # remove batch dimension
             a,sv,s,v = a[0],sv[0],s[0],v[0]
             sents,dact,bases = sents[0],dact[0],bases[0]
@@ -474,6 +480,7 @@ class Model(object):
             # compute gold standard slot error rate
             for sent in sents:
                 # score slot error rate
+                #print(sent)
                 cnt, total, caty = self.gentscorer.scoreERR(a,felements,
                         self.reader.delexicalise(sent,dact))
                 # accumulate slot error cnts
@@ -492,8 +499,9 @@ class Model(object):
         print ('##############################################')
         print ('Metric       :\tBLEU\tT.ERR\tA.ERR')
         print ('HDC          :\t%.4f\t%2.2f%%\t%2.2f%%'% (bleuHDC,0.0,0.0))
-        print ('Ref          :\t%.4f\t%2.2f%%\t%2.2f%%'% (1.0,
-                100*refcnts[1]/refcnts[0],100*refcnts[2]/refcnts[0]))
+        print(refcnts[0])
+        #print ('Ref          :\t%.4f\t%2.2f%%\t%2.2f%%'% (1.0,
+        #        100*refcnts[1]/refcnts[0],100*refcnts[2]/refcnts[0]))
         print ('----------------------------------------------')
         print ('This Model   :\t%.4f\t%2.2f%%\t%2.2f%%'% (bleuModel,
                 100*gencnts[1]/gencnts[0],100*gencnts[2]/gencnts[0]))

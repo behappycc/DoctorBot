@@ -1,5 +1,12 @@
-_PAD
-_UNK
+<unk>
+</s>
+result_doctors
+result_divisions
+result_symptoms
+SLOT_INTENT
+SLOT_DISEASE
+SLOT_RESULTS
+SLOT_DIVISION
 的
 門診
 我

@@ -196,7 +196,7 @@ def main():
     for dis in disease_list:
         result = search_disease_file(disease_csv, dis, 4)
         if result != "":
-            result = 'SLOT_SYMPTOM'
+            result = 'RESULT_SYMPTOMS'
             item.append("end(intent='1';disease='" + dis + "';results='" + result + "')")
             item.append("幫您查詢症狀,以下是" + dis + "的症狀," + result)
             item.append(dis + "的症狀有" + result)
@@ -209,6 +209,7 @@ def main():
     for dis in disease_list:
         result = search_disease_file(disease_csv, dis, 2)
         if result != "":
+            result = 'RESULT_DIVISIONS'
             item.append("end(intent='2';disease='" + dis + "';results='" + result + "')")
             item.append("已查詢到科別," + dis + "的科別是," + result)
             item.append(dis + "的相關科別是" + result)
@@ -221,6 +222,7 @@ def main():
     for dis in disease_list:
         result = search_doctor(division_csv, dis, "")
         if result != "":
+            result = 'RESULT_DOCTORS'
             item.append("end(intent='3';disease='" + dis + "';results='" + result + "')")
             item.append("已經幫您查詢到" + dis + "的主治醫生有," + result)
             item.append(dis + "的主治醫師有" + result)
@@ -233,6 +235,7 @@ def main():
     for dis in disease_list:
         result = search_doctor(division_csv, dis, "")
         if result != "":
+            result = 'RESULT_DOCTORS'
             item.append("end(intent='3';division='眼科';results='" + result + "')")
             item.append("已查詢到眼科的醫師有," + result)
             item.append("眼科的醫生有" + result)
