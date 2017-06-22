@@ -1,0 +1,23 @@
+您這個病得去<division>
+<doctor>醫師跟<doctor>醫師都是可以的喔
+嗯...這裡有<slot>和<slot>可以選呢！
+<division><doctor>醫生在<time>有看診喔，請問您要選擇哪一個
+這個科別的話，於您選擇的日期有<doctor>醫師和<doctor>醫師可供選擇喔!
+這位醫生在以下的時間有看診：
+您選擇的<dovision>看診時間有<doctor>醫師和<doctor>醫師
+找到了！<doctor>醫師跟<doctor>醫師在這個時間都可以幫你看診。
+您的醫生在<time>和<time>目前都還沒掛滿歐～
+您的症狀需要掛<division>喔！推薦您<doctor>醫生與<doctor>醫生。
+這症狀聽起來有點嚴重，應該要趕快去掛急診喔！
+這種狀況的話掛<division>會比較好哦。
+我看看這要掛<doctor>醫師的診喔
+這個科別有三位醫師，分別是<doctor>、<doctor>、<doctor>，那他們的看診時間分別是<time>、<time>、<time>哦！
+關於你的問題，我這邊有一些資料
+嗯你這個病的話要去<division> 可以找<doctor>醫生 <doctor>醫生
+經過我精密地查找與計算，<division>的<doctor>醫生是你的最佳解
+今天<doctor>醫生有看外科哦~
+這個科的話，除了<doctor>醫師還有<doctor>醫師喔！
+查詢中.請稍後
+這種症狀要到___樓的<division>去看唷!
+您的症狀就交給<doctor>醫師吧!
+嘿! <doctor>醫生在<time>都有看診唷! 歡迎掛號

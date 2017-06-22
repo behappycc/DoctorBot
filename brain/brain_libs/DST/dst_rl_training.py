@@ -24,22 +24,26 @@ DB_NAME = "doctorbot"  # use the collection
 
 ############ SETTINGS #############
 
-GAME = 'ICB' # the name of the game being played for log files
-GAMMA = 0.99 # decay rate of past observations
-N_SAVE_PROGRESS = 1000 # save progress every 1000 iteration
+GAME = 'ICB'            # the name of the game being played for log files
+GAMMA = 0.99            # decay rate of past observations
+N_SAVE_PROGRESS = 200   # save progress every 1000 iteration
 OBSERVE = 100 # 100000. # timesteps to observe before training
-EXPLORE = 2000000. # frames over which to anneal epsilon
-FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 0.5 #0.0001 # starting value of epsilon
-REPLAY_MEMORY = 50000 # number of previous transitions to remember
-BATCH = 32 # size of minibatch
-ACTIONS = 12 # number of valid actions
-STATES = 15 # number of states
-n_hidden_1 = 256  # 1st layer number of features
-n_hidden_2 = 256  # 2nd layer number of features
-n_input = STATES  # MNIST data input (img shape: 28*28)
-n_classes = ACTIONS # MNIST total classes (0-9 digits)
-NDEBUG = False# if False print dialogue detail
+EXPLORE = 2000000.      # frames over which to anneal epsilon
+FINAL_EPSILON = 0.0001  # final value of epsilon
+INITIAL_EPSILON = 0.5   # 0.0001 # starting value of epsilon
+REPLAY_MEMORY = 50000   # number of previous transitions to remember
+BATCH = 32              # size of minibatch
+ACTIONS = 12            # number of valid actions
+STATES = 15             # number of states
+n_hidden_1 = 256        # 1st layer number of features
+n_hidden_2 = 256        # 2nd layer number of features
+n_input = STATES        # MNIST data input (img shape: 28*28)
+n_classes = ACTIONS     # MNIST total classes (0-9 digits)
+NDEBUG = False          # if False print dialogue detail
+ACTION_MASK = True      # if True then restrict the actions the agent can choose from
+                        # depend on the agent's state
+
+###################################
 
 def get_dbinfo(slot1,slot2, choose):
     client = db.MongoClient(DB_IP, DB_PORT)
@@ -149,9 +153,11 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
         if state_verbose['intent']==[]:
             if "我想要掛門診" in observation and addRulebase:
                 state_verbose['intent'] = [5]
+                state[4]                =  1
             else:
                 state_verbose['intent'] = [int(LU_frame['intent'])]
-            state[int(LU_frame['intent'])-1] = 1 ######must bugs here zzz
+                state[int(LU_frame['intent'])-1] = 1 ######must bugs here zzz
+            state[5] = 1
     for key,value in LU_frame['slot'].items(): #state
         if value!='':
             state_verbose[key] = [value]
@@ -160,6 +166,7 @@ def state_update(observation, semantic_frame, old_state=None, old_state_verbose 
     match = pattern.search(observation)
     if match:
         state_verbose["time"] = [observation[match.start():match.end()]]
+        state[slot_dict["time"]+4] = 1
     return state, state_verbose, LU_frame
 
 def action_affect_state(action_index, state):
@@ -179,6 +186,33 @@ def generate_DM_frame(state_verbose, action):
     action(DM_frame) # deal with "request" and "slot"
     return DM_frame
 
+basic_mask = [ [],
+        [2,3,4,5,6,7,9,10,11], # intent 1
+        [2,3,4,5,6,7,9,10,11], # intent 2
+        [3,4,6,7,10,11],       # intent 3
+        [4,7,11],              # intent 4
+        []                     # intent 5
+        ]
+def get_mask(state, state_verbose):
+    mask = np.ones([ACTIONS])
+    # if you haven't got the slot, you cannot confirm it.
+    for i in range(4):
+        if state[i+6] == 0:
+            mask[i+8] = 0
+    # if there's no disease, you can't provide options about division
+    if state[6] == 0:
+        mask[5] = 0
+    # you cannot find doctors with the infomation of both the disease and division
+    if state[6] == 0 and state[7] == 0:
+        mask[6] = 0
+    # you can't search time without knowing the doctor whom the client wants.
+    if state[8] == 0:
+        mask[7] = 0
+    if len(state_verbose["intent"])>0 and state_verbose["intent"][0] in [1,2,3,4,5]:
+        for i in basic_mask[state_verbose["intent"][0]]:
+            mask[i] = 0
+    return mask
+
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev = 0.01)
     return tf.Variable(initial)
@@ -196,27 +230,28 @@ def max_pool_2x2(x):
 def createNetwork():
     s = tf.placeholder("float", [None, n_input])
     weights = {
-        'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-        'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-        'out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
+        'weights_h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
+        'weights_h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+        'weights_out': tf.Variable(tf.random_normal([n_hidden_2, n_classes]))
     }
     biases = {
-        'b1': tf.Variable(tf.random_normal([n_hidden_1])),
-        'b2': tf.Variable(tf.random_normal([n_hidden_2])),
-        'out': tf.Variable(tf.random_normal([n_classes]))
+        'biases_b1': tf.Variable(tf.random_normal([n_hidden_1])),
+        'biases_b2': tf.Variable(tf.random_normal([n_hidden_2])),
+        'biases_out': tf.Variable(tf.random_normal([n_classes]))
     }
     # network weights
-    layer_1 = tf.add(tf.matmul(s, weights['h1']), biases['b1'])
+    layer_1 = tf.add(tf.matmul(s, weights['weights_h1']), biases['biases_b1'])
     layer_1 = tf.nn.relu(layer_1)
     # Hidden layer with RELU activation
-    layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+    layer_2 = tf.add(tf.matmul(layer_1, weights['weights_h2']), biases['biases_b2'])
     layer_2 = tf.nn.relu(layer_2)# h1_fc
     # Output layer with linear activation
-    readout = tf.matmul(layer_2, weights['out']) + biases['out']
+    readout = tf.matmul(layer_2, weights['weights_out']) + biases['biases_out']
     var = [item for key,item in weights.items()] + [item for key, item in biases.items()]
-    return s, readout, layer_2, var
+    saver_dict = {**weights, **biases}
+    return s, readout, layer_2, var, saver_dict
 
-def trainNetwork(s, readout, h_fc1, sess, var):
+def trainNetwork(s, readout, h_fc1, sess, var, saver_dict):
     # define the cost function
     # readout is the action-predicting net
     start_training = False
@@ -225,7 +260,6 @@ def trainNetwork(s, readout, h_fc1, sess, var):
     readout_action = tf.reduce_sum(tf.multiply(readout, a), reduction_indices=1)
     cost = tf.reduce_mean(tf.square(y - readout_action))
     train_step = tf.train.AdamOptimizer(1e-6).minimize(cost, var_list=var)
-
 
     # open up a game state to communicate with emulator
     sim_user = CompleteUser()
@@ -244,8 +278,8 @@ def trainNetwork(s, readout, h_fc1, sess, var):
     s_t, s_t_verbose, LU_frame = state_update(x_t, lu_model.semantic_frame, old_state=None, old_state_verbose=None)
 
     # saving and loading networks
-    saver = tf.train.Saver()
-    sess.run(tf.initialize_all_variables())
+    saver = tf.train.Saver(saver_dict)
+    sess.run(tf.global_variables_initializer())
     checkpoint = tf.train.get_checkpoint_state("saved_networks")
     if checkpoint and checkpoint.model_checkpoint_path:
         saver.restore(sess, checkpoint.model_checkpoint_path)
@@ -262,13 +296,29 @@ def trainNetwork(s, readout, h_fc1, sess, var):
         a_t = np.zeros([ACTIONS])
         action_index = 0
         #if t % FRAME_PER_ACTION == 0:
+        mask = np.array(get_mask(s_t, s_t_verbose))
         if random.random() <= epsilon:
-            print("----------Random Action----------")
-            action_index = random.randrange(ACTIONS)
-            a_t[random.randrange(ACTIONS)] = 1
+            if ACTION_MASK == True:
+                print("-----Random Action with Mask-----")
+                choosable_actions = np.where(mask)
+                action_index = np.random.choice(choosable_actions[0])
+                a_t[action_index] = 1
+            else:
+                print("----------Random Action----------")
+                action_index = random.randrange(ACTIONS)
+                #  a_t[random.randrange(ACTIONS)] = 1
+                a_t[action_index] = 1
         else:
-            action_index = np.argmax(readout_t)
-            a_t[action_index] = 1
+            if ACTION_MASK == True:
+                readoutCopy = readout_t.copy()
+                for idx, i in enumerate(mask):
+                    if i == 0:
+                        readoutCopy[idx] = -np.inf
+                action_index = np.argmax(readoutCopy)
+                a_t[action_index] = 1
+            else:
+                action_index = np.argmax(readout_t)
+                a_t[action_index] = 1
         if not NDEBUG: print("\033[1;33;40mUser: ", x_t,"\033[0m")
         if not NDEBUG: print("LU: ",LU_frame)
         # some function using action_index and state_verbose to generate
@@ -320,7 +370,6 @@ def trainNetwork(s, readout, h_fc1, sess, var):
                 s : s_j_batch},
                 session = sess
             )
-
 
         # update the old values
         s_t = s_t1
@@ -377,6 +426,9 @@ def UserSimDebug():
             a_t = np.zeros([ACTIONS])
             a_t[a] = 1
             print("\033[1;33;40mUser: ", x_t,"\033[0m")
+            print("state: ", s_t)
+            print("state_verbose: ", s_t_verbose)
+            print(get_mask(s_t,s_t_verbose))
             print("LU: ",LU_frame)
             # some function using action_index and state_verbose to generate
             # semantic frame for the user simulator or the NLG module
@@ -392,12 +444,12 @@ def UserSimDebug():
 
 def playGame():
     sess = tf.Session()
-    s, readout, h_fc1, var = createNetwork()
-    trainNetwork(s, readout, h_fc1, sess, var)
+    s, readout, h_fc1, var, saver_dict  = createNetwork()
+    trainNetwork(s, readout, h_fc1, sess, var, saver_dict)
 
 def main():
-    UserSimDebug()
-    #  playGame()
+    #  UserSimDebug()
+    playGame()
 
 if __name__ == "__main__":
     main()
