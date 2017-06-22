@@ -70,7 +70,7 @@ class ExactMatchDataLexicaliser(DataLexicaliser):
                 pass
                 #raise ValueError('value "'+value+'" cannot be delexicalised!')
 
-        print(sent)
+        #print(sent)
         return sent
 
     def lexicalise(self,sent,jssv):

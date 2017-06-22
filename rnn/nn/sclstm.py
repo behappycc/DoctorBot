@@ -15,7 +15,7 @@ class sclstm(BaseRLG):
 
     def __init__(self, gentype, vocab, beamwidth, overgen,
             vocab_size, hidden_size, batch_size, da_sizes):
-        
+
         # calling superclass constructor
         BaseRLG.__init__(self, gentype, beamwidth, overgen,
                 vocab_size, hidden_size, batch_size, da_sizes)
@@ -26,7 +26,7 @@ class sclstm(BaseRLG):
         self._init_params()
 
     def _init_params(self):
-        
+
         # word embedding weight matrix
         self.Wemb   = theano.shared(0.3 * np.random.uniform(-1.0,1.0,\
                 (self.di,self.dh)).astype(theano.config.floatX))
@@ -52,15 +52,17 @@ class sclstm(BaseRLG):
         self.c0 = theano.shared(np.zeros((self.db,self.dh),
             dtype=theano.config.floatX))
         # all parameters
-        self.params = [ 
-                self.Wemb, 
-                self.Wgate, self.Wrgate, 
+        self.params = [
+                self.Wemb,
+                self.Wgate, self.Wrgate,
                 self.Wcx,   self.Wfc,
                 self.Who ]
-    
+
     def setWordVec(self,word2vec):
         self.Wemb_np = self.Wemb.get_value()
         for w,v in word2vec.iteritems():
+            print('w: '+w)
+            print('v: '+v)
             self.Wemb_np[w,:] = v
         self.Wemb.set_value(self.Wemb_np)
 
@@ -95,7 +97,7 @@ class sclstm(BaseRLG):
         return cost, cutoff_logp
 
     def _recur(self, w_t, y_t, sv_tm1, h_tm1, c_tm1, a):
-        
+
         # input word embedding
         wv_t = T.nnet.sigmoid(self.Wemb[w_t,:])
         # compute ig, fg, og together and slice it
@@ -144,11 +146,11 @@ class sclstm(BaseRLG):
         qsize = 1
         # start beam search
         while True:
-            # give up when decoding takes too long 
+            # give up when decoding takes too long
             if qsize>10000: break
             # fetch the best node
             score, n = nodes.get()
-            # if end of sentence token 
+            # if end of sentence token
             if n.wordid==1 and n.prevNode!=None:
                 # update score with sem cost
                 n.logp -= np.sum(abs(n.sv))
@@ -157,7 +159,7 @@ class sclstm(BaseRLG):
                 # if reach maximum # of sentences required
                 if len(endnodes)>=self.overgen: break
                 else:                           continue
-            # decode for one step using decoder 
+            # decode for one step using decoder
             words, probs, sv, c, h = self._gen(n)
             # put them into a queue
             for i in range(len(words)):
@@ -234,10 +236,10 @@ class sclstm(BaseRLG):
         # ranking generation according to score
         overgen = self.overgen if len(gens)>self.overgen else len(gens)
         gens = sorted(gens,key=operator.itemgetter(0))[:overgen]
-        return gens 
+        return gens
 
     def _gen(self,node):
-        
+
         # input word embedding
         wv_t = sigmoid(self.Wemb_np[node.wordid,:])
         # compute ig, fg, og together and slice it
