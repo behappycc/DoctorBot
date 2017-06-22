@@ -130,7 +130,7 @@ def get_dbinfo(slot1,slot2, choose):
 def DM_request(DM):
     DM["Request"] = None
     DM["Slot"] = None
-    
+
     if DM["Intent"] == 1 or DM["Intent"] == 2:
         if DM["State"]["disease"]!=None:
             DM["Request"] = "end"
@@ -365,7 +365,7 @@ def get_sentence(DM):
     #                      ADDDING                      #
     #####################################################
 #    elif (DM["Request"] == "confirm"):
-        
+
     return sentence
 def intent_LU(DM,sentence):
     if(sentence == '我要查症狀'):
@@ -381,9 +381,9 @@ def intent_LU(DM,sentence):
     if(DM['History'] =='end12'):
         if(sentence.find('哪科')or sentence.find('哪一科') or sentence.find('什麽科')):
             DM["Intent"] = 2
-        elif(sentence.find('掛號')or sentence.find('掛門診') or sentence.find('幫我掛')): 
+        elif(sentence.find('掛號')or sentence.find('掛門診') or sentence.find('幫我掛')):
             DM["Intent"] = 5
-    
+
     return DM
 def confirm(DM):
     if(DM["History"] == 'time_C_A'):
@@ -394,7 +394,7 @@ def confirm(DM):
         DM['Slot'] = DM["State"]["division"]
     DM['History'] = None
     return DM
-LU_train(DM,sentence,lu_model):    
+def LU_train(DM,sentence,lu_model):
     slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
     pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
     match = pattern.match(sentence)
@@ -423,10 +423,10 @@ LU_train(DM,sentence,lu_model):
     if found == False:
         semantic_frame = lu_model.semantic_frame(sentence)
         slot_dictionary = semantic_frame['slot']
-    #Nothing found, use LU model. 
+    #Nothing found, use LU model.
     print ('[ Before LU ]')
     print (DM)
-    print("[ LU ]")    
+    print("[ LU ]")
     for slot, value in semantic_frame['slot'].items():
         print(slot, ": ", value)
     for slot in slot_dictionary:
@@ -464,11 +464,11 @@ def main():
         for line in r_division:
             division.append(line.replace('\n',''))
     lu_model = get_lu_pred.LuModel()
-    
+
     fb = conn.cursor()
     print("waiting for the fb input...")
     fb.execute('select * from fb_doctor_chatbot_fb_db')
-    init = fb.fetchall()   
+    init = fb.fetchall()
     while True:
     #website user DM
         #with open("user_data/DM_website_input.json",'r') as f:
@@ -581,7 +581,7 @@ def main():
                             #DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
                             json.dump(DM,f)
                             print('write json DM')
-                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}            
+                    slot_dictionary = {'disease': '', 'division': '', 'doctor': '', 'time': ''}
                     user_greeting = ['嗨', '你好', '您好', '哈囉', '安安', 'hi', 'Hi', '嗨嗨', '早安',
                                      '午安', '晚安', '早上好', '勢早', 'Hello', 'hello']
                     user_ending = ['謝謝', '掰掰','掰','okbye', '結束', '再見', 'bye', '好掰掰', '拜拜',
