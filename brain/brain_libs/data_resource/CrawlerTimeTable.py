@@ -43,6 +43,11 @@ class Timetable(object):
         for col in self.result:
             time_list.append(col[2])
         return time_list
+    def get_status(self):
+        status_list = []
+        for col in self.result:
+            status_list.append(col[0])
+        return status_list
 
     def save_csv(self):
         f = open("../data_resource/doctor.csv", "w")
@@ -54,7 +59,7 @@ class Timetable(object):
 def main():
     name = input('Doctor name: ')
     time = Timetable(name)
-    print(time.get_time())
+    print(time.get_status())
 
 
 if __name__ == '__main__':
