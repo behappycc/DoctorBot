@@ -353,6 +353,8 @@ def get_sentence(DM):
         elif DM['Slot'][0] == "time":
             sentence += "看診時間："
             temp = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_status()
+            DM['State']['time'] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
+#            DM['State']['time']
             for key,value in DM['State']['time']:
                 sentence += value + ' '
                 sentence += temp[key]+' '
