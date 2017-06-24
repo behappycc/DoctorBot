@@ -195,7 +195,7 @@ class Model(object):
                 #print('s: '+str(s))
                 #print('v: '+str(v))
                 #print('words: '+str(words))
-                print('cutoff: '+str(cutoff_f))
+                #print('cutoff: '+str(cutoff_f))
                 # train net using current example
                 train_logp += self.model.train( a,sv,s,v,words,
                         cutoff_f, cutoff_b, self.lr, reg)

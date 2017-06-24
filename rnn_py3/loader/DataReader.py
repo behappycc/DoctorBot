@@ -142,7 +142,10 @@ class DataReader(object):
             for i in range(0,5):
                 for j in range(len(proc_data[i])):
                     lengs[i].append(len(proc_data[i][j]))
+                    #print(lengs[:])
+                    #print(proc_data[:])
                     proc_data[i][j].extend([-1]*(max_leng[i]-len(proc_data[i][j])))
+                    #print(proc_data[:])
         # padding to have the same batch size
         for x in range(end-start,batch):
             for i in range(0,5):
