@@ -195,6 +195,7 @@ class Model(object):
                 #print('s: '+str(s))
                 #print('v: '+str(v))
                 #print('words: '+str(words))
+                print('cutoff: '+str(cutoff_f))
                 # train net using current example
                 train_logp += self.model.train( a,sv,s,v,words,
                         cutoff_f, cutoff_b, self.lr, reg)
@@ -464,7 +465,7 @@ class Model(object):
             # get the top-k for evaluation
             gens = sorted(gens,key=operator.itemgetter(0))[:self.topk]
             # print results
-            print (dact)
+            #print (dact)
             print ('Penalty\tTSER\tASER\tGen')
             for penalty, gen in gens:
                 # score slot error rate
@@ -499,9 +500,9 @@ class Model(object):
         print ('##############################################')
         print ('Metric       :\tBLEU\tT.ERR\tA.ERR')
         print ('HDC          :\t%.4f\t%2.2f%%\t%2.2f%%'% (bleuHDC,0.0,0.0))
-        print(refcnts[0])
-        #print ('Ref          :\t%.4f\t%2.2f%%\t%2.2f%%'% (1.0,
-        #        100*refcnts[1]/refcnts[0],100*refcnts[2]/refcnts[0]))
+        #print(refcnts[0])
+        print ('Ref          :\t%.4f\t%2.2f%%\t%2.2f%%'% (1.0,
+                100*refcnts[1]/refcnts[0],100*refcnts[2]/refcnts[0]))
         print ('----------------------------------------------')
         print ('This Model   :\t%.4f\t%2.2f%%\t%2.2f%%'% (bleuModel,
                 100*gencnts[1]/gencnts[0],100*gencnts[2]/gencnts[0]))

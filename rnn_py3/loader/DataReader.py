@@ -119,11 +119,15 @@ class DataReader(object):
                 # delexicalised text & formatted feature
                 if self.obj=='ml': # ML training, 1 sent per example
                     sent = self.delexicalise(sent,dact)
+                    #print('1: '+str(sent))
                     sent = self.genInputSent(sent, self.vocab)
+                    #print('2: '+str(sent))
                     # put in container
                     xvec = [a,sv,s,v,sent,dact,base]
+                    #print(xvec)
                     for j in range(len(proc_data)):
                         proc_data[j].append(xvec[j])
+                    #print('proc: '+str(proc_data))
                     # padding length
                     for j in range(0,5):
                         if len(xvec[j])>max_leng[j]:
@@ -155,6 +159,9 @@ class DataReader(object):
             words = proc_data[4]
         dact=proc_data[5]
         base=proc_data[6]
+        #print(words)
+        #print(dact)
+        #print(base)
         # current batch size
         b_size = end-start
         lengs  = np.array(lengs,dtype=np.int32)
@@ -292,8 +299,10 @@ class DataReader(object):
             # make it 1-to-1 relation
             self.feat2token = {}
             for k,v in self.tokenMap:
+                #print(k, v)
                 for x in ['1','2','3']:
                     key = 'sv.'+k+'._'+x
+                    #print(key, v)
                     self.feat2token[key] = v
 
     def tokenMap2Indexes(self):
@@ -308,6 +317,7 @@ class DataReader(object):
         for i in range(len(idxmap)):
             idxmap[i].extend([-1]*abs(len(idxmap[i])-maxleng))
         idxmap = np.array(idxmap,dtype='int32')
+        #print(idxmap)
         return idxmap
 
     def readVecFile(self,filename,vocab):

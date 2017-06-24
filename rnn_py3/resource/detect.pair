@@ -1,5 +1,11 @@
 {
     "general" : {
+		"disease"    : "SLOT_DISEASE",
+        "division"   : "SLOT_DIVISION",
+		"doctor"     : "SLOT_DOCTOR",
+		"time"       : "SLOT_TIME",
+		"intent"     : "SLOT_INTENT",
+		"result"     : "SLOT_RESULT",
         "address"    : "SLOT_ADDRESS",
         "area"       : "SLOT_AREA",
         "count"      : "SLOT_COUNT",

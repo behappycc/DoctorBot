@@ -149,7 +149,7 @@ def main():
         if 2 < index < len(doctor_list)-2:
             select_doctor.append(item + "," + doctor_list[index+1])
 
-    create_json_list(json_list, select_doctor, "select(division='",
+    create_json_list(json_list, select_doctor, "select(doctor='",
                      "請選擇醫生,", "請問您要選擇哪位醫生,")
     split_data(json_list, train_json, valid_json, test_json)
     json_list = []
