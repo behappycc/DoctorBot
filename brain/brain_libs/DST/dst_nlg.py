@@ -359,7 +359,7 @@ def get_sentence(DM):
             for key,value in enumerate(DM['State']['time']):
                 sentence += value + ' '
                 sentence += temp[key]+' \n'
-            if time_full:
+            if time_full(temp):
                 sentence += "都滿了耶！再選一個?"
                 DM['History'] = 'full'
                 DM['State']['doctor'] = None
