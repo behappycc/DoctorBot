@@ -433,7 +433,7 @@ def LU_train(DM,sentence,lu_model):
     print("[ LU ]")
     for slot, value in semantic_frame['slot'].items():
         print(slot, ": ", value)
-    for slot in slot_dictionary:
+    for slot,value in slot_dictionary:
         if slot_dictionary[slot] != '' and (DM["State"][slot] == None or (type(DM["State"][slot]) == list and len(DM["State"][slot]) < 1)):
             DM["State"][slot] = slot_dictionary[slot]
 
