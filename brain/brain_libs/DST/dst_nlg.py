@@ -322,7 +322,8 @@ def get_sentence(DM):
             sentence += ", ".join(CrawlerTimeTable.Timetable(get_str(DM["State"]["doctor"])).get_time())
         elif DM["Intent"] == 5:
             sen_list = ["掛號完成~是", "幫您完成掛號了喔~", "耶！掛號完成,是",
-             "掛號成功了！是", "已經幫您預約好", "您好,掛號已經完成,是", "恭喜您掛號完成,是"]
+            "掛號成功了！是", "已經幫您預約好", "您好,掛號已經完成,是", "恭喜您掛號完成,是"]
+            sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             sentence += get_str(DM['State']['division'])
             sentence += get_str(DM['State']['disease'])
             sentence += get_str(DM['State']['doctor'])
@@ -416,6 +417,18 @@ def LU_train(DM,sentence,lu_model):
     pattern = re.compile("[0-9]+\.[0-9]+\.[0-9]+")
     match = pattern.match(sentence)
     found = False
+    if(DM['Request'] == 'choose') and (DM['Slot'][0]=='time'):
+        for key in week:
+            if sentence.find(key):
+                temp = key
+                temp = time_C_A(temp)
+        for key in c_day:
+            if sentence.find(key):
+                temp = key
+                temp = time_C_A(temp)
+        for key in DM['State']['time']:
+            if key.find(temp):
+                DM['State']['time'] = key
     if match:
         DM["State"]["time"] = sentence
 #        DM["State"]["time"] = time_C_A(DM["State"]["time"])
