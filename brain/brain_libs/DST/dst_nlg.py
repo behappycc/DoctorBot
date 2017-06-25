@@ -380,7 +380,7 @@ def get_sentence(DM):
 def time_full(status):
     flag = True
     for value in status:
-        if value =='.掛號.':
+        if value != '名額已滿':
             flag = False
     return flag
 
