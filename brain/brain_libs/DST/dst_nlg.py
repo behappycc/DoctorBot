@@ -235,7 +235,7 @@ def greeting():
     sentence += "\n\n"
     sen_list = ["我支援的功能有", "我可以幫忙", "我能夠"]
     sentence += sen_list[random.randint(0, len(sen_list)-1)]
-    sentence += "(1)查疾病的症狀, (2)查疾病的科別, (3)查醫師, (4)查門診時刻表, (5)幫忙掛號，對我說 謝謝 可以重設系統"
+    sentence += "(1)查疾病的症狀/n (2)查疾病的科別/n (3)查醫師/n (4)用醫生查門診時刻表/n (5)幫忙掛號/n 打招呼或道別可以重設系統,/n看對得醫生比有空的時間重要哦，先找醫生再確定時間吧"
     return sentence
 
 def goodbye():
