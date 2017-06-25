@@ -427,7 +427,10 @@ def LU_train(DM,sentence,lu_model):
         if sentence.find(key):
             DM["State"]["time"] = key
             DM["State"]["time"] = time_C_A(DM["State"]["time"])
-
+    if DM['Slot']=='doctor':
+        for key in DM['State'][DM['Slot']]:
+            if sentence.find(key):
+                DM['State'][DM['Slot']] = key
     if sentence in division:
         DM["State"]["division"] = sentence
     elif sentence[:len(sentence)-1] in division:
