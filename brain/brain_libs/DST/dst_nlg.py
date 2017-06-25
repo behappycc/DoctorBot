@@ -179,8 +179,6 @@ def DM_request(DM):
         elif DM["State"]["time"] == None:
             if DM["State"]["doctor"] != None:
                 DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
-                print(DM["State"]["time"])
-                print("ZZZZZZZZZZZZZZZZZZZ")
                 DM["Request"] = "choose"
                 DM["Slot"] = ["time"]
         else:
@@ -357,7 +355,7 @@ def get_sentence(DM):
             temp = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_status()
             DM['State']['time'] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
 #            DM['State']['time']
-            for key,value in DM['State']['time']:
+            for key,value in enumerate(DM['State']['time']):
                 sentence += value + ' '
                 sentence += temp[key]+' '
 
