@@ -359,23 +359,37 @@ def get_sentence(DM):
             for key,value in enumerate(DM['State']['time']):
                 sentence += value + ' '
                 sentence += temp[key]+' '
-
+            if time_full:
+                sentence += "都滿了耶！"
+                DM['History'] = 'full'
+                DM['State']['doctor'] = None
+                
 
     elif (DM["Request"] == "confirm"):
         sentence += "你說的是" + DM["Slot"] + "?"
+#        if DM["State"]["division"] != None of DM['State']['division'] !=[]:
+            
 
     #####################################################
     #                      ADDDING                      #
     #####################################################
 #    elif (DM["Request"] == "confirm"):
 
-    return sentence
+    return sentence,DM
+
+def time_full(status):
+    flag = True
+    for value in status:
+        if value =='.掛號.':
+            flag = False
+    return flag
+
 def intent_LU(DM,sentence):
-    if(sentence == '我要查症狀'):
+    if(sentence in ['我要查症狀','查症狀'):
         DM["Intent"] = 1
-    elif(sentence =='我要查科別'):
+    elif(sentence in ['我要查科別','查科別']):
         DM["Intent"] = 2
-    elif(sentence =='我要查醫生'):
+    elif(sentence  in ['我要查醫生','查醫生']):
         DM["Intent"] = 3
     elif(sentence =='我要查時間'):
         DM["Intent"] = 4
@@ -592,7 +606,10 @@ def main():
                                    '感謝', '好窩', '謝啦', '你真棒', '謝惹','再會','你可以走了']
                     if sentence in user_greeting or sentence in user_ending:
                         DM = initialize()
-                        DM['Sentence'] = greeting()
+                        if sentence in user_ending:
+                            DM['Sentence'] = ending()+'\n'+greeting()
+                        else:
+                            DM['Sentence'] = greeting()
                         #DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
                         with open('./user_data/DM_'+name+'.json','w') as f_w:
                             json.dump(DM,f_w)
@@ -604,7 +621,8 @@ def main():
                     DM = DM_request(DM)
                     DM = confirm(DM)
                     DM_nlg = DM
-                    DM_nlg['Sentence'] = get_sentence(DM)
+                    DM_nlg['Sentence'],DM = get_sentence(DM)
+                    DM_nlg['History'] = DM['History']
                     print ("[ DM ]")
                     for i in DM_nlg:
                         print (i, DM_nlg[i])
