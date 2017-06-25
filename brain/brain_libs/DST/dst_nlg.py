@@ -179,6 +179,8 @@ def DM_request(DM):
         elif DM["State"]["time"] == None:
             if DM["State"]["doctor"] != None:
                 DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
+                print(DM["State"]["time"])
+                print("ZZZZZZZZZZZZZZZZZZZ")
                 DM["Request"] = "choose"
                 DM["Slot"] = ["time"]
         else:
@@ -404,9 +406,10 @@ def LU_train(DM,sentence,lu_model):
     if match:
         DM["State"]["time"] = sentence
 #        DM["State"]["time"] = time_C_A(DM["State"]["time"])
-    if sentence in week or sentence[:len(sentence)-1] in week :
-        DM["State"]["time"] = sentence
-        DM["State"]["time"] = time_C_A(DM["State"]["time"])
+    for key in week:
+        if sentence.find(key):
+            DM["State"]["time"] = key
+            DM["State"]["time"] = time_C_A(DM["State"]["time"])
     for key in c_day:
         if sentence.find(key):
             DM["State"]["time"] = key
@@ -597,7 +600,7 @@ def main():
                             print("update DM success")
                         continue
 
-#                    DM =LU_train(DM,sentence,lu_model)
+                    DM =LU_train(DM,sentence,lu_model)
                     DM = intent_LU(DM,sentence)
                     DM = DM_request(DM)
                     DM = confirm(DM)
