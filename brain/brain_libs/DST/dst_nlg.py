@@ -385,7 +385,7 @@ def time_full(status):
     return flag
 
 def intent_LU(DM,sentence):
-    if(sentence in ['我要查症狀','查症狀'):
+    if(sentence in ['我要查症狀','查症狀']):
         DM["Intent"] = 1
     elif(sentence in ['我要查科別','查科別']):
         DM["Intent"] = 2
