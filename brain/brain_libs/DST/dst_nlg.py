@@ -429,17 +429,18 @@ def LU_train(DM,sentence,lu_model):
         for key in DM['State']['time']:
             if key.find(temp):
                 DM['State']['time'] = key
-    if match:
-        DM["State"]["time"] = sentence
-#        DM["State"]["time"] = time_C_A(DM["State"]["time"])
-    for key in week:
-        if sentence.find(key):
-            DM["State"]["time"] = key
-            DM["State"]["time"] = time_C_A(DM["State"]["time"])
-    for key in c_day:
-        if sentence.find(key):
-            DM["State"]["time"] = key
-            DM["State"]["time"] = time_C_A(DM["State"]["time"])
+    else:
+        if match:
+            DM["State"]["time"] = sentence
+    #        DM["State"]["time"] = time_C_A(DM["State"]["time"])
+        for key in week:
+            if sentence.find(key):
+                DM["State"]["time"] = key
+                DM["State"]["time"] = time_C_A(DM["State"]["time"])
+        for key in c_day:
+            if sentence.find(key):
+                DM["State"]["time"] = key
+                DM["State"]["time"] = time_C_A(DM["State"]["time"])
     if DM['Request'] =='choose':
         if DM['Slot'][0]=='doctor':
             for key in DM['State'][DM['Slot'][0]]:
