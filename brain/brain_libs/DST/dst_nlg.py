@@ -611,7 +611,7 @@ def main():
                     if sentence in user_greeting or sentence in user_ending:
                         DM = initialize()
                         if sentence in user_ending:
-                            DM['Sentence'] = ending()+'\n'+greeting()
+                            DM['Sentence'] = goodbye()+'\n'+greeting()
                         else:
                             DM['Sentence'] = greeting()
                         #DM['Sentence'] = "你好，我是seek doctor Bot，我支援的功能有(1)查症狀, (2)查科別, (3)查醫師, (4)查時間, (5)幫我掛號，並可以用 謝謝 重設系統"
