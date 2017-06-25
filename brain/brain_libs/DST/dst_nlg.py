@@ -597,7 +597,7 @@ def main():
                             print("update DM success")
                         continue
 
-                    DM =LU_train(DM,sentence,lu_model)
+#                    DM =LU_train(DM,sentence,lu_model)
                     DM = intent_LU(DM,sentence)
                     DM = DM_request(DM)
                     DM = confirm(DM)
