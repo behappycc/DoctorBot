@@ -403,7 +403,7 @@ def LU_train(DM,sentence,lu_model):
     found = False
     if match:
         DM["State"]["time"] = sentence
-        DM["State"]["time"] = time_C_A(DM["State"]["time"])
+#        DM["State"]["time"] = time_C_A(DM["State"]["time"])
     if sentence in week or sentence[:len(sentence)-1] in week :
         DM["State"]["time"] = sentence
         DM["State"]["time"] = time_C_A(DM["State"]["time"])
