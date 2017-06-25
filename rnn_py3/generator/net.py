@@ -450,6 +450,7 @@ class Model(object):
             # for slot error rate scoring
             felements = [self.reader.cardinality[x+self.reader.dfs[1]]\
                     for x in sv]
+            #print(felements)
 
             # post processing
             for i in range(len(gens)):

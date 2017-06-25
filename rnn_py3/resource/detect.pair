@@ -5,7 +5,7 @@
 		"doctor"     : "SLOT_DOCTOR",
 		"time"       : "SLOT_TIME",
 		"intent"     : "SLOT_INTENT",
-		"result"     : "SLOT_RESULT",
+		"results"    : "SLOT_RESULTS",
         "address"    : "SLOT_ADDRESS",
         "area"       : "SLOT_AREA",
         "count"      : "SLOT_COUNT",
