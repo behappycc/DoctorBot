@@ -393,7 +393,7 @@ def intent_LU(DM,sentence):
         DM["Intent"] = 3
     elif(sentence =='我要查時間'):
         DM["Intent"] = 4
-    elif(sentence =='我要掛號' or sentence =='我要掛門診'or sentence =='我想要掛門診'):
+    elif(sentence =='我要掛號' or sentence =='我要掛門診'or sentence =='我想要掛門診'or sentence.find('掛門診') or sentence.find('幫我掛'):
         DM["Intent"] = 5
     if(DM['History'] =='end12'):
         if(sentence.find('哪科')or sentence.find('哪一科') or sentence.find('什麽科')):
