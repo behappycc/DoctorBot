@@ -121,7 +121,7 @@ def get_dbinfo(slot1,slot2, choose):
         for data in collection_division.find({"$and": [{"disease": {"$regex": ''}},
                                                        {"department": {"$regex": slot1}}]}):
             for name in data['doctor']:
-                if name not in doctor_list:
+               if name not in doctor_list:
                     doctor_list.append(name)
         return doctor_list
 #################################################################################################
@@ -132,9 +132,9 @@ def DM_request(DM):
     DM["Slot"] = None
 
     if DM["Intent"] == 1 or DM["Intent"] == 2:
-        if DM["State"]["disease"]!=None:
+        if DM["State"]["disease"]!=None and DM["State"]["disease"]!=[]:
             DM["Request"] = "end"
-            DM['History'] =='end12'
+#            DM['History'] =='end12'
         else:
             DM["Request"] = "info"
             DM["Slot"] = ["disease"]
@@ -176,7 +176,7 @@ def DM_request(DM):
             else:
                 DM["Request"] = "info"
                 DM["Slot"] = ["disease","division","doctor"]
-        elif DM["State"]["time"] == None:
+        elif DM["State"]["time"] == None or DM["State"]["time"] ==[]:
             if DM["State"]["doctor"] != None:
                 DM["State"]["time"] = CrawlerTimeTable.Timetable(str(DM["State"]["doctor"])).get_time()
                 DM["Request"] = "choose"
@@ -300,12 +300,14 @@ def get_sentence(DM):
             sentence += ", ".join(data['symptom'])
             sentence += "更多資訊可以到這裡看看喔；\n"
             sentence += data['url']
+            DM['History'] =='end12'
         elif DM["Intent"] == 2:
             sentence += get_str(DM['State']['disease'])
             sen_list = ["的科別是：\n", "的相關科別：\n", "可以去這些科別喔：\n"]
             sentence += sen_list[random.randint(0, len(sen_list) - 1)]
             for data in collection_disease.find({"disease_c": {"$regex": get_str(DM['State']['disease'])}}):
                 sentence += ", ".join(data['department'])
+            DM['History'] =='end12'
         elif DM["Intent"] == 3:
             sentence += get_str(DM['State']['division'])
             sentence += get_str(DM['State']['disease'])
@@ -350,7 +352,7 @@ def get_sentence(DM):
         sentence += sen_list[random.randint(0, len(sen_list) - 1)]
         if DM['Slot'][0] == "doctor":
             sentence += "醫生名稱："
-            DM['History'] = 'c_doctor'
+#            DM['History'] = 'c_doctor'
             sentence += get_str(DM['State'][get_str(DM['Slot'][0])])
         elif DM['Slot'][0] == "time":
             sentence += "看診時間："
@@ -386,6 +388,7 @@ def time_full(status):
     return flag
 
 def intent_LU(DM,sentence):
+    temp = DM['Intent']
     if(sentence in ['我要查症狀','查症狀']):
         DM["Intent"] = 1
     elif(sentence in ['我要查科別','查科別']):
@@ -394,14 +397,15 @@ def intent_LU(DM,sentence):
         DM["Intent"] = 3
     elif(sentence =='我要查時間'):
         DM["Intent"] = 4
-    elif(sentence =='我要掛號' or sentence =='我要掛門診'or sentence =='我想要掛門診'or sentence.find('掛門診') or sentence.find('幫我掛')):
+    elif(sentence =='我要掛號' or sentence =='我要掛門診' or sentence =='我想要掛門診' or sentence.find('掛門診')!=-1 or sentence.find('幫我掛')!=-1):
         DM["Intent"] = 5
     if(DM['History'] =='end12'):
-        if(sentence.find('哪科')or sentence.find('哪一科') or sentence.find('什麽科')):
+        if(sentence.find('哪科')!=-1 or sentence.find('哪一科')!=-1 or sentence.find('什麽科')!=-1):
             DM["Intent"] = 2
-        elif(sentence.find('掛號')or sentence.find('掛門診') or sentence.find('幫我掛')):
+        elif(sentence.find('掛號')!=-1 or sentence.find('掛門診')!=-1 or sentence.find('幫我掛')!=-1):
             DM["Intent"] = 5
-
+    if temp != DM['Intent']:
+        DM['State']['intent']= DM['Intent']
     return DM
 def confirm(DM):
     if(DM["History"] == 'time_C_A'):
@@ -418,39 +422,41 @@ def LU_train(DM,sentence,lu_model):
     match = pattern.match(sentence)
     found = False
     if(DM['Request'] == 'choose') and (DM['Slot'][0]=='time'):
+        temp = sentence
         for key in week:
-            if sentence.find(key):
+            if sentence.find(key)!=-1:
                 temp = key
                 temp = time_C_A(temp)
         for key in c_day:
-            if sentence.find(key):
+            if sentence.find(key)!=-1:
                 temp = key
                 temp = time_C_A(temp)
         for key in DM['State']['time']:
-            if key.find(temp):
+            if key.find(temp)!=-1:
                 DM['State']['time'] = key
     else:
         if match:
             DM["State"]["time"] = sentence
     #        DM["State"]["time"] = time_C_A(DM["State"]["time"])
         for key in week:
-            if sentence.find(key):
+            if sentence.find(key)!=-1:
                 DM["State"]["time"] = key
                 DM["State"]["time"] = time_C_A(DM["State"]["time"])
         for key in c_day:
-            if sentence.find(key):
+            if sentence.find(key)!=-1:
                 DM["State"]["time"] = key
                 DM["State"]["time"] = time_C_A(DM["State"]["time"])
     if DM['Request'] =='choose':
         if DM['Slot'][0]=='doctor':
             for key in DM['State'][DM['Slot'][0]]:
-                if sentence.find(key):
+                if sentence.find(key)!=-1:
                     DM['State'][DM['Slot'][0]] = key
     if sentence in division:
         DM["State"]["division"] = sentence
     elif sentence[:len(sentence)-1] in division:
         DM["State"]["division"] = sentence[:len(sentence)-1] + '部'
         DM["History"] = 'vague_division'
+        found = True
     elif sentence[:len(sentence)-1] + '科' in division:
         DM["State"]["division"] = sentence[:len(sentence)-1] + '部'
         DM["History"] = 'vague_division'
@@ -635,8 +641,11 @@ def main():
                         continue
 
                     DM =LU_train(DM,sentence,lu_model)
+                    print(DM["Intent"])
                     DM = intent_LU(DM,sentence)
+                    print(DM["Intent"])
                     DM = DM_request(DM)
+                    print(DM["Intent"])
                     DM = confirm(DM)
                     DM_nlg = DM
                     DM_nlg['Sentence'],DM = get_sentence(DM)

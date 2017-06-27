@@ -1,8 +1,8 @@
 import numpy as np
 
 vocab_file = '../resource/vocab'
-vector_file = 'vectors_custom-80.txt'
-dim = 80
+vector_file = 'vectors_custom-160.txt'
+dim = 160
 with open(vector_file, mode='w') as fout:
     with open(vocab_file, mode='r') as fin:
         for line in fin.readlines():
